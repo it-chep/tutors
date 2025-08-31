@@ -4,29 +4,27 @@ import (
 	"context"
 	"fmt"
 	"github.com/it-chep/tutors.git/internal/config"
+	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
-	"github.com/it-chep/tutors.git/internal/pkg/worker"
+	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
 	"github.com/it-chep/tutors.git/internal/server"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
 )
-
-type Workers []worker.Worker
 
 type App struct {
 	config *config.Config
 	pool   *pgxpool.Pool
 
 	server *server.Server
-	//bot    *tg_bot.Bot
+	bot    *tg_bot.Bot
 
 	modules Modules
-	workers Workers
 }
 
 type Modules struct {
 	//Bot   *bot.Bot
-	//Admin *admin.Module
+	Admin *admin.Module
 }
 
 func New(ctx context.Context) *App {
@@ -36,11 +34,10 @@ func New(ctx context.Context) *App {
 		config: cfg,
 	}
 
-	//app.initDB(ctx).
-	//	initTgBot(ctx).
-	//	initModules(ctx).
-	//	initJobs(ctx).
-	//	initServer(ctx)
+	app.initDB(ctx).
+		initTgBot(ctx).
+		initModules(ctx).
+		initServer(ctx)
 
 	return app
 }
@@ -48,9 +45,6 @@ func New(ctx context.Context) *App {
 func (a *App) Run(ctx context.Context) {
 	fmt.Println("start server http://localhost:8080")
 	ctx = logger.ContextWithLogger(ctx, logger.New())
-	for _, w := range a.workers {
-		w.Start(ctx)
-	}
 
 	if !a.config.BotIsActive() {
 		log.Fatal(a.server.ListenAndServe())
