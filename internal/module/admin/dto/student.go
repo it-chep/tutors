@@ -25,3 +25,9 @@ type StudentFinance struct {
 	Count  int64
 	Amount int64
 }
+
+type Wallet struct {
+	ID        int64
+	StudentID int64
+	Balance   string
+}

@@ -48,3 +48,15 @@ func (sf StudentFinance) ToDomain() dto.StudentFinance {
 		Amount: sf.Amount,
 	}
 }
+
+type Wallet struct {
+	xo.Wallet
+}
+
+func (w Wallet) ToDomain() dto.Wallet {
+	return dto.Wallet{
+		ID:        w.ID,
+		StudentID: w.StudentID,
+		Balance:   w.Balance,
+	}
+}
