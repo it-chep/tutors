@@ -18,5 +18,8 @@ func New(pool *pgxpool.Pool) *Action {
 }
 
 func (a *Action) Do(ctx context.Context) (tutors []dto.Tutor, err error) {
-	return a.dal.GetTutors(ctx)
+	tutors, err = a.dal.GetTutors(ctx)
+	// todo доделать красный желтый зеленый
+
+	return tutors, err
 }

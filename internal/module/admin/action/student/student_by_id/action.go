@@ -18,5 +18,8 @@ func New(pool *pgxpool.Pool) *Action {
 }
 
 func (a *Action) Do(ctx context.Context, studentID int64) (dto.Student, error) {
-	return a.dal.GetStudent(ctx, studentID)
+	student, err := a.dal.GetStudent(ctx, studentID)
+	// todo доделать шильдики о том что нет оплат или новичок
+
+	return student, err
 }
