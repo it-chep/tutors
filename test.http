@@ -4,6 +4,25 @@ GET http://localhost:8080/admin/tutors/
 ### Получить репетитора по ID
 GET http://localhost:8080/admin/tutors/1
 
+### Поиск по репетиторам
+GET http://localhost:8080/admin/tutors/search?query="Нечепорук Максим Алексеевич"
+
+### Создание репетитора
+POST http://localhost:8080/admin/tutors
+
+### Удаление репетитора
+DELETE http://localhost:8080/admin/tutors/1
+
+### Получение информации по финансам репетитора
+POST http://localhost:8080/admin/tutors/1/finance
+Content-Type: application/json
+
+{
+  "from": "2006-01-02 15:04:05",
+  "to": "2006-01-02 15:04:05"
+}
+
+
 ### Получить всех студентов
 GET http://localhost:8080/admin/students
 
@@ -12,3 +31,21 @@ GET http://localhost:8080/admin/students?tutor_id=1
 
 ### Получить информацию о студенте
 GET http://localhost:8080/admin/students/1
+
+### Поиск по студентам
+GET http://localhost:8080/admin/students/search?query="Нечепорук Максим Алексеевич"
+
+### Создание студента
+POST http://localhost:8080/admin/students
+
+### Удаление студента
+DELETE http://localhost:8080/admin/students/1
+
+### Получение информации по финансам студента
+POST http://localhost:8080/admin/students/1/finance
+Content-Type: application/json
+
+{
+  "from": "2006-01-02 15:04:05",
+  "to": "2006-01-02 15:04:05"
+}
