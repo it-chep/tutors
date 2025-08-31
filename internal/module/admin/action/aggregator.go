@@ -9,6 +9,8 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_students"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/search_student"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/student_by_id"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/conduct_lesson"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/conduct_trial"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/create_tutor"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/delete_tutor"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/get_tutor_finance"
@@ -26,6 +28,8 @@ type Aggregator struct {
 	GetTutors       *get_tutors.Action
 	SearchTutor     *search_tutor.Action
 	GetTutorByID    *tutor_by_id.Action
+	ConductTrial    *conduct_trial.Action
+	ConductLesson   *conduct_lesson.Action
 
 	// Студент
 	CreateStudent     *create_student.Action
@@ -51,6 +55,8 @@ func NewAggregator(pool *pgxpool.Pool) *Aggregator {
 		GetTutors:       get_tutors.New(pool),
 		SearchTutor:     search_tutor.New(pool),
 		GetTutorByID:    tutor_by_id.New(pool),
+		ConductTrial:    conduct_trial.New(pool),
+		ConductLesson:   conduct_lesson.New(pool),
 
 		// Студент
 		CreateStudent:     create_student.New(pool),
