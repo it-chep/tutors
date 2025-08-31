@@ -1,0 +1,53 @@
+version: "3.6"
+
+services:
+  postgres:
+    image: postgres:15.2-bullseye
+    shm_size: 1g
+    container_name: postgres
+    command: [ "postgres", "-c", "log_statement=all" ]
+    networks:
+      - network
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_INITDB_WALDIR=/var/log/pg_logs
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_DB=${DB_NAME}
+    expose:
+      - 5432
+    ports:
+      - "5432:5432"
+
+#  app:
+#    build: .
+#    ports:
+#      - "8000:8000"
+#    expose:
+#      - 8000
+#    container_name: app
+#    networks:
+#      - network
+#    depends_on:
+#      - postgres
+#    environment:
+#      - C_FORCE_ROOT='true'
+#      - ENVIRONMENT_TYPE=docker
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+      PGADMIN_LISTEN_PORT: 5050
+    ports:
+      - "5050:5050"
+
+networks:
+  network:
+    driver: bridge
+
+volumes:
+  postgres_data:

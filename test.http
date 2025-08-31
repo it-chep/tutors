@@ -1,0 +1,14 @@
+### Получить всех репетиторов
+GET http://localhost:8080/admin/tutors/
+
+### Получить репетитора по ID
+GET http://localhost:8080/admin/tutors/1
+
+### Получить всех студентов
+GET http://localhost:8080/admin/students
+
+### Получить студентов репетитора
+GET http://localhost:8080/admin/students?tutor_id=1
+
+### Получить информацию о студенте
+GET http://localhost:8080/admin/students/1
