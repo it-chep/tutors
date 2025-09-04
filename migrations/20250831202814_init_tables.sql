@@ -1,5 +1,5 @@
 -- +goose Up
--- +goose StatementBegin
+-- +goose StatementBegi
 
 -- Таблица репетиторов
 create table if not exists tutors
