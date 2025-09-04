@@ -39,9 +39,10 @@ func (h *Handler) setupRoutes() {
 		//r.Post(fmt.Sprintf("/%s/", cfg.Token()), h.bot())
 	})
 
+	h.router.Get("/roles", h.adminAgg.GetAvailableRoles.Handle()) // GET /roles
+
 	h.router.Route("/admin", func(r chi.Router) {
 		//r.Get("/", h.admin())
-		r.Get("/roles", h.adminAgg.GetAvailableRoles.Handle()) // GET /admin/roles
 
 		// Админы
 		r.Route("/admins", func(r chi.Router) {
