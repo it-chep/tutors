@@ -1,4 +1,4 @@
-package get_all_subjects
+package get_available_roles
 
 import (
 	"github.com/it-chep/tutors.git/internal/module/admin"
@@ -19,6 +19,7 @@ func (h *Handler) Handle() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		_ = r.Context()
 
+		// todo перелделать правильно
 	}
 }
 

@@ -32,16 +32,15 @@ func (h *Handler) Handle() http.HandlerFunc {
 			return
 		}
 
-		err := h.adminModule.Actions.CreateInformationPost.Do(ctx, dto.Request{
-			PostName:      req.PostName,
-			ThemeID:       req.ThemeID,
-			Order:         req.Order,
-			MediaID:       req.MediaID,
-			ContentTypeID: req.ContentTypeID,
-			Message:       req.Message,
-		})
+		err := h.adminModule.Actions.CreateTutor.Do(ctx, dto.Request{
+			FullName:    req.FullName,
+			Phone:       req.Phone,
+			Tg:          req.Tg,
+			CostPerHour: req.CostPerHour,
+			SubjectID:   req.SubjectID,
+		}, 0) // todo admin_id
 		if err != nil {
-			http.Error(w, "failed to create information post: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, "failed to create tutor: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
