@@ -60,7 +60,7 @@ func (a *App) initModules(context.Context) *App {
 
 func (a *App) initServer(context.Context) *App {
 	// todo: в NewHandler передаем сервис для админки или бота
-	h := handler.NewHandler()
+	h := handler.NewHandler(a.modules.Admin)
 	srv := server.New(h)
 	a.server = srv
 	return a

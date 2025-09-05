@@ -1,6 +1,7 @@
 package action
 
 import (
+	"github.com/it-chep/tutors.git/internal/module/admin/action/auth/check_path_permission"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_subjects"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/create_student"
@@ -44,6 +45,9 @@ type Aggregator struct {
 
 	// Предметы
 	GetAllSubjects *get_all_subjects.Action
+
+	// AUTH
+	CheckPathPermission *check_path_permission.Action
 }
 
 func NewAggregator(pool *pgxpool.Pool) *Aggregator {
@@ -71,5 +75,8 @@ func NewAggregator(pool *pgxpool.Pool) *Aggregator {
 
 		// Предметы
 		GetAllSubjects: get_all_subjects.New(pool),
+
+		// AUTH
+		CheckPathPermission: check_path_permission.New(pool),
 	}
 }

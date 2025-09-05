@@ -1,10 +1,9 @@
 package middleware
 
 import (
-	"context"
-	"fmt"
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
+	pkgContext "github.com/it-chep/tutors.git/internal/pkg/context"
 	"net/http"
 	"strings"
 
@@ -38,6 +37,7 @@ func JWTMiddleware(next http.HandlerFunc) http.HandlerFunc {
 func Auth(adminModule *admin.Module) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
 			//// 1. Извлечение токена (например, из заголовка Authorization)
 			//tokenString := r.Header.Get("Authorization")
 			//if tokenString == "" {
@@ -59,12 +59,16 @@ func Auth(adminModule *admin.Module) func(http.Handler) http.Handler {
 			//	return
 			//}
 			//
-			requestPath := r.URL.Path
-			fmt.Println("Request Path:", requestPath)
+			roleID := int8(dto.TutorRole)
 
-			// 4. Добавляем роль в контекст
-			ctx := context.WithValue(r.Context(), "user_role", dto.SuperAdminRole)
-			//
+			hasPermission, err := adminModule.Actions.CheckPathPermission.Do(ctx, roleID, r.URL.Path)
+			if err != nil || !hasPermission {
+				w.WriteHeader(http.StatusForbidden) // 403 ебашим
+				return
+			}
+
+			ctx = pkgContext.WithUserRole(ctx, roleID)
+
 			// 5. Продолжаем выполнение запроса
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})

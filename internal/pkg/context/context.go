@@ -1,6 +1,8 @@
 package context
 
-import "context"
+import (
+	"context"
+)
 
 // contextKey типобезопасный ключ для контекста
 type contextKey string
@@ -23,4 +25,9 @@ func GetUserRole(ctx context.Context) (int8, bool) {
 func GetUserID(ctx context.Context) (string, bool) {
 	id, ok := ctx.Value(UserIDKey).(string)
 	return id, ok
+}
+
+// WithUserRole добавляет информацию по роли в контекст
+func WithUserRole(ctx context.Context, roleID int8) context.Context {
+	return context.WithValue(ctx, UserRoleKey, roleID)
 }

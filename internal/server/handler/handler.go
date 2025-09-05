@@ -21,7 +21,7 @@ func NewHandler(adminModule *admin.Module) *Handler {
 
 	//h.setupMiddleware()
 	h.setupHandlerAggregator(adminModule)
-	//h.setupRoutes(cfg)
+	h.setupRoutes(adminModule)
 
 	return h
 }
