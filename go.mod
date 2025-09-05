@@ -19,6 +19,7 @@ require (
 	github.com/jackc/pgx/v5 v5.7.5 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/samber/lo v1.51.0 // indirect
+	github.com/shopspring/decimal v1.4.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
 	golang.org/x/text v0.28.0 // indirect

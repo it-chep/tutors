@@ -1,5 +1,10 @@
 package dto
 
+import (
+	"context"
+	pkgContext "github.com/it-chep/tutors.git/internal/pkg/context"
+)
+
 type Role int8
 
 const (
@@ -24,4 +29,28 @@ func (r Role) String() string {
 	default:
 		return "Неизвестно"
 	}
+}
+
+func IsTutorRole(ctx context.Context) bool {
+	roleID, _ := pkgContext.GetUserRole(ctx)
+	if roleID == int8(TutorRole) {
+		return true
+	}
+	return false
+}
+
+func IsAdminRole(ctx context.Context) bool {
+	roleID, _ := pkgContext.GetUserRole(ctx)
+	if roleID == int8(AdminRole) {
+		return true
+	}
+	return false
+}
+
+func IsSuperAdminRole(ctx context.Context) bool {
+	roleID, _ := pkgContext.GetUserRole(ctx)
+	if roleID == int8(SuperAdminRole) {
+		return true
+	}
+	return false
 }

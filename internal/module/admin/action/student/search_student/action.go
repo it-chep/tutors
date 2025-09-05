@@ -17,6 +17,24 @@ func New(pool *pgxpool.Pool) *Action {
 	}
 }
 
-func (a *Action) Do(ctx context.Context, query string) (students []dto.Student, err error) {
-	return a.dal.SearchStudent(ctx, query)
+func (a *Action) Do(ctx context.Context, query string) (_ []dto.Student, _ error) {
+	students, err := a.dal.SearchStudent(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	if dto.IsTutorRole(ctx) {
+		studentsForTutor := make([]dto.Student, 0, len(students))
+		for _, student := range students {
+			studentsForTutor = append(studentsForTutor, dto.Student{
+				ID:         student.ID,
+				FirstName:  student.FirstName,
+				MiddleName: student.MiddleName,
+			})
+		}
+
+		return studentsForTutor, nil
+	}
+
+	return students, nil
 }

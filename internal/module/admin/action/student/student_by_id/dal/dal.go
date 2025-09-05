@@ -30,3 +30,30 @@ func (r *Repository) GetStudent(ctx context.Context, studentID int64) (dto.Stude
 
 	return student.ToDomain(), nil
 }
+
+// GetStudentWalletInfo получение информации о кошельке студента
+func (r *Repository) GetStudentWalletInfo(ctx context.Context, studentID int64) (dto.Wallet, error) {
+	sql := `
+		select * from wallet where student_id = $1
+	`
+
+	var wallet dao.Wallet
+	err := pgxscan.Get(ctx, r.pool, &wallet, sql, studentID)
+	if err != nil {
+		return dto.Wallet{}, err
+	}
+	return wallet.ToDomain(), nil
+}
+
+// HasStudentPayments у студента есть платные занятия
+func (r *Repository) HasStudentPayments(ctx context.Context, studentID int64) (bool, error) {
+	sql := `
+		select count(*) from transactions_history where student_id = $1
+	`
+	var count int
+	err := pgxscan.Get(ctx, r.pool, &count, sql, studentID)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}

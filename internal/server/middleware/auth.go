@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"net/http"
@@ -58,6 +59,9 @@ func Auth(adminModule *admin.Module) func(http.Handler) http.Handler {
 			//	return
 			//}
 			//
+			requestPath := r.URL.Path
+			fmt.Println("Request Path:", requestPath)
+
 			// 4. Добавляем роль в контекст
 			ctx := context.WithValue(r.Context(), "user_role", dto.SuperAdminRole)
 			//

@@ -14,8 +14,8 @@ const (
 )
 
 // GetUserRole извлекает роль пользователя из контекста
-func GetUserRole(ctx context.Context) (string, bool) {
-	role, ok := ctx.Value(UserRoleKey).(string)
+func GetUserRole(ctx context.Context) (int8, bool) {
+	role, ok := ctx.Value(UserRoleKey).(int8)
 	return role, ok
 }
 

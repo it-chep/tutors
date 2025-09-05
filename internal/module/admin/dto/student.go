@@ -16,9 +16,11 @@ type Student struct {
 	ParentPhone    string
 	ParentTg       string
 
-	IsFinishedTrial   bool
-	IsBalanceNegative bool
-	IsNewbie          bool
+	HasButtons          bool
+	IsFinishedTrial     bool
+	IsOnlyTrialFinished bool
+	IsBalanceNegative   bool
+	IsNewbie            bool
 }
 
 type StudentFinance struct {
