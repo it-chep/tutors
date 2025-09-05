@@ -1,5 +1,44 @@
 -- +goose Up
--- +goose StatementBegi
+-- +goose StatementBegin
+
+-- Пользователи сайта
+create table if not exists users
+(
+    id          bigserial,
+    email       varchar(255) not null unique, -- email
+    password    varchar(255) not null,        -- пароль
+    full_name   VARCHAR(100),                 -- фио
+    is_active   bool,                         -- активный ли пользователь
+    activate_at timestamp,                    -- дата активации юзера
+    created_at  timestamp default now(),      -- дата создания в системе
+    role_id     bigint                        -- ID роли (админ, суперадмин, репетитор)
+);
+
+-- Роли
+create table if not exists roles
+(
+    id          bigserial,
+    name        varchar(50) not null, -- АНГЛ Название роли
+    description text                  -- Описание роли
+);
+
+-- Права доступа
+create table if not exists permissions
+(
+    id          bigserial,
+    name        varchar(50) not null, -- Название права (уникальное)
+    url         text        not null, -- Урл в системе
+    description text                  -- Описание права (необязательно)
+);
+
+-- Права для ролей
+create table if not exists roles_permissions
+(
+    id            bigserial,
+    role_id       bigint, -- Роль
+    permission_id bigint  -- Правило
+);
+
 
 -- Таблица репетиторов
 create table if not exists tutors

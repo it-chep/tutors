@@ -34,7 +34,7 @@ func (h *Handler) setupHandlerAggregator(adminModule *admin.Module) {
 	h.adminAgg = adminHandler.NewAggregator(adminModule)
 }
 
-func (h *Handler) setupRoutes() {
+func (h *Handler) setupRoutes(adminModule *admin.Module) {
 	h.router.Route("/", func(r chi.Router) {
 		//r.Post(fmt.Sprintf("/%s/", cfg.Token()), h.bot())
 	})
@@ -42,7 +42,7 @@ func (h *Handler) setupRoutes() {
 	h.router.Get("/roles", h.adminAgg.GetAvailableRoles.Handle()) // GET /roles
 
 	h.router.Route("/admin", func(r chi.Router) {
-		//r.Get("/", h.admin())
+		r.Use(middleware.Auth(adminModule))
 
 		// Админы
 		r.Route("/admins", func(r chi.Router) {
