@@ -1,6 +1,10 @@
 package action
 
 import (
+	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/create_admin"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/delete_admin"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/get_admin_by_id"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/get_admins"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/auth/check_path_permission"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_subjects"
@@ -48,6 +52,12 @@ type Aggregator struct {
 
 	// AUTH
 	CheckPathPermission *check_path_permission.Action
+
+	// Админы
+	CreateAdmin  *create_admin.Action
+	DeleteAdmin  *delete_admin.Action
+	GetAdmins    *get_admins.Action
+	GetAdminByID *get_admin_by_id.Action
 }
 
 func NewAggregator(pool *pgxpool.Pool) *Aggregator {
@@ -78,5 +88,11 @@ func NewAggregator(pool *pgxpool.Pool) *Aggregator {
 
 		// AUTH
 		CheckPathPermission: check_path_permission.New(pool),
+
+		// Админы
+		CreateAdmin:  create_admin.New(pool),
+		DeleteAdmin:  delete_admin.New(pool),
+		GetAdmins:    get_admins.New(pool),
+		GetAdminByID: get_admin_by_id.New(pool),
 	}
 }
