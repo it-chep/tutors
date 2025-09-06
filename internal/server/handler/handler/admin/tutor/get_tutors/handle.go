@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
+	"github.com/samber/lo"
 	"net/http"
-	"strconv"
 )
 
 type Handler struct {
@@ -22,12 +22,12 @@ func (h *Handler) Handle() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		tutorIDStr := r.URL.Query().Get("admin_id")
-		_, err := strconv.ParseInt(tutorIDStr, 10, 64)
-		if err != nil {
-			http.Error(w, "invalid admin ID", http.StatusBadRequest)
-			return
-		}
+		//tutorIDStr := r.URL.Query().Get("admin_id")
+		//_, err := strconv.ParseInt(tutorIDStr, 10, 64)
+		//if err != nil {
+		//	http.Error(w, "invalid admin ID", http.StatusBadRequest)
+		//	return
+		//}
 
 		baseData, err := h.adminModule.Actions.GetTutors.Do(ctx)
 		if err != nil {
@@ -46,5 +46,16 @@ func (h *Handler) Handle() http.HandlerFunc {
 }
 
 func (h *Handler) prepareResponse(students []dto.Tutor) Response {
-	return Response{}
+	return Response{
+		Tutors: lo.Map(students, func(item dto.Tutor, index int) Tutor {
+			return Tutor{
+				ID:                 item.ID,
+				FullName:           item.FullName,
+				Tg:                 item.Tg,
+				HasBalanceNegative: false,
+				HasOnlyTrial:       false,
+				HasNewBie:          false,
+			}
+		}),
+	}
 }

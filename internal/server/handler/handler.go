@@ -51,14 +51,14 @@ func (h *Handler) setupRoutes(adminModule *admin.Module) {
 
 		// Репетиторы
 		r.Route("/tutors", func(r chi.Router) {
-			r.Get("/", h.adminAgg.Tutors.GetTutors.Handle())                            // GET /admin/tutors
-			r.Get("/search", h.adminAgg.Tutors.SearchTutor.Handle())                    // GET /admin/tutors/search
-			r.Get("/{student_id}", h.adminAgg.Tutors.GetTutorByID.Handle())             // GET /admin/tutors/{id}
-			r.Post("/", h.adminAgg.Tutors.CreateTutor.Handle())                         // POST /admin/tutors
-			r.Delete("/{student_id}", h.adminAgg.Tutors.DeleteTutor.Handle())           // DELETE /admin/tutors/{id}
-			r.Post("/{student_id}/finance", h.adminAgg.Tutors.GetTutorFinance.Handle()) // POST /admin/tutors/{id}/finance
-			r.Post("/trial_lesson", h.adminAgg.Tutors.ConductTrial.Handle())            // POST /admin/tutors/trial_lesson
-			r.Post("/conduct_lesson", h.adminAgg.Tutors.ConductLesson.Handle())         // POST /admin/tutors/conduct_lesson
+			r.Get("/", h.adminAgg.Tutors.GetTutors.Handle())                          // GET /admin/tutors
+			r.Get("/search", h.adminAgg.Tutors.SearchTutor.Handle())                  // GET /admin/tutors/search
+			r.Get("/{tutor_id}", h.adminAgg.Tutors.GetTutorByID.Handle())             // GET /admin/tutors/{id}
+			r.Post("/", h.adminAgg.Tutors.CreateTutor.Handle())                       // POST /admin/tutors
+			r.Delete("/{tutor_id}", h.adminAgg.Tutors.DeleteTutor.Handle())           // DELETE /admin/tutors/{id}
+			r.Post("/{tutor_id}/finance", h.adminAgg.Tutors.GetTutorFinance.Handle()) // POST /admin/tutors/{id}/finance
+			r.Post("/trial_lesson", h.adminAgg.Tutors.ConductTrial.Handle())          // POST /admin/tutors/trial_lesson
+			r.Post("/conduct_lesson", h.adminAgg.Tutors.ConductLesson.Handle())       // POST /admin/tutors/conduct_lesson
 		})
 
 		// Студенты

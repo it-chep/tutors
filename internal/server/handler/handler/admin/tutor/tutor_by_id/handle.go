@@ -47,5 +47,14 @@ func (h *Handler) Handle() http.HandlerFunc {
 }
 
 func (h *Handler) prepareResponse(tutor dto.Tutor) Response {
-	return Response{}
+	return Response{
+		Tutor: Tutor{
+			ID:          tutor.ID,
+			FullName:    tutor.FullName,
+			Phone:       tutor.Phone,
+			Tg:          tutor.Tg,
+			CostPerHour: tutor.CostPerHour,
+			SubjectID:   tutor.SubjectID,
+		},
+	}
 }

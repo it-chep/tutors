@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
+	"github.com/samber/lo"
 	"net/http"
 )
 
@@ -44,5 +45,15 @@ func (h *Handler) Handle() http.HandlerFunc {
 }
 
 func (h *Handler) prepareResponse(students []dto.Student) Response {
-	return Response{}
+	return Response{
+		Students: lo.Map(students, func(item dto.Student, index int) Student {
+			return Student{
+				ID:             item.ID,
+				FirstName:      item.FirstName,
+				LastName:       item.LastName,
+				MiddleName:     item.MiddleName,
+				ParentFullName: item.ParentFullName,
+			}
+		}),
+	}
 }

@@ -24,7 +24,17 @@ func (r *Repository) CreateStudent(ctx context.Context, createDTO dto.CreateRequ
 		returning id
 	`
 	args := []interface{}{
-		createDTO,
+		createDTO.FirstName,
+		createDTO.LastName,
+		createDTO.MiddleName,
+		createDTO.Phone,
+		createDTO.Tg,
+		createDTO.CostPerHour,
+		createDTO.SubjectID,
+		createDTO.TutorID,
+		createDTO.ParentFullName,
+		createDTO.ParentPhone,
+		createDTO.ParentTg,
 	}
 
 	var id int64

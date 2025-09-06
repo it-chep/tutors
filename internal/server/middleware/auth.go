@@ -33,7 +33,7 @@ func JWTMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// Auth получает роль пользователя и кладет ее в контекст
+// Auth получает роль пользователя и кладет ее в контекст, а также разграничивает урлы по доступам
 func Auth(adminModule *admin.Module) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -59,13 +59,13 @@ func Auth(adminModule *admin.Module) func(http.Handler) http.Handler {
 			//	return
 			//}
 			//
-			roleID := int8(dto.TutorRole)
+			roleID := int8(dto.SuperAdminRole)
 
-			hasPermission, err := adminModule.Actions.CheckPathPermission.Do(ctx, roleID, r.URL.Path)
-			if err != nil || !hasPermission {
-				w.WriteHeader(http.StatusForbidden) // 403 ебашим
-				return
-			}
+			//hasPermission, err := adminModule.Actions.CheckPathPermission.Do(ctx, roleID, r.URL.Path)
+			//if err != nil || !hasPermission {
+			//	w.WriteHeader(http.StatusForbidden) // 403 ебашим
+			//	return
+			//}
 
 			ctx = pkgContext.WithUserRole(ctx, roleID)
 

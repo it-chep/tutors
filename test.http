@@ -1,3 +1,4 @@
+# Репетиторы
 ### Получить всех репетиторов
 GET http://localhost:8080/admin/tutors/
 
@@ -5,13 +6,22 @@ GET http://localhost:8080/admin/tutors/
 GET http://localhost:8080/admin/tutors/1
 
 ### Поиск по репетиторам
-GET http://localhost:8080/admin/tutors/search?query="Нечепорук Максим Алексеевич"
+GET http://localhost:8080/admin/tutors/search?search=Нечепорук
 
 ### Создание репетитора
 POST http://localhost:8080/admin/tutors
+Content-Type: application/json
+
+{
+  "full_name": "Узянов Даниил Евгеньевич",
+  "phone": "+7 995 677 8781",
+  "tg": "https://t.me/danzelVash",
+  "cost_per_hour": "1500",
+  "subject_id": 1
+}
 
 ### Удаление репетитора
-DELETE http://localhost:8080/admin/tutors/1
+DELETE http://localhost:8080/admin/tutors/3
 
 ### Получение информации по финансам репетитора
 POST http://localhost:8080/admin/tutors/1/finance
@@ -22,6 +32,25 @@ Content-Type: application/json
   "to": "2006-01-02 15:04:05"
 }
 
+### Репетитор проводит демо урок
+POST http://localhost:8080/admin/tutors/trial_lesson
+Content-Type: application/json
+
+{
+  "student_id": 2
+}
+
+### Репетитор проводит обычный урок
+POST http://localhost:8080/admin/tutors/conduct_lesson
+Content-Type: application/json
+
+{
+  "student_id": 2,
+  "duration": 1
+}
+
+###
+# Студенты
 
 ### Получить всех студентов
 GET http://localhost:8080/admin/students
@@ -33,10 +62,25 @@ GET http://localhost:8080/admin/students?tutor_id=1
 GET http://localhost:8080/admin/students/1
 
 ### Поиск по студентам
-GET http://localhost:8080/admin/students/search?query="Нечепорук Максим Алексеевич"
+GET http://localhost:8080/admin/students/search?search=Нечепорук
 
 ### Создание студента
 POST http://localhost:8080/admin/students
+Content-Type: application/json
+
+{
+  "first_name": "Узянов",
+  "last_name": "Даниил",
+  "middle_name": "Евгеньевич",
+  "phone": "+7 995 677 8781",
+  "tg": "https://t.me/danzelVash",
+  "cost_per_hour": "1500",
+  "subject_id": 1,
+  "tutor_id": 1,
+  "parent_full_name": "Узянов Даниил Евгеньевич",
+  "parent_phone": "+7 995 677 8781",
+  "parent_tg": "https://t.me/danzelVash"
+}
 
 ### Удаление студента
 DELETE http://localhost:8080/admin/students/1

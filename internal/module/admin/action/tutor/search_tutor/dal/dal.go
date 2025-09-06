@@ -7,6 +7,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/dal/dao"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"strings"
 )
 
 type Repository struct {
@@ -25,9 +26,9 @@ func (r *Repository) Search(ctx context.Context, query string) ([]dto.Tutor, err
 		select * from tutors where full_name ilike $1
 	`
 
-	query = fmt.Sprintf("%s%s%s", "%", query, "%")
+	searchQuery := fmt.Sprintf("%%%s%%", strings.TrimSpace(query))
 	var tutors dao.TutorsDao
-	if err := pgxscan.Select(ctx, r.pool, &tutors, sql, query); err != nil {
+	if err := pgxscan.Select(ctx, r.pool, &tutors, sql, searchQuery); err != nil {
 		return nil, err
 	}
 

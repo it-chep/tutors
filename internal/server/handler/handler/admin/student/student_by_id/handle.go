@@ -47,5 +47,25 @@ func (h *Handler) Handle() http.HandlerFunc {
 }
 
 func (h *Handler) prepareResponse(student dto.Student) Response {
-	return Response{}
+	return Response{
+		Student: Student{
+			ID:                  student.ID,
+			FirstName:           student.FirstName,
+			LastName:            student.LastName,
+			MiddleName:          student.MiddleName,
+			Phone:               student.Phone,
+			Tg:                  student.Tg,
+			CostPerHour:         student.CostPerHour,
+			SubjectID:           student.SubjectID,
+			TutorID:             student.TutorID,
+			ParentFullName:      student.ParentFullName,
+			ParentPhone:         student.ParentPhone,
+			ParentTg:            student.ParentTg,
+			Balance:             student.Balance,
+			HasButtons:          student.HasButtons,
+			IsOnlyTrialFinished: student.IsOnlyTrialFinished,
+			IsBalanceNegative:   student.IsBalanceNegative,
+			IsNewbie:            student.IsNewbie,
+		},
+	}
 }

@@ -40,6 +40,7 @@ func (a *Action) Do(ctx context.Context, studentID int64) (dto.Student, error) {
 	if err != nil {
 		logger.Error(ctx, "Ошибка при получении кошелька студента", err)
 	}
+	student.Balance = walletInfo.Balance
 	balance, _ := decimal.NewFromString(walletInfo.Balance)
 	student.IsBalanceNegative = balance.LessThan(decimal.NewFromFloat(0.0))
 

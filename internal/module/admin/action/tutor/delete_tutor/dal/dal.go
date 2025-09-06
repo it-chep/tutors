@@ -33,10 +33,7 @@ func (r *Repository) UpdateStudents(ctx context.Context, tutorID int64) (err err
 	sql := `
 		update students set tutor_id = 0 where tutor_id = $1
 	`
-	result, err := r.pool.Exec(ctx, sql, tutorID)
-	if result.RowsAffected() == 0 {
-		return errors.New("Ошибка при обновлении студентов")
-	}
+	_, err = r.pool.Exec(ctx, sql, tutorID)
 
 	return err
 }

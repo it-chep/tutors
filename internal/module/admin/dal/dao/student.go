@@ -3,6 +3,7 @@ package dao
 import (
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/it-chep/tutors.git/pkg/xo"
+	"github.com/samber/lo"
 )
 
 type StudentDAO struct {
@@ -38,14 +39,14 @@ func (studs StudentsDAO) ToDomain() []dto.Student {
 }
 
 type StudentFinance struct {
-	Count  int64 `db:"count" json:"count"`
-	Amount int64 `db:"amount" json:"amount"`
+	Count  *int64 `db:"count" json:"count"`
+	Amount *int64 `db:"amount" json:"amount"`
 }
 
 func (sf StudentFinance) ToDomain() dto.StudentFinance {
 	return dto.StudentFinance{
-		Count:  sf.Count,
-		Amount: sf.Amount,
+		Count:  lo.FromPtr(sf.Count),
+		Amount: lo.FromPtr(sf.Amount),
 	}
 }
 

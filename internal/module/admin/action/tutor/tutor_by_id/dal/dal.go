@@ -30,7 +30,7 @@ func (r *Repository) GetTutor(ctx context.Context, tutorID int64) (dto.Tutor, er
 	}
 
 	var tutor dao.TutorDAO
-	err := pgxscan.Get(ctx, r.pool, &tutor, sql, args)
+	err := pgxscan.Get(ctx, r.pool, &tutor, sql, args...)
 	if err != nil {
 		return dto.Tutor{}, err
 	}

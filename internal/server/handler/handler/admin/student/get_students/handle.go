@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
+	"github.com/samber/lo"
 	"net/http"
 	"strconv"
 )
@@ -25,8 +26,7 @@ func (h *Handler) Handle() http.HandlerFunc {
 		tutorIDStr := r.URL.Query().Get("tutor_id")
 		tutorID, err := strconv.ParseInt(tutorIDStr, 10, 64)
 		if err != nil {
-			http.Error(w, "invalid tutor ID", http.StatusBadRequest)
-			return
+			tutorID = 0
 		}
 
 		baseData, err := h.adminModule.Actions.GetStudents.Do(ctx, tutorID)
@@ -46,5 +46,18 @@ func (h *Handler) Handle() http.HandlerFunc {
 }
 
 func (h *Handler) prepareResponse(students []dto.Student) Response {
-	return Response{}
+	return Response{
+		Students: lo.Map(students, func(item dto.Student, index int) Student {
+			return Student{
+				ID:                  item.ID,
+				FirstName:           item.FirstName,
+				LastName:            item.LastName,
+				MiddleName:          item.MiddleName,
+				Tg:                  item.Tg,
+				IsOnlyTrialFinished: item.IsOnlyTrialFinished,
+				IsBalanceNegative:   item.IsBalanceNegative,
+				IsNewbie:            item.IsNewbie,
+			}
+		}),
+	}
 }
