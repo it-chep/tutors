@@ -2,11 +2,12 @@ package dal
 
 import (
 	"context"
+	"time"
+
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/it-chep/tutors.git/internal/module/admin/dal/dao"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"time"
 )
 
 type Repository struct {

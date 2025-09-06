@@ -2,11 +2,12 @@ package student_by_id
 
 import (
 	"encoding/json"
+	"net/http"
+	"strconv"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
-	"net/http"
-	"strconv"
 )
 
 type Handler struct {
@@ -61,7 +62,7 @@ func (h *Handler) prepareResponse(student dto.Student) Response {
 			ParentFullName:      student.ParentFullName,
 			ParentPhone:         student.ParentPhone,
 			ParentTg:            student.ParentTg,
-			Balance:             student.Balance,
+			Balance:             student.Balance.String(),
 			HasButtons:          student.HasButtons,
 			IsOnlyTrialFinished: student.IsOnlyTrialFinished,
 			IsBalanceNegative:   student.IsBalanceNegative,

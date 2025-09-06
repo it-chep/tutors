@@ -2,10 +2,11 @@ package get_all_subjects
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/samber/lo"
-	"net/http"
 )
 
 type Handler struct {

@@ -2,6 +2,7 @@ package get_admin_by_id
 
 import (
 	"context"
+
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/get_admin_by_id/dal"
 	"github.com/jackc/pgx/v5/pgxpool"
 )

@@ -1,11 +1,12 @@
 package middleware
 
 import (
+	"net/http"
+	"strings"
+
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	pkgContext "github.com/it-chep/tutors.git/internal/pkg/context"
-	"net/http"
-	"strings"
 
 	"github.com/it-chep/tutors.git/internal/pkg/jwt"
 )

@@ -18,7 +18,7 @@ type Student struct {
 	ParentPhone    string
 	ParentTg       string
 
-	Balance string
+	Balance decimal.Decimal
 
 	HasButtons          bool
 	IsFinishedTrial     bool
@@ -29,7 +29,7 @@ type Student struct {
 
 type StudentFinance struct {
 	Count  int64
-	Amount int64
+	Amount decimal.Decimal
 }
 
 type Wallet struct {

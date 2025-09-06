@@ -1,10 +1,11 @@
 package delete_tutor
 
 import (
-	"github.com/go-chi/chi/v5"
-	"github.com/it-chep/tutors.git/internal/module/admin"
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/it-chep/tutors.git/internal/module/admin"
 )
 
 type Handler struct {

@@ -44,12 +44,12 @@ create table if not exists roles_permissions
 create table if not exists tutors
 (
     id            bigserial,
-    full_name     text   not null,        -- ФИО репетитора
-    phone         text   not null,        -- номер телефона репетитора
-    tg            text   not null,        -- телега репетитора
-    cost_per_hour money  not null,        --  стоимость часа работы репетитора todo?)
-    subject_id    bigint not null,        -- учебный предмет
-    admin_id      bigint not null,        -- админ репетитора
+    full_name     text    not null,       -- ФИО репетитора
+    phone         text    not null,       -- номер телефона репетитора
+    tg            text    not null,       -- телега репетитора
+    cost_per_hour numeric not null,       --  стоимость часа работы репетитора
+    subject_id    bigint  not null,       -- учебный предмет
+    admin_id      bigint  not null,       -- админ репетитора
 
     created_at    timestamp default now() -- дата создания
 );
@@ -68,27 +68,27 @@ create table if not exists students
 (
     id                bigserial,
     -- личные данные студента
-    first_name        text   not null,        -- имя студента
-    last_name         text   not null,        -- фамилия студента
-    middle_name       text   not null,        -- отчество студента
-    phone             text   not null,        -- номер телефона студента
-    tg                text   not null,        -- телега студента
+    first_name        text    not null,        -- имя студента
+    last_name         text    not null,        -- фамилия студента
+    middle_name       text    not null,        -- отчество студента
+    phone             text    not null,        -- номер телефона студента
+    tg                text    not null,        -- телега студента
 
     -- логика с репетиторами
-    cost_per_hour     money  not null,        --  стоимость часа для студента todo?)
-    subject_id        bigint not null,        -- учебный предмет
-    tutor_id          bigint not null,        -- репетитор
-    is_finished_trial bool   not null,        -- посещал ли пробный урок
+    cost_per_hour     numeric not null,        -- стоимость часа для студента
+    subject_id        bigint  not null,        -- учебный предмет
+    tutor_id          bigint  not null,        -- репетитор
+    is_finished_trial bool    not null,        -- посещал ли пробный урок
 
     -- родители студента
-    parent_full_name  text   not null,        -- ФИО родителя студента
-    parent_phone      text   not null,        -- номер телефона родителя
-    parent_tg         text   not null,        -- телега родителя
-    parent_tg_id      bigint not null,        -- тг ид родителя
+    parent_full_name  text    not null,        -- ФИО родителя студента
+    parent_phone      text    not null,        -- номер телефона родителя
+    parent_tg         text    not null,        -- телега родителя
+    parent_tg_id      bigint  not null,        -- тг ид родителя
 
     created_at        timestamp default now(), -- дата создания
     -- У родителя есть кошелек - wallet связь 1-1
-    -- todo логика с ботом
+
     unique (parent_tg_id)
 );
 

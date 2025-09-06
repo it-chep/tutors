@@ -4,6 +4,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/convert"
 	"github.com/it-chep/tutors.git/pkg/xo"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/samber/lo"
 )
 
@@ -40,14 +41,14 @@ func (studs StudentsDAO) ToDomain() []dto.Student {
 }
 
 type StudentFinance struct {
-	Count  *int64 `db:"count" json:"count"`
-	Amount *int64 `db:"amount" json:"amount"`
+	Count  *int64          `db:"count" json:"count"`
+	Amount *pgtype.Numeric `db:"amount" json:"amount"`
 }
 
 func (sf StudentFinance) ToDomain() dto.StudentFinance {
 	return dto.StudentFinance{
 		Count:  lo.FromPtr(sf.Count),
-		Amount: lo.FromPtr(sf.Amount),
+		Amount: convert.NumericToDecimal(lo.FromPtr(sf.Amount)),
 	}
 }
 

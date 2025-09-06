@@ -2,11 +2,12 @@ package get_tutor_finance
 
 import (
 	"encoding/json"
+	"net/http"
+	"strconv"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
-	"net/http"
-	"strconv"
 )
 
 type Handler struct {
@@ -57,7 +58,7 @@ func (h *Handler) prepareResponse(financeInfo dto.TutorFinance) Response {
 		Finance: Finance{
 			Conversion: financeInfo.Conversion,
 			Count:      financeInfo.Count,
-			Amount:     financeInfo.Amount,
+			Amount:     financeInfo.Amount.String(),
 		},
 	}
 }

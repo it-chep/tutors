@@ -4,7 +4,6 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/alpha"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/admins"
-	"github
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/get_all_finance"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/get_all_subjects"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/get_available_roles"

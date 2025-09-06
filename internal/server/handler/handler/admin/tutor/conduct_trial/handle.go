@@ -2,8 +2,9 @@ package conduct_trial
 
 import (
 	"encoding/json"
-	"github.com/it-chep/tutors.git/internal/module/admin"
 	"net/http"
+
+	"github.com/it-chep/tutors.git/internal/module/admin"
 )
 
 type Handler struct {

@@ -2,9 +2,10 @@ package create_tutor
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/create_tutor/dto"
-	"net/http"
 )
 
 type Handler struct {

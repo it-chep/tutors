@@ -2,11 +2,12 @@ package get_student_finance
 
 import (
 	"context"
+	"time"
+
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_student_finance/dal"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pkg/errors"
-	"time"
 )
 
 type Action struct {

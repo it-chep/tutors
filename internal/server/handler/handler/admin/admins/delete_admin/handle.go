@@ -1,8 +1,9 @@
 package delete_admin
 
 import (
-	"github.com/it-chep/tutors.git/internal/module/admin"
 	"net/http"
+
+	"github.com/it-chep/tutors.git/internal/module/admin"
 )
 
 type Handler struct {

@@ -3,11 +3,12 @@ package dal
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/it-chep/tutors.git/internal/module/admin/dal/dao"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"strings"
 )
 
 type Repository struct {

@@ -1,9 +1,10 @@
 package server
 
 import (
-	"github.com/it-chep/tutors.git/internal/server/handler"
 	"net/http"
 	"time"
+
+	"github.com/it-chep/tutors.git/internal/server/handler"
 )
 
 type Server struct {

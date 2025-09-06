@@ -125,7 +125,7 @@
   "data": {
     "conversion": 30,
     "count": 23,
-    "amount": 23
+    "amount": "23"
   }
 }
 ```
@@ -338,7 +338,7 @@
 {
   "data": {
     "count": 10,
-    "amount": 23
+    "amount": "23"
   }
 }
 ```

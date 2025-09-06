@@ -2,6 +2,7 @@ package check_auth
 
 import (
 	"context"
+
 	"github.com/it-chep/tutors.git/internal/module/admin/action/auth/check_auth/dal"
 	"github.com/jackc/pgx/v5/pgxpool"
 )

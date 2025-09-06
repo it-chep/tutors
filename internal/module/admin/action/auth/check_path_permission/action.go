@@ -2,10 +2,11 @@ package check_path_permission
 
 import (
 	"context"
-	"github.com/it-chep/tutors.git/internal/module/admin/action/auth/check_path_permission/dal"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"regexp"
 	"strings"
+
+	"github.com/it-chep/tutors.git/internal/module/admin/action/auth/check_path_permission/dal"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Action struct {
