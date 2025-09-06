@@ -46,7 +46,10 @@ func (h *Handler) setupRoutes(adminModule *admin.Module) {
 
 		// Админы
 		r.Route("/admins", func(r chi.Router) {
-
+			r.Get("/", h.adminAgg.Admins.GetAdmins.Handle())                // GET /admin/admins
+			r.Post("/", h.adminAgg.Admins.CreateAdmin.Handle())             // POST /admin/admins
+			r.Get("/{admin_id}", h.adminAgg.Admins.GetAdminByID.Handle())   // GET /admin/admins/{id}
+			r.Delete("/{admin_id}", h.adminAgg.Admins.DeleteAdmin.Handle()) // DELETE /admin/admins/{id}
 		})
 
 		// Репетиторы

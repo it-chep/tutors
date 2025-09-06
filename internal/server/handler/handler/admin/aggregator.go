@@ -2,6 +2,7 @@ package admin
 
 import (
 	"github.com/it-chep/tutors.git/internal/module/admin"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/admins"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/get_all_finance"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/get_all_subjects"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/get_available_roles"
@@ -12,6 +13,7 @@ import (
 type HandlerAggregator struct {
 	Students *student.HandlerGroup
 	Tutors   *tutor.HandlerGroup
+	Admins   *admins.HandlerGroup
 
 	GetAllFinance     *get_all_finance.Handler
 	GetAllSubjects    *get_all_subjects.Handler
@@ -22,6 +24,7 @@ func NewAggregator(adminModule *admin.Module) *HandlerAggregator {
 	return &HandlerAggregator{
 		Students: student.NewGroup(adminModule),
 		Tutors:   tutor.NewGroup(adminModule),
+		Admins:   admins.NewGroup(adminModule),
 
 		GetAllFinance:     get_all_finance.NewHandler(adminModule),
 		GetAllSubjects:    get_all_subjects.NewHandler(adminModule),
