@@ -1,4 +1,4 @@
-package get_all_finance
+package create_admin
 
 import (
 	"encoding/json"
@@ -20,18 +20,10 @@ func (h *Handler) Handle() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		_ = r.Context()
 
-		response := h.prepareResponse()
-
-		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(response); err != nil {
-			http.Error(w, "failed to encode response: "+err.Error(), http.StatusInternalServerError)
+		var req Request
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "failed to decode request: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-	}
-}
-
-func (h *Handler) prepareResponse() Response {
-	return Response{
-		Finance: Finance{},
 	}
 }

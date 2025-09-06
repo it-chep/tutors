@@ -1,3 +1,17 @@
+### Получение информации по всем финансам
+POST http://localhost:8080/admin/finance
+Content-Type: application/json
+
+{
+  "from": "2006-01-02 15:04:05",
+  "to": "2006-01-02 15:04:05"
+}
+
+### Получить списка учебных предметов
+GET http://localhost:8080/admin/subjects
+
+
+###
 # Репетиторы
 ### Получить всех репетиторов
 GET http://localhost:8080/admin/tutors/
@@ -93,3 +107,9 @@ Content-Type: application/json
   "from": "2006-01-02 15:04:05",
   "to": "2006-01-02 15:04:05"
 }
+
+###
+# Админы
+
+### Получение информации по админам
+GET

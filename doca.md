@@ -345,5 +345,72 @@
 
 </details>
 
+# Админы
 
+# AUTH
 
+# Остальные
+
+### Получение информации по всем финансам
+
+`POST` http://localhost:8080/admin/finance
+
+<details>
+<summary><b>Пример запроса</b></summary>
+
+```json
+{
+  "from": "2023-01-01 00:00:00",
+  "to": "2023-03-31 23:59:59"
+}
+```
+
+</details>
+
+<details>
+<summary><b>Пример ответа</b></summary>
+
+```json
+{
+  "data": {
+    "profit": "1244",
+    "cash_flow": "2132323",
+    "conversion": 20,
+    "lessons_count": 1000
+  }
+}
+```
+
+</details>
+
+### Получение информации по учебным предметам
+
+`GET` http://localhost:8080/admin/subjects
+
+<details>
+<summary><b>Пример ответа</b></summary>
+
+```json
+{
+  "subjects": [
+    {
+      "id": 1,
+      "name": "Математика"
+    },
+    {
+      "id": 2,
+      "name": "Русский язык"
+    },
+    {
+      "id": 3,
+      "name": "Физика"
+    },
+    {
+      "id": 4,
+      "name": "Информатика"
+    }
+  ]
+}
+```
+
+</details>
