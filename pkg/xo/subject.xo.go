@@ -2,17 +2,77 @@
 // Package xo contains the types for schema 'public'.
 package xo
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+	"strings"
+)
 
 // Subject represents a row from 'public.subjects'.
 type Subject struct {
-	ID   int64  `db:"id" json:"id"`     // id
-	Name string `db:"name" json:"name"` // name
+	ID   int64  `db:"id" json:"id"`     // id bigint
+	Name string `db:"name" json:"name"` // name text
 }
 
 // zeroSubject zero value of dto
 var zeroSubject = Subject{}
 
+// Constants that should be used when building where statements
+const (
+	Alias_Subject            = "s"
+	Table_Subject_With_Alias = "subjects AS s"
+	Table_Subject            = "subjects"
+	Field_Subject_ID         = "id"
+	Field_Subject_Name       = "name"
+)
+
+func (t Subject) SelectColumnsWithCoalesce() []string {
+	return []string{
+		fmt.Sprintf("COALESCE(s.id, %v) as id", zeroSubject.ID),
+		fmt.Sprintf("COALESCE(s.name, '%v') as name", zeroSubject.Name),
+	}
+}
+
+func (t Subject) SelectColumns() []string {
+	return []string{
+		"s.id",
+		"s.name",
+	}
+}
+
+func (t Subject) Columns(without ...string) []string {
+	var str = "id, name"
+	for _, exc := range without {
+		str = strings.Replace(str+", ", exc+", ", "", 1)
+	}
+	return strings.Split(strings.TrimRight(str, ", "), ", ")
+}
+
+func (t Subject) WithTable(col string) string {
+	return fmt.Sprintf("s.%s", col)
+}
+
 func (t Subject) IsEmpty() bool {
 	return reflect.DeepEqual(t, zeroSubject)
+}
+
+func (t Subject) Join(rightColumnTable string, leftColumnTable string) string {
+	return fmt.Sprintf("subjects AS s ON s.%s = %s", rightColumnTable, leftColumnTable)
+}
+
+func (t *Subject) ToMap() map[string]interface{} {
+	return map[string]interface{}{
+		"id":   t.ID,
+		"name": t.Name,
+	}
+}
+
+func (t *Subject) Values(colNames ...string) (vals []interface{}) {
+	m := t.ToMap()
+
+	for _, v := range colNames {
+		vals = append(vals, m[v])
+	}
+
+	return vals
 }

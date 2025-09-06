@@ -3,9 +3,10 @@ package conduct_lesson
 import (
 	"context"
 	"fmt"
+
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/conduct_lesson/dal"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"strconv"
+	"github.com/shopspring/decimal"
 )
 
 // Action провести обычное занятие
@@ -36,8 +37,7 @@ func (a *Action) Do(ctx context.Context, tutorID, studentID int64, duration int6
 	// Из кошелька вычитаем стоимость занятия
 	//remain := wallet.Balance - tutor.CostPerHour*duration
 	_ = tutor.CostPerHour
-	remain, _ := strconv.Atoi(wallet.Balance)
-	if remain < 0 {
+	if wallet.Balance.LessThan(decimal.NewFromInt(0)) {
 		student, err := a.dal.GetStudent(ctx, studentID)
 		if err != nil {
 			return err
@@ -47,5 +47,5 @@ func (a *Action) Do(ctx context.Context, tutorID, studentID int64, duration int6
 	}
 	// ---- todo
 
-	return a.dal.UpdateStudentWallet(ctx, studentID, fmt.Sprintf("%d", remain))
+	return a.dal.UpdateStudentWallet(ctx, studentID, fmt.Sprintf("%s", wallet.Balance.String()))
 }

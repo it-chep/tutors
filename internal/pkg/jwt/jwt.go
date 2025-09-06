@@ -27,7 +27,7 @@ func init() {
 	}
 	key := os.Getenv(jwtSecretKey)
 	if key == "" {
-		panic("JWT secret key not set")
+		//panic("JWT secret key not set")
 	}
 	jwtSecret = []byte(key)
 

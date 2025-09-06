@@ -2,19 +2,87 @@
 // Package xo contains the types for schema 'public'.
 package xo
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+	"strings"
+)
 
 // Admin represents a row from 'public.admins'.
 type Admin struct {
-	ID       int64  `db:"id" json:"id"`               // id
-	FullName string `db:"full_name" json:"full_name"` // full_name
-	Phone    string `db:"phone" json:"phone"`         // phone
-	Tg       string `db:"tg" json:"tg"`               // tg
+	ID       int64  `db:"id" json:"id"`               // id bigint
+	FullName string `db:"full_name" json:"full_name"` // full_name text
+	Phone    string `db:"phone" json:"phone"`         // phone text
+	Tg       string `db:"tg" json:"tg"`               // tg text
 }
 
 // zeroAdmin zero value of dto
 var zeroAdmin = Admin{}
 
+// Constants that should be used when building where statements
+const (
+	Alias_Admin            = "a"
+	Table_Admin_With_Alias = "admins AS a"
+	Table_Admin            = "admins"
+	Field_Admin_ID         = "id"
+	Field_Admin_FullName   = "full_name"
+	Field_Admin_Phone      = "phone"
+	Field_Admin_Tg         = "tg"
+)
+
+func (t Admin) SelectColumnsWithCoalesce() []string {
+	return []string{
+		fmt.Sprintf("COALESCE(a.id, %v) as id", zeroAdmin.ID),
+		fmt.Sprintf("COALESCE(a.full_name, '%v') as full_name", zeroAdmin.FullName),
+		fmt.Sprintf("COALESCE(a.phone, '%v') as phone", zeroAdmin.Phone),
+		fmt.Sprintf("COALESCE(a.tg, '%v') as tg", zeroAdmin.Tg),
+	}
+}
+
+func (t Admin) SelectColumns() []string {
+	return []string{
+		"a.id",
+		"a.full_name",
+		"a.phone",
+		"a.tg",
+	}
+}
+
+func (t Admin) Columns(without ...string) []string {
+	var str = "id, full_name, phone, tg"
+	for _, exc := range without {
+		str = strings.Replace(str+", ", exc+", ", "", 1)
+	}
+	return strings.Split(strings.TrimRight(str, ", "), ", ")
+}
+
+func (t Admin) WithTable(col string) string {
+	return fmt.Sprintf("a.%s", col)
+}
+
 func (t Admin) IsEmpty() bool {
 	return reflect.DeepEqual(t, zeroAdmin)
+}
+
+func (t Admin) Join(rightColumnTable string, leftColumnTable string) string {
+	return fmt.Sprintf("admins AS a ON a.%s = %s", rightColumnTable, leftColumnTable)
+}
+
+func (t *Admin) ToMap() map[string]interface{} {
+	return map[string]interface{}{
+		"id":        t.ID,
+		"full_name": t.FullName,
+		"phone":     t.Phone,
+		"tg":        t.Tg,
+	}
+}
+
+func (t *Admin) Values(colNames ...string) (vals []interface{}) {
+	m := t.ToMap()
+
+	for _, v := range colNames {
+		vals = append(vals, m[v])
+	}
+
+	return vals
 }

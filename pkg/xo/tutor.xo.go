@@ -2,22 +2,109 @@
 // Package xo contains the types for schema 'public'.
 package xo
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+	"strings"
+
+	"github.com/lib/pq"
+)
 
 // Tutor represents a row from 'public.tutors'.
 type Tutor struct {
-	ID          int64  `db:"id" json:"id"`                       // id
-	FullName    string `db:"full_name" json:"full_name"`         // full_name
-	Phone       string `db:"phone" json:"phone"`                 // phone
-	Tg          string `db:"tg" json:"tg"`                       // tg
-	CostPerHour string `db:"cost_per_hour" json:"cost_per_hour"` // cost_per_hour
-	SubjectID   int64  `db:"subject_id" json:"subject_id"`       // subject_id
-	AdminID     int64  `db:"admin_id" json:"admin_id"`           // admin_id
+	ID          int64       `db:"id" json:"id"`                       // id bigint
+	FullName    string      `db:"full_name" json:"full_name"`         // full_name text
+	Phone       string      `db:"phone" json:"phone"`                 // phone text
+	Tg          string      `db:"tg" json:"tg"`                       // tg text
+	CostPerHour string      `db:"cost_per_hour" json:"cost_per_hour"` // cost_per_hour money
+	SubjectID   int64       `db:"subject_id" json:"subject_id"`       // subject_id bigint
+	AdminID     int64       `db:"admin_id" json:"admin_id"`           // admin_id bigint
+	CreatedAt   pq.NullTime `db:"created_at" json:"created_at"`       // created_at timestamp without time zone
 }
 
 // zeroTutor zero value of dto
 var zeroTutor = Tutor{}
 
+// Constants that should be used when building where statements
+const (
+	Alias_Tutor             = "t"
+	Table_Tutor_With_Alias  = "tutors AS t"
+	Table_Tutor             = "tutors"
+	Field_Tutor_ID          = "id"
+	Field_Tutor_FullName    = "full_name"
+	Field_Tutor_Phone       = "phone"
+	Field_Tutor_Tg          = "tg"
+	Field_Tutor_CostPerHour = "cost_per_hour"
+	Field_Tutor_SubjectID   = "subject_id"
+	Field_Tutor_AdminID     = "admin_id"
+	Field_Tutor_CreatedAt   = "created_at"
+)
+
+func (t Tutor) SelectColumnsWithCoalesce() []string {
+	return []string{
+		fmt.Sprintf("COALESCE(t.id, %v) as id", zeroTutor.ID),
+		fmt.Sprintf("COALESCE(t.full_name, '%v') as full_name", zeroTutor.FullName),
+		fmt.Sprintf("COALESCE(t.phone, '%v') as phone", zeroTutor.Phone),
+		fmt.Sprintf("COALESCE(t.tg, '%v') as tg", zeroTutor.Tg),
+		fmt.Sprintf("COALESCE(t.cost_per_hour, '%v') as cost_per_hour", zeroTutor.CostPerHour),
+		fmt.Sprintf("COALESCE(t.subject_id, %v) as subject_id", zeroTutor.SubjectID),
+		fmt.Sprintf("COALESCE(t.admin_id, %v) as admin_id", zeroTutor.AdminID),
+		"t.created_at",
+	}
+}
+
+func (t Tutor) SelectColumns() []string {
+	return []string{
+		"t.id",
+		"t.full_name",
+		"t.phone",
+		"t.tg",
+		"t.cost_per_hour",
+		"t.subject_id",
+		"t.admin_id",
+		"t.created_at",
+	}
+}
+
+func (t Tutor) Columns(without ...string) []string {
+	var str = "id, full_name, phone, tg, cost_per_hour, subject_id, admin_id, created_at"
+	for _, exc := range without {
+		str = strings.Replace(str+", ", exc+", ", "", 1)
+	}
+	return strings.Split(strings.TrimRight(str, ", "), ", ")
+}
+
+func (t Tutor) WithTable(col string) string {
+	return fmt.Sprintf("t.%s", col)
+}
+
 func (t Tutor) IsEmpty() bool {
 	return reflect.DeepEqual(t, zeroTutor)
+}
+
+func (t Tutor) Join(rightColumnTable string, leftColumnTable string) string {
+	return fmt.Sprintf("tutors AS t ON t.%s = %s", rightColumnTable, leftColumnTable)
+}
+
+func (t *Tutor) ToMap() map[string]interface{} {
+	return map[string]interface{}{
+		"id":            t.ID,
+		"full_name":     t.FullName,
+		"phone":         t.Phone,
+		"tg":            t.Tg,
+		"cost_per_hour": t.CostPerHour,
+		"subject_id":    t.SubjectID,
+		"admin_id":      t.AdminID,
+		"created_at":    t.CreatedAt,
+	}
+}
+
+func (t *Tutor) Values(colNames ...string) (vals []interface{}) {
+	m := t.ToMap()
+
+	for _, v := range colNames {
+		vals = append(vals, m[v])
+	}
+
+	return vals
 }

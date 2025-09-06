@@ -2,6 +2,7 @@ package get_students
 
 import (
 	"context"
+
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_students/dal"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
@@ -98,8 +99,7 @@ func (a *Action) enrichStudents(ctx context.Context, students []dto.Student) {
 		if !ok {
 			students[i].IsBalanceNegative = false
 		}
-		balance, _ := decimal.NewFromString(wallet.Balance)
-		students[i].IsBalanceNegative = balance.LessThan(decimal.NewFromFloat(0.0))
+		students[i].IsBalanceNegative = wallet.Balance.LessThan(decimal.NewFromFloat(0.0))
 
 		// Оплаты/новичок
 		hasPayments := payments[students[i].ID]
