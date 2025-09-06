@@ -1,5 +1,7 @@
 package dto
 
+import "github.com/shopspring/decimal"
+
 type Student struct {
 	ID         int64
 	FirstName  string
@@ -33,5 +35,5 @@ type StudentFinance struct {
 type Wallet struct {
 	ID        int64
 	StudentID int64
-	Balance   string
+	Balance   decimal.Decimal
 }

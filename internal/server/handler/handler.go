@@ -1,11 +1,12 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	adminHandler "github.com/it-chep/tutors.git/internal/server/handler/handler/admin"
 	"github.com/it-chep/tutors.git/internal/server/middleware"
-	"net/http"
 )
 
 type Handler struct {
@@ -75,6 +76,7 @@ func (h *Handler) setupRoutes(adminModule *admin.Module) {
 		r.Post("/finance", h.adminAgg.GetAllFinance.Handle())  // POST /admin/finance
 	})
 
+	h.router.Post("/alpha/hook", h.adminAgg.AlphaHook.Handle()) // POST /alpha/hook
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

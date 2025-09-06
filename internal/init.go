@@ -2,14 +2,16 @@ package internal
 
 import (
 	"context"
+	"log"
+
 	"github.com/georgysavva/scany/v2/dbscan"
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/it-chep/tutors.git/internal/module/admin"
+	"github.com/it-chep/tutors.git/internal/module/bot"
 	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
 	"github.com/it-chep/tutors.git/internal/server"
 	"github.com/it-chep/tutors.git/internal/server/handler"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"log"
 )
 
 func init() {
@@ -52,7 +54,7 @@ func (a *App) initTgBot(context.Context) *App {
 
 func (a *App) initModules(context.Context) *App {
 	a.modules = Modules{
-		//Bot:   bot.New(a.pool, a.bot),
+		Bot:   bot.New(a.pool, a.bot),
 		Admin: admin.New(a.pool),
 	}
 	return a

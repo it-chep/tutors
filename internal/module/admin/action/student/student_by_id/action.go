@@ -2,6 +2,7 @@ package student_by_id
 
 import (
 	"context"
+
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/student_by_id/dal"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
@@ -41,8 +42,7 @@ func (a *Action) Do(ctx context.Context, studentID int64) (dto.Student, error) {
 		logger.Error(ctx, "Ошибка при получении кошелька студента", err)
 	}
 	student.Balance = walletInfo.Balance
-	balance, _ := decimal.NewFromString(walletInfo.Balance)
-	student.IsBalanceNegative = balance.LessThan(decimal.NewFromFloat(0.0))
+	student.IsBalanceNegative = walletInfo.Balance.LessThan(decimal.NewFromFloat(0.0))
 
 	hasStudentPayments, err := a.dal.HasStudentPayments(ctx, studentID)
 

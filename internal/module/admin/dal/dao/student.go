@@ -2,6 +2,7 @@ package dao
 
 import (
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
+	"github.com/it-chep/tutors.git/internal/pkg/convert"
 	"github.com/it-chep/tutors.git/pkg/xo"
 	"github.com/samber/lo"
 )
@@ -58,6 +59,6 @@ func (w Wallet) ToDomain() dto.Wallet {
 	return dto.Wallet{
 		ID:        w.ID,
 		StudentID: w.StudentID,
-		Balance:   w.Balance,
+		Balance:   convert.NumericToDecimal(w.Balance),
 	}
 }

@@ -2,18 +2,84 @@
 // Package xo contains the types for schema 'public'.
 package xo
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+	"strings"
+
+	"github.com/jackc/pgx/v5/pgtype"
+)
 
 // Wallet represents a row from 'public.wallet'.
 type Wallet struct {
-	ID        int64  `db:"id" json:"id"`                 // id
-	StudentID int64  `db:"student_id" json:"student_id"` // student_id
-	Balance   string `db:"balance" json:"balance"`       // balance
+	ID        int64          `db:"id" json:"id"`                 // id bigint
+	StudentID int64          `db:"student_id" json:"student_id"` // student_id bigint
+	Balance   pgtype.Numeric `db:"balance" json:"balance"`       // balance numeric
 }
 
 // zeroWallet zero value of dto
 var zeroWallet = Wallet{}
 
+// Constants that should be used when building where statements
+const (
+	Alias_Wallet            = "w"
+	Table_Wallet_With_Alias = "wallet AS w"
+	Table_Wallet            = "wallet"
+	Field_Wallet_ID         = "id"
+	Field_Wallet_StudentID  = "student_id"
+	Field_Wallet_Balance    = "balance"
+)
+
+func (t Wallet) SelectColumnsWithCoalesce() []string {
+	return []string{
+		fmt.Sprintf("COALESCE(w.id, %v) as id", zeroWallet.ID),
+		fmt.Sprintf("COALESCE(w.student_id, %v) as student_id", zeroWallet.StudentID),
+		fmt.Sprintf("COALESCE(w.balance, %v) as balance", zeroWallet.Balance),
+	}
+}
+
+func (t Wallet) SelectColumns() []string {
+	return []string{
+		"w.id",
+		"w.student_id",
+		"w.balance",
+	}
+}
+
+func (t Wallet) Columns(without ...string) []string {
+	var str = "id, student_id, balance"
+	for _, exc := range without {
+		str = strings.Replace(str+", ", exc+", ", "", 1)
+	}
+	return strings.Split(strings.TrimRight(str, ", "), ", ")
+}
+
+func (t Wallet) WithTable(col string) string {
+	return fmt.Sprintf("w.%s", col)
+}
+
 func (t Wallet) IsEmpty() bool {
 	return reflect.DeepEqual(t, zeroWallet)
+}
+
+func (t Wallet) Join(rightColumnTable string, leftColumnTable string) string {
+	return fmt.Sprintf("wallet AS w ON w.%s = %s", rightColumnTable, leftColumnTable)
+}
+
+func (t *Wallet) ToMap() map[string]interface{} {
+	return map[string]interface{}{
+		"id":         t.ID,
+		"student_id": t.StudentID,
+		"balance":    t.Balance,
+	}
+}
+
+func (t *Wallet) Values(colNames ...string) (vals []interface{}) {
+	m := t.ToMap()
+
+	for _, v := range colNames {
+		vals = append(vals, m[v])
+	}
+
+	return vals
 }

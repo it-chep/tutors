@@ -84,18 +84,12 @@ create table if not exists students
     parent_full_name  text   not null,        -- ФИО родителя студента
     parent_phone      text   not null,        -- номер телефона родителя
     parent_tg         text   not null,        -- телега родителя
+    parent_tg_id      bigint not null,        -- тг ид родителя
 
-    created_at        timestamp default now() -- дата создания
+    created_at        timestamp default now(), -- дата создания
     -- У родителя есть кошелек - wallet связь 1-1
     -- todo логика с ботом
-);
-
--- Таблица кошелька родителя студента
-create table if not exists wallet
-(
-    id         bigserial,
-    student_id bigint not null,
-    balance    money  not null -- todo ?)
+    unique (parent_tg_id)
 );
 
 -- Таблица учебных предметов
@@ -104,20 +98,16 @@ create table if not exists subjects
     id   bigserial,
     name text not null unique
 );
-
--- todo транзакции/оплаты уроков
--- transactions/finance
-create table if not exists transactions_history
-(
-    id         bigserial,
-    created_at timestamp default now(), -- время совершения транзакции
-    amount     money,                   -- стоимость todo ?)
-    student_id bigint                   -- студент чья оплата
-    -- остальная логика
-);
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-SELECT 'down SQL query';
+drop table if exists users;
+drop table if exists roles;
+drop table if exists permissions;
+drop table if exists roles_permissions;
+drop table if exists tutors;
+drop table if exists admins;
+drop table if exists students;
+drop table if exists subjects;
 -- +goose StatementEnd

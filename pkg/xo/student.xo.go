@@ -2,28 +2,144 @@
 // Package xo contains the types for schema 'public'.
 package xo
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+	"strings"
+
+	"github.com/lib/pq"
+)
 
 // Student represents a row from 'public.students'.
 type Student struct {
-	ID              int64  `db:"id" json:"id"`                               // id
-	FirstName       string `db:"first_name" json:"first_name"`               // first_name
-	LastName        string `db:"last_name" json:"last_name"`                 // last_name
-	MiddleName      string `db:"middle_name" json:"middle_name"`             // middle_name
-	Phone           string `db:"phone" json:"phone"`                         // phone
-	Tg              string `db:"tg" json:"tg"`                               // tg
-	CostPerHour     string `db:"cost_per_hour" json:"cost_per_hour"`         // cost_per_hour
-	SubjectID       int64  `db:"subject_id" json:"subject_id"`               // subject_id
-	TutorID         int64  `db:"tutor_id" json:"tutor_id"`                   // tutor_id
-	IsFinishedTrial bool   `db:"is_finished_trial" json:"is_finished_trial"` // is_finished_trial
-	ParentFullName  string `db:"parent_full_name" json:"parent_full_name"`   // parent_full_name
-	ParentPhone     string `db:"parent_phone" json:"parent_phone"`           // parent_phone
-	ParentTg        string `db:"parent_tg" json:"parent_tg"`                 // parent_tg
+	ID              int64       `db:"id" json:"id"`                               // id bigint
+	FirstName       string      `db:"first_name" json:"first_name"`               // first_name text
+	LastName        string      `db:"last_name" json:"last_name"`                 // last_name text
+	MiddleName      string      `db:"middle_name" json:"middle_name"`             // middle_name text
+	Phone           string      `db:"phone" json:"phone"`                         // phone text
+	Tg              string      `db:"tg" json:"tg"`                               // tg text
+	CostPerHour     string      `db:"cost_per_hour" json:"cost_per_hour"`         // cost_per_hour money
+	SubjectID       int64       `db:"subject_id" json:"subject_id"`               // subject_id bigint
+	TutorID         int64       `db:"tutor_id" json:"tutor_id"`                   // tutor_id bigint
+	IsFinishedTrial bool        `db:"is_finished_trial" json:"is_finished_trial"` // is_finished_trial boolean
+	ParentFullName  string      `db:"parent_full_name" json:"parent_full_name"`   // parent_full_name text
+	ParentPhone     string      `db:"parent_phone" json:"parent_phone"`           // parent_phone text
+	ParentTg        string      `db:"parent_tg" json:"parent_tg"`                 // parent_tg text
+	ParentTgID      int64       `db:"parent_tg_id" json:"parent_tg_id"`           // parent_tg_id bigint
+	CreatedAt       pq.NullTime `db:"created_at" json:"created_at"`               // created_at timestamp without time zone
 }
 
 // zeroStudent zero value of dto
 var zeroStudent = Student{}
 
+// Constants that should be used when building where statements
+const (
+	Alias_Student                 = "s"
+	Table_Student_With_Alias      = "students AS s"
+	Table_Student                 = "students"
+	Field_Student_ID              = "id"
+	Field_Student_FirstName       = "first_name"
+	Field_Student_LastName        = "last_name"
+	Field_Student_MiddleName      = "middle_name"
+	Field_Student_Phone           = "phone"
+	Field_Student_Tg              = "tg"
+	Field_Student_CostPerHour     = "cost_per_hour"
+	Field_Student_SubjectID       = "subject_id"
+	Field_Student_TutorID         = "tutor_id"
+	Field_Student_IsFinishedTrial = "is_finished_trial"
+	Field_Student_ParentFullName  = "parent_full_name"
+	Field_Student_ParentPhone     = "parent_phone"
+	Field_Student_ParentTg        = "parent_tg"
+	Field_Student_ParentTgID      = "parent_tg_id"
+	Field_Student_CreatedAt       = "created_at"
+)
+
+func (t Student) SelectColumnsWithCoalesce() []string {
+	return []string{
+		fmt.Sprintf("COALESCE(s.id, %v) as id", zeroStudent.ID),
+		fmt.Sprintf("COALESCE(s.first_name, '%v') as first_name", zeroStudent.FirstName),
+		fmt.Sprintf("COALESCE(s.last_name, '%v') as last_name", zeroStudent.LastName),
+		fmt.Sprintf("COALESCE(s.middle_name, '%v') as middle_name", zeroStudent.MiddleName),
+		fmt.Sprintf("COALESCE(s.phone, '%v') as phone", zeroStudent.Phone),
+		fmt.Sprintf("COALESCE(s.tg, '%v') as tg", zeroStudent.Tg),
+		fmt.Sprintf("COALESCE(s.cost_per_hour, '%v') as cost_per_hour", zeroStudent.CostPerHour),
+		fmt.Sprintf("COALESCE(s.subject_id, %v) as subject_id", zeroStudent.SubjectID),
+		fmt.Sprintf("COALESCE(s.tutor_id, %v) as tutor_id", zeroStudent.TutorID),
+		fmt.Sprintf("COALESCE(s.is_finished_trial, %v) as is_finished_trial", zeroStudent.IsFinishedTrial),
+		fmt.Sprintf("COALESCE(s.parent_full_name, '%v') as parent_full_name", zeroStudent.ParentFullName),
+		fmt.Sprintf("COALESCE(s.parent_phone, '%v') as parent_phone", zeroStudent.ParentPhone),
+		fmt.Sprintf("COALESCE(s.parent_tg, '%v') as parent_tg", zeroStudent.ParentTg),
+		fmt.Sprintf("COALESCE(s.parent_tg_id, %v) as parent_tg_id", zeroStudent.ParentTgID),
+		"s.created_at",
+	}
+}
+
+func (t Student) SelectColumns() []string {
+	return []string{
+		"s.id",
+		"s.first_name",
+		"s.last_name",
+		"s.middle_name",
+		"s.phone",
+		"s.tg",
+		"s.cost_per_hour",
+		"s.subject_id",
+		"s.tutor_id",
+		"s.is_finished_trial",
+		"s.parent_full_name",
+		"s.parent_phone",
+		"s.parent_tg",
+		"s.parent_tg_id",
+		"s.created_at",
+	}
+}
+
+func (t Student) Columns(without ...string) []string {
+	var str = "id, first_name, last_name, middle_name, phone, tg, cost_per_hour, subject_id, tutor_id, is_finished_trial, parent_full_name, parent_phone, parent_tg, parent_tg_id, created_at"
+	for _, exc := range without {
+		str = strings.Replace(str+", ", exc+", ", "", 1)
+	}
+	return strings.Split(strings.TrimRight(str, ", "), ", ")
+}
+
+func (t Student) WithTable(col string) string {
+	return fmt.Sprintf("s.%s", col)
+}
+
 func (t Student) IsEmpty() bool {
 	return reflect.DeepEqual(t, zeroStudent)
+}
+
+func (t Student) Join(rightColumnTable string, leftColumnTable string) string {
+	return fmt.Sprintf("students AS s ON s.%s = %s", rightColumnTable, leftColumnTable)
+}
+
+func (t *Student) ToMap() map[string]interface{} {
+	return map[string]interface{}{
+		"id":                t.ID,
+		"first_name":        t.FirstName,
+		"last_name":         t.LastName,
+		"middle_name":       t.MiddleName,
+		"phone":             t.Phone,
+		"tg":                t.Tg,
+		"cost_per_hour":     t.CostPerHour,
+		"subject_id":        t.SubjectID,
+		"tutor_id":          t.TutorID,
+		"is_finished_trial": t.IsFinishedTrial,
+		"parent_full_name":  t.ParentFullName,
+		"parent_phone":      t.ParentPhone,
+		"parent_tg":         t.ParentTg,
+		"parent_tg_id":      t.ParentTgID,
+		"created_at":        t.CreatedAt,
+	}
+}
+
+func (t *Student) Values(colNames ...string) (vals []interface{}) {
+	m := t.ToMap()
+
+	for _, v := range colNames {
+		vals = append(vals, m[v])
+	}
+
+	return vals
 }

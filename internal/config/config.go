@@ -11,6 +11,7 @@ import (
 type Config struct {
 	pgConn string
 	BotConfig
+	PaymentConfig PaymentConfig
 }
 
 type BotConfig struct {
@@ -18,6 +19,10 @@ type BotConfig struct {
 	webhookURL string
 	useWebhook bool
 	isActive   bool
+}
+
+type PaymentConfig struct {
+	User, Password, BaseUrl string
 }
 
 func (c Config) PgConn() string {
@@ -59,5 +64,10 @@ func NewConfig() *Config {
 			os.Getenv("DB_HOST"),
 			os.Getenv("DB_NAME"),
 		),
+		PaymentConfig: PaymentConfig{
+			User:     os.Getenv("PAYMENT_USER"),
+			Password: os.Getenv("PAYMENT_PASSWORD"),
+			BaseUrl:  os.Getenv("PAYMENT_BASE_URL"),
+		},
 	}
 }
