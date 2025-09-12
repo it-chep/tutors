@@ -6,6 +6,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+const (
+	RefreshCookie = "100_rep_refresh"
+)
+
 type Claims struct {
 	Email string `json:"email"`
 	jwt.RegisteredClaims
@@ -34,8 +38,12 @@ type VerifyRequest struct {
 }
 
 type TokenPair struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	AccessToken  string `json:"token"`
+	refreshToken string
+}
+
+func (p TokenPair) Refresh() string {
+	return p.refreshToken
 }
 
 type LoginRequest struct {

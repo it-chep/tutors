@@ -61,7 +61,7 @@ func (h *Handler) setupRoutes(adminModule *admin.Module) {
 
 		// Аутентификация
 		r.Route("/auth", func(r chi.Router) {
-			r.Post("/refresh", h.adminAgg.Auth.Refresh.RefreshHandler())
+			r.Post("/refresh", h.adminAgg.Auth.Refresh.RefreshHandler()) // POST /admin/auth/refresh
 		})
 
 		// Админы

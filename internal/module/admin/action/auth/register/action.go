@@ -105,6 +105,12 @@ func (a *Action) VerifyHandler() http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
+		http.SetCookie(w, &http.Cookie{
+			Name:     register_dto.RefreshCookie,
+			Value:    tokens.Refresh(),
+			Expires:  time.Now().UTC().Add(14 * 24 * time.Hour),
+			HttpOnly: true,
+		})
 		_ = json.NewEncoder(w).Encode(tokens)
 	}
 }

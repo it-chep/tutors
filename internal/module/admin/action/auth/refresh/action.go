@@ -23,15 +23,13 @@ func New(jwt config.JwtConfig) *Action {
 
 func (a *Action) RefreshHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req struct {
-			RefreshToken string `json:"refresh_token"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			http.Error(w, "invalid request", http.StatusBadRequest)
+		cookie, err := r.Cookie(register_dto.RefreshCookie)
+		if err != nil {
+			http.Error(w, "invalid refresh token", http.StatusUnauthorized)
 			return
 		}
 
-		token, err := jwt.ParseWithClaims(req.RefreshToken, &register_dto.Claims{}, func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.ParseWithClaims(cookie.Value, &register_dto.Claims{}, func(token *jwt.Token) (interface{}, error) {
 			return []byte(a.jwt.RefreshSecret), nil
 		})
 		if err != nil || !token.Valid {
@@ -52,6 +50,12 @@ func (a *Action) RefreshHandler() http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
+		http.SetCookie(w, &http.Cookie{
+			Name:     register_dto.RefreshCookie,
+			Value:    tokens.Refresh(),
+			Expires:  time.Now().UTC().Add(14 * 24 * time.Hour),
+			HttpOnly: true,
+		})
 		_ = json.NewEncoder(w).Encode(tokens)
 	}
 }
