@@ -12,6 +12,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
 	"github.com/it-chep/tutors.git/internal/server"
+	"github.com/it-chep/tutors.git/pkg/smtp"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -21,6 +22,7 @@ type App struct {
 
 	server *server.Server
 	bot    *tg_bot.Bot
+	smtp   *smtp.ClientSmtp
 
 	modules Modules
 }

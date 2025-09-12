@@ -1,11 +1,12 @@
 package action
 
 import (
+	"github.com/it-chep/tutors.git/internal/config"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/create_admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/delete_admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/get_admin_by_id"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/get_admins"
-	"github.com/it-chep/tutors.git/internal/module/admin/action/auth/check_path_permission"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/auth"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_subjects"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/create_student"
@@ -22,6 +23,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/get_tutors"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/search_tutor"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/tutor_by_id"
+	"github.com/it-chep/tutors.git/pkg/smtp"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -51,7 +53,7 @@ type Aggregator struct {
 	GetAllSubjects *get_all_subjects.Action
 
 	// AUTH
-	CheckPathPermission *check_path_permission.Action
+	Auth *auth.Aggregator
 
 	// Админы
 	CreateAdmin  *create_admin.Action
@@ -60,7 +62,7 @@ type Aggregator struct {
 	GetAdminByID *get_admin_by_id.Action
 }
 
-func NewAggregator(pool *pgxpool.Pool) *Aggregator {
+func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtConfig) *Aggregator {
 	return &Aggregator{
 		// Репетитор
 		CreateTutor:     create_tutor.New(pool),
@@ -87,7 +89,7 @@ func NewAggregator(pool *pgxpool.Pool) *Aggregator {
 		GetAllSubjects: get_all_subjects.New(pool),
 
 		// AUTH
-		CheckPathPermission: check_path_permission.New(pool),
+		Auth: auth.NewAggregator(pool, smtp, config),
 
 		// Админы
 		CreateAdmin:  create_admin.New(pool),

@@ -42,8 +42,27 @@ func (h *Handler) setupRoutes(adminModule *admin.Module) {
 
 	h.router.Get("/roles", h.adminAgg.GetAvailableRoles.Handle()) // GET /roles
 
+	h.router.Route("/auth", func(r chi.Router) {
+		// Регистрация
+		r.Route("/register", func(r chi.Router) {
+			r.Post("/", h.adminAgg.Auth.Register.RegisterHandler())     // POST /auth/register
+			r.Post("/verify", h.adminAgg.Auth.Register.VerifyHandler()) // POST /auth/register/verify
+		})
+
+		// Авторизация
+		r.Route("/login", func(r chi.Router) {
+			r.Post("/", h.adminAgg.Auth.Login.LoginHandler())        // POST /auth/login
+			r.Post("/verify", h.adminAgg.Auth.Login.VerifyHandler()) // POST /auth/login/verify
+		})
+	})
+
 	h.router.Route("/admin", func(r chi.Router) {
 		r.Use(middleware.Auth(adminModule))
+
+		// Аутентификация
+		r.Route("/auth", func(r chi.Router) {
+			r.Post("/refresh", h.adminAgg.Auth.Refresh.RefreshHandler())
+		})
 
 		// Админы
 		r.Route("/admins", func(r chi.Router) {
@@ -79,7 +98,7 @@ func (h *Handler) setupRoutes(adminModule *admin.Module) {
 		r.Post("/finance", h.adminAgg.GetAllFinance.Handle())  // POST /admin/finance
 	})
 
-	h.router.Post("/alpha/hook", h.adminAgg.AlphaHook.Handle()) // POST /alpha/hook
+	h.router.Post("/webhook/alpha", h.adminAgg.AlphaHook.Handle()) // POST /alpha/hook
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

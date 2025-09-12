@@ -1,4 +1,4 @@
-package register
+package login
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/it-chep/tutors.git/internal/config"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/auth/dto"
 	login_dal "github.com/it-chep/tutors.git/internal/module/admin/action/auth/login/dal"
 	"github.com/it-chep/tutors.git/pkg/cache"
@@ -16,19 +17,18 @@ import (
 )
 
 type Action struct {
-	jwtKey, refreshKey string
-	codes              *cache.Cache[string, string]
-	repo               *login_dal.Repository
-	smtp               *smtp.ClientSmtp
+	jwt   config.JwtConfig
+	codes *cache.Cache[string, string]
+	repo  *login_dal.Repository
+	smtp  *smtp.ClientSmtp
 }
 
-func New(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, jwtKey, refreshKey string) *Action {
+func New(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, jwt config.JwtConfig) *Action {
 	return &Action{
-		jwtKey:     jwtKey,
-		refreshKey: refreshKey,
-		codes:      cache.NewCache[string, string](1000, time.Minute),
-		repo:       login_dal.NewRepository(pool),
-		smtp:       smtp,
+		jwt:   jwt,
+		codes: cache.NewCache[string, string](1000, time.Minute),
+		repo:  login_dal.NewRepository(pool),
+		smtp:  smtp,
 	}
 }
 
@@ -80,7 +80,7 @@ func (a *Action) VerifyHandler() http.HandlerFunc {
 			return
 		}
 
-		tokens, err := token.GenerateTokens(req.Email, a.jwtKey, a.refreshKey)
+		tokens, err := token.GenerateTokens(req.Email, a.jwt.JwtSecret, a.jwt.RefreshSecret)
 		if err != nil {
 			http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusInternalServerError)
 			return

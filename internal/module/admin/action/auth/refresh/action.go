@@ -6,18 +6,18 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/it-chep/tutors.git/internal/config"
 	register_dto "github.com/it-chep/tutors.git/internal/module/admin/action/auth/dto"
 	tkn "github.com/it-chep/tutors.git/pkg/token"
 )
 
 type Action struct {
-	jwtKey, refreshKey string
+	jwt config.JwtConfig
 }
 
-func New(jwtKey, refreshKey string) *Action {
+func New(jwt config.JwtConfig) *Action {
 	return &Action{
-		jwtKey:     jwtKey,
-		refreshKey: refreshKey,
+		jwt: jwt,
 	}
 }
 
@@ -32,7 +32,7 @@ func (a *Action) RefreshHandler() http.HandlerFunc {
 		}
 
 		token, err := jwt.ParseWithClaims(req.RefreshToken, &register_dto.Claims{}, func(token *jwt.Token) (interface{}, error) {
-			return []byte(a.refreshKey), nil
+			return []byte(a.jwt.RefreshSecret), nil
 		})
 		if err != nil || !token.Valid {
 			http.Error(w, "invalid refresh token", http.StatusUnauthorized)
@@ -45,7 +45,7 @@ func (a *Action) RefreshHandler() http.HandlerFunc {
 			return
 		}
 
-		tokens, err := tkn.GenerateTokens(claims.Email, a.jwtKey, a.refreshKey)
+		tokens, err := tkn.GenerateTokens(claims.Email, a.jwt.JwtSecret, a.jwt.RefreshSecret)
 		if err != nil {
 			http.Error(w, "server error", http.StatusInternalServerError)
 			return

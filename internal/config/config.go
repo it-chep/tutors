@@ -12,6 +12,8 @@ type Config struct {
 	pgConn string
 	BotConfig
 	PaymentConfig PaymentConfig
+	JwtConfig     JwtConfig
+	SMTPConfig    SMTPConfig
 }
 
 type BotConfig struct {
@@ -23,6 +25,16 @@ type BotConfig struct {
 
 type PaymentConfig struct {
 	User, Password, BaseUrl string
+}
+
+type JwtConfig struct {
+	JwtSecret     string
+	RefreshSecret string
+}
+
+type SMTPConfig struct {
+	Address string
+	PassKey string
 }
 
 func (c Config) PgConn() string {
@@ -68,6 +80,14 @@ func NewConfig() *Config {
 			User:     os.Getenv("PAYMENT_USER"),
 			Password: os.Getenv("PAYMENT_PASSWORD"),
 			BaseUrl:  os.Getenv("PAYMENT_BASE_URL"),
+		},
+		JwtConfig: JwtConfig{
+			JwtSecret:     os.Getenv("JWT_SECRET_KEY"),
+			RefreshSecret: os.Getenv("REFRESH_JWT_SECRET_KEY"),
+		},
+		SMTPConfig: SMTPConfig{
+			Address: os.Getenv("ADMIN_EMAIL"),
+			PassKey: os.Getenv("PASS_KEY"),
 		},
 	}
 }

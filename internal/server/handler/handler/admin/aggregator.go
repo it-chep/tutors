@@ -2,6 +2,7 @@ package admin
 
 import (
 	"github.com/it-chep/tutors.git/internal/module/admin"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/auth"
 	"github.com/it-chep/tutors.git/internal/module/admin/alpha"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/admins"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/get_all_finance"
@@ -21,6 +22,7 @@ type HandlerAggregator struct {
 	GetAvailableRoles *get_available_roles.Handler
 
 	AlphaHook *alpha.WebHookAlpha
+	Auth      *auth.Aggregator
 }
 
 func NewAggregator(adminModule *admin.Module) *HandlerAggregator {
@@ -34,5 +36,6 @@ func NewAggregator(adminModule *admin.Module) *HandlerAggregator {
 		GetAvailableRoles: get_available_roles.NewHandler(adminModule),
 
 		AlphaHook: adminModule.AlphaHook,
+		Auth:      adminModule.Actions.Auth,
 	}
 }

@@ -1,9 +1,11 @@
 package admin
 
 import (
+	"github.com/it-chep/tutors.git/internal/config"
 	"github.com/it-chep/tutors.git/internal/module/admin/action"
 	"github.com/it-chep/tutors.git/internal/module/admin/alpha"
 	alpha_dal "github.com/it-chep/tutors.git/internal/module/admin/alpha/dal"
+	"github.com/it-chep/tutors.git/pkg/smtp"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -14,8 +16,8 @@ type Module struct {
 	AlphaHook *alpha.WebHookAlpha
 }
 
-func New(pool *pgxpool.Pool) *Module {
-	actions := action.NewAggregator(pool)
+func New(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtConfig) *Module {
+	actions := action.NewAggregator(pool, smtp, config)
 
 	return &Module{
 		Actions: actions,

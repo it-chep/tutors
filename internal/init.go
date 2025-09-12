@@ -11,6 +11,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
 	"github.com/it-chep/tutors.git/internal/server"
 	"github.com/it-chep/tutors.git/internal/server/handler"
+	"github.com/it-chep/tutors.git/pkg/smtp"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -39,6 +40,11 @@ func (a *App) initDB(ctx context.Context) *App {
 	return a
 }
 
+func (a *App) initSmtp(context.Context) *App {
+	a.smtp = smtp.NewClientSmtp(a.config.SMTPConfig.Address, a.config.SMTPConfig.PassKey)
+	return a
+}
+
 func (a *App) initTgBot(context.Context) *App {
 	if !a.config.BotIsActive() {
 		return a
@@ -55,7 +61,7 @@ func (a *App) initTgBot(context.Context) *App {
 func (a *App) initModules(context.Context) *App {
 	a.modules = Modules{
 		Bot:   bot.New(a.pool, a.bot),
-		Admin: admin.New(a.pool),
+		Admin: admin.New(a.pool, a.smtp, a.config.JwtConfig),
 	}
 	return a
 }
