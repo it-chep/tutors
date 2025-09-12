@@ -21,6 +21,7 @@ type User struct {
 	ActivateAt pq.NullTime    `db:"activate_at" json:"activate_at"` // activate_at timestamp without time zone
 	CreatedAt  pq.NullTime    `db:"created_at" json:"created_at"`   // created_at timestamp without time zone
 	RoleID     sql.NullInt64  `db:"role_id" json:"role_id"`         // role_id bigint
+	TutorID    sql.NullInt64  `db:"tutor_id" json:"tutor_id"`       // tutor_id bigint
 }
 
 // zeroUser zero value of dto
@@ -39,6 +40,7 @@ const (
 	Field_User_ActivateAt = "activate_at"
 	Field_User_CreatedAt  = "created_at"
 	Field_User_RoleID     = "role_id"
+	Field_User_TutorID    = "tutor_id"
 )
 
 func (t User) SelectColumnsWithCoalesce() []string {
@@ -51,6 +53,7 @@ func (t User) SelectColumnsWithCoalesce() []string {
 		"u.activate_at",
 		"u.created_at",
 		"u.role_id",
+		"u.tutor_id",
 	}
 }
 
@@ -64,11 +67,12 @@ func (t User) SelectColumns() []string {
 		"u.activate_at",
 		"u.created_at",
 		"u.role_id",
+		"u.tutor_id",
 	}
 }
 
 func (t User) Columns(without ...string) []string {
-	var str = "id, email, password, full_name, is_active, activate_at, created_at, role_id"
+	var str = "id, email, password, full_name, is_active, activate_at, created_at, role_id, tutor_id"
 	for _, exc := range without {
 		str = strings.Replace(str+", ", exc+", ", "", 1)
 	}
@@ -97,6 +101,7 @@ func (t *User) ToMap() map[string]interface{} {
 		"activate_at": t.ActivateAt,
 		"created_at":  t.CreatedAt,
 		"role_id":     t.RoleID,
+		"tutor_id":    t.TutorID,
 	}
 }
 

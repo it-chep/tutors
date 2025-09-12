@@ -7,7 +7,8 @@ import (
 	"time"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/action/auth/dto"
-	login_dal "github.com/it-chep/tutors.git/internal/module/admin/action/auth/login/dal"
+	register_dal "github.com/it-chep/tutors.git/internal/module/admin/action/auth/register/dal"
+	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	"github.com/it-chep/tutors.git/pkg/cache"
 	"github.com/it-chep/tutors.git/pkg/smtp"
 	"github.com/it-chep/tutors.git/pkg/token"
@@ -17,8 +18,8 @@ import (
 
 type Action struct {
 	jwtKey, refreshKey string
-	codes              *cache.Cache[string, string]
-	repo               *login_dal.Repository
+	codes              *cache.Cache[string, register_dto.CodeRegister]
+	repo               *register_dal.Repository
 	smtp               *smtp.ClientSmtp
 }
 
@@ -26,39 +27,51 @@ func New(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, jwtKey, refreshKey string) *
 	return &Action{
 		jwtKey:     jwtKey,
 		refreshKey: refreshKey,
-		codes:      cache.NewCache[string, string](1000, time.Minute),
-		repo:       login_dal.NewRepository(pool),
+		codes:      cache.NewCache[string, register_dto.CodeRegister](1000, time.Minute),
+		repo:       register_dal.NewRepository(pool),
 		smtp:       smtp,
 	}
 }
 
-func (a *Action) LoginHandler() http.HandlerFunc {
+func (a *Action) RegisterHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req register_dto.LoginRequest
+		var req register_dto.RegisterRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, "invalid request", http.StatusBadRequest)
 			return
 		}
 
-		user, err := a.repo.GetUser(r.Context(), req.Email)
-		if err != nil {
-			http.Error(w, "Не нашли такого пользователя", http.StatusUnauthorized)
+		if err := req.Validate(); err != nil {
+			http.Error(w, "invalid request", http.StatusBadRequest)
 			return
 		}
 
-		if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-			http.Error(w, "неверный email или пароль", http.StatusUnauthorized)
+		exists, err := a.repo.IsEmailExists(r.Context(), req.Email)
+		if err != nil {
+			logger.Error(r.Context(), "произошла ошибка проверки email", err)
+			http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusInternalServerError)
+			return
+		}
+		if !exists {
+			http.Error(w, "Не смогли найти такого email", http.StatusBadRequest)
+			return
+		}
+
+		passHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+		if err != nil {
+			http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusInternalServerError)
 			return
 		}
 
 		code := smtp.GenerateCode()
-		a.codes.Put(req.Email, code)
+		a.codes.Put(req.Email, register_dto.CodeRegister{Password: string(passHash), Code: code})
 		err = a.smtp.SendEmail(smtp.EmailParams{
 			Body: fmt.Sprintf("Ваш код %d", code), Destination: req.Email,
-			Subject: "Авторизация в системе 100rep.ru",
+			Subject: "Регистрация в системе 100rep.ru",
 		})
 		if err != nil {
 			http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusInternalServerError)
+			return
 		}
 
 		w.WriteHeader(http.StatusOK)
@@ -75,8 +88,13 @@ func (a *Action) VerifyHandler() http.HandlerFunc {
 
 		code, ok := a.codes.Get(req.Email)
 		defer a.codes.Remove(req.Email)
-		if !ok || code != req.Code {
+		if !ok || code.Code != req.Code {
 			http.Error(w, "invalid code", http.StatusBadRequest)
+			return
+		}
+
+		if err := a.repo.SavePass(r.Context(), req.Email, code.Password); err != nil {
+			http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusInternalServerError)
 			return
 		}
 
