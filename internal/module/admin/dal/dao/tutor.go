@@ -14,10 +14,10 @@ type TutorDAO struct {
 
 func (t TutorDAO) ToDomain() dto.Tutor {
 	return dto.Tutor{
-		ID:          t.ID,
-		FullName:    t.FullName,
-		Phone:       t.Phone,
-		Tg:          t.Tg,
+		ID: t.ID,
+		//FullName:    t.FullName,
+		//Phone:       t.Phone,
+		//Tg:          t.Tg,
 		CostPerHour: t.CostPerHour,
 		SubjectID:   t.SubjectID,
 		AdminID:     t.AdminID,
