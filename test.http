@@ -3,8 +3,8 @@ POST http://localhost:8080/admin/finance
 Content-Type: application/json
 
 {
-  "from": "2006-01-02 15:04:05",
-  "to": "2006-01-02 15:04:05"
+  "from": "2006-01-02",
+  "to": "2006-01-02"
 }
 
 ### Получить списка учебных предметов
@@ -42,8 +42,8 @@ POST http://localhost:8080/admin/tutors/1/finance
 Content-Type: application/json
 
 {
-  "from": "2006-01-02 15:04:05",
-  "to": "2006-01-02 15:04:05"
+  "from": "2006-01-02",
+  "to": "2006-01-02"
 }
 
 ### Репетитор проводит демо урок
@@ -104,8 +104,8 @@ POST http://localhost:8080/admin/students/1/finance
 Content-Type: application/json
 
 {
-  "from": "2006-01-02 15:04:05",
-  "to": "2006-01-02 15:04:05"
+  "from": "2006-01-02",
+  "to": "2006-01-02"
 }
 
 ###

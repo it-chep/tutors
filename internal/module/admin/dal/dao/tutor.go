@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"database/sql"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/convert"
 	"github.com/it-chep/tutors.git/pkg/xo"
@@ -10,6 +11,11 @@ import (
 
 type TutorDAO struct {
 	xo.Tutor
+}
+
+type TutorWithSubjectName struct {
+	TutorDAO
+	SubjectName sql.NullString `db:"subject_name"`
 }
 
 func (t TutorDAO) ToDomain() dto.Tutor {

@@ -23,18 +23,24 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 // GetTutor получение репетитора по ID
 func (r *Repository) GetTutor(ctx context.Context, tutorID int64) (dto.Tutor, error) {
 	sql := `
-		select * from tutors where id = $1
+		select t.*, s.name as "subject_name" 
+		from tutors t 
+		    join subjects s on t.subject_id = s.id 
+		where t.id = $1
 	`
 
 	args := []interface{}{
 		tutorID,
 	}
 
-	var tutor dao.TutorDAO
+	var tutor dao.TutorWithSubjectName
 	err := pgxscan.Get(ctx, r.pool, &tutor, sql, args...)
 	if err != nil {
 		return dto.Tutor{}, err
 	}
 
-	return tutor.ToDomain(), nil
+	tutorDTO := tutor.ToDomain()
+	tutorDTO.SubjectName = tutor.SubjectName.String
+
+	return tutorDTO, nil
 }

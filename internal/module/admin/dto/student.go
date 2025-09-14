@@ -12,7 +12,9 @@ type Student struct {
 
 	CostPerHour string
 	SubjectID   int64
+	SubjectName string
 	TutorID     int64
+	TutorName   string
 
 	ParentFullName string
 	ParentPhone    string
@@ -20,11 +22,12 @@ type Student struct {
 
 	Balance decimal.Decimal
 
-	HasButtons          bool
 	IsFinishedTrial     bool
 	IsOnlyTrialFinished bool
 	IsBalanceNegative   bool
 	IsNewbie            bool
+
+	ParentTgID int64
 }
 
 type StudentFinance struct {

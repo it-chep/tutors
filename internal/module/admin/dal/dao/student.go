@@ -27,6 +27,7 @@ func (s StudentDAO) ToDomain() dto.Student {
 		ParentPhone:     s.ParentPhone,
 		ParentTg:        s.ParentTg,
 		IsFinishedTrial: s.IsFinishedTrial,
+		ParentTgID:      s.ParentTgID,
 	}
 }
 

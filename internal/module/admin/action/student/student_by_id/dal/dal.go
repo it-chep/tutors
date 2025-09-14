@@ -19,6 +19,24 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 	}
 }
 
+func (r *Repository) GetSubjectName(ctx context.Context, subjectID int64) (string, error) {
+	sql := `
+		select name from subjects where id = $1
+	`
+	var name string
+	err := pgxscan.Get(ctx, r.pool, &name, sql, subjectID)
+	return name, err
+}
+
+func (r *Repository) GetTutorName(ctx context.Context, tutorID int64) (string, error) {
+	sql := `
+		select full_name from tutors where id = $1
+	`
+	var name string
+	err := pgxscan.Get(ctx, r.pool, &name, sql, tutorID)
+	return name, err
+}
+
 func (r *Repository) GetStudent(ctx context.Context, studentID int64) (dto.Student, error) {
 	sql := `
 		select * from students where id = $1

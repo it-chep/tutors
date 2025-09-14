@@ -9,6 +9,7 @@ type Tutor struct {
 	Tg          string
 	CostPerHour string
 	SubjectID   int64
+	SubjectName string
 	AdminID     int64
 }
 

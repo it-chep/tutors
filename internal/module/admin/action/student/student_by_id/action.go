@@ -26,15 +26,11 @@ func (a *Action) Do(ctx context.Context, studentID int64) (dto.Student, error) {
 		return dto.Student{}, err
 	}
 
-	if dto.IsTutorRole(ctx) {
-		return dto.Student{
-			ID:         student.ID,
-			FirstName:  student.FirstName,
-			MiddleName: student.MiddleName,
-			SubjectID:  student.SubjectID, // todo мб name сделать
-			HasButtons: true,              // у репа есть кнопки чтобы проводить занятие
-		}, nil
+	subjectName, err := a.dal.GetSubjectName(ctx, student.SubjectID)
+	if err != nil {
+		logger.Error(ctx, "Ошибка при получении названия предмета", err)
 	}
+	student.SubjectName = subjectName
 
 	// Обогащение признаками оплат
 	walletInfo, err := a.dal.GetStudentWalletInfo(ctx, studentID)
@@ -54,6 +50,22 @@ func (a *Action) Do(ctx context.Context, studentID int64) (dto.Student, error) {
 		student.IsOnlyTrialFinished = false
 		logger.Error(ctx, "Ошибка при получении оплат студента", err)
 	}
+
+	if dto.IsTutorRole(ctx) {
+		return dto.Student{
+			ID:          student.ID,
+			FirstName:   student.FirstName,
+			MiddleName:  student.MiddleName,
+			SubjectName: subjectName,
+			IsNewbie:    student.IsNewbie,
+		}, nil
+	}
+
+	tutorName, err := a.dal.GetTutorName(ctx, student.TutorID)
+	if err != nil {
+		logger.Error(ctx, "Ошибка при получении имени репетитора", err)
+	}
+	student.TutorName = tutorName
 
 	return student, err
 }

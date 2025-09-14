@@ -40,7 +40,7 @@
     "phone": "89826588317",
     "tg": "https://t.me/maxim_jordan",
     "cost_per_hour": "1,500.00",
-    "subject_id": 1
+    "subject_name": "Математика"
   }
 }
 ```
@@ -109,8 +109,8 @@
 
 ```json
 {
-  "from": "2023-01-01 00:00:00",
-  "to": "2023-03-31 23:59:59"
+  "from": "2023-01-01",
+  "to": "2023-03-31"
 }
 ```
 
@@ -240,14 +240,14 @@
     "middle_name": "Алексеевич",
     "phone": "89826588317",
     "tg": "https://t.me/maxim_jordan",
-    "cost_per_hour": "$1,500.00",
-    "subject_id": 1,
+    "cost_per_hour": "1,500.00",
+    "subject_name": "Математика",
     "tutor_id": 1,
+    "tutor_name": "какое-то имя",
     "parent_full_name": "Нечепорук Алексей Владимирович",
     "parent_phone": "89826588317",
     "parent_tg": "https://t.me/maxim_jordan",
-    "balance": "$1,000.00",
-    "has_buttons": false,
+    "balance": "1,000.00",
     "is_only_trial_finished": true,
     "is_balance_negative": false,
     "is_newbie": false
@@ -324,8 +324,8 @@
 
 ```json
 {
-  "from": "2023-01-01 00:00:00",
-  "to": "2023-03-31 23:59:59"
+  "from": "2023-01-01",
+  "to": "2023-03-31"
 }
 ```
 
@@ -360,8 +360,8 @@
 
 ```json
 {
-  "from": "2023-01-01 00:00:00",
-  "to": "2023-03-31 23:59:59"
+  "from": "2023-01-01",
+  "to": "2023-03-31"
 }
 ```
 

@@ -55,7 +55,7 @@ func (h *Handler) prepareResponse(tutor dto.Tutor) Response {
 			Phone:       tutor.Phone,
 			Tg:          tutor.Tg,
 			CostPerHour: tutor.CostPerHour,
-			SubjectID:   tutor.SubjectID,
+			SubjectName: tutor.SubjectName,
 		},
 	}
 }

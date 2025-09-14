@@ -9,18 +9,20 @@ type Student struct {
 	Tg         string `json:"tg"`
 
 	CostPerHour string `json:"cost_per_hour"`
-	SubjectID   int64  `json:"subject_id"`
+	SubjectName string `json:"subject_name"`
 	TutorID     int64  `json:"tutor_id"`
+	TutorName   string `json:"tutor_name"`
 
 	ParentFullName string `json:"parent_full_name"`
 	ParentPhone    string `json:"parent_phone"`
 	ParentTg       string `json:"parent_tg"`
 
 	Balance             string `json:"balance"`
-	HasButtons          bool   `json:"has_buttons"`
 	IsOnlyTrialFinished bool   `json:"is_only_trial_finished"`
 	IsBalanceNegative   bool   `json:"is_balance_negative"`
 	IsNewbie            bool   `json:"is_newbie"`
+
+	ParentTgID int64 `json:"tg_id"`
 }
 
 type Response struct {

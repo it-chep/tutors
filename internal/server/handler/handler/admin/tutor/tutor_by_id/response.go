@@ -6,7 +6,7 @@ type Tutor struct {
 	Phone       string `json:"phone"`
 	Tg          string `json:"tg"`
 	CostPerHour string `json:"cost_per_hour"`
-	SubjectID   int64  `json:"subject_id"`
+	SubjectName string `json:"subject_name"`
 }
 
 type Response struct {
