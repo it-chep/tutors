@@ -5,6 +5,7 @@ type Student struct {
 	FirstName           string `json:"first_name"`
 	LastName            string `json:"last_name"`
 	MiddleName          string `json:"middle_name"`
+	ParentFullName      string `json:"parent_full_name"`
 	Tg                  string `json:"tg"`
 	IsOnlyTrialFinished bool   `json:"is_only_trial_finished"`
 	IsBalanceNegative   bool   `json:"is_balance_negative"`

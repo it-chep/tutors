@@ -29,13 +29,13 @@ func GenerateTokens(email, jwtKey, refreshKey string) (register_dto.TokenPair, e
 		},
 	}
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
-	refreshString, err := refreshToken.SignedString([]byte(refreshKey))
+	_, err = refreshToken.SignedString([]byte(refreshKey))
 	if err != nil {
 		return register_dto.TokenPair{}, err
 	}
 
 	return register_dto.TokenPair{
-		AccessToken:  accessString,
-		RefreshToken: refreshString,
+		AccessToken: accessString,
+		//RefreshToken: refreshString,
 	}, nil
 }

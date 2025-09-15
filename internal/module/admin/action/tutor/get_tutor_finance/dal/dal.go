@@ -27,7 +27,7 @@ func (r *Repository) GetFinanceInfo(ctx context.Context, tutorID int64, from, to
 		select count(*) as count, sum(amount) as amount, 123 as conversion -- todo посчитать конверсию
 		from transactions_history th 
 		    join students s on th.student_id = s.id
-		where s.tutor_id = $1 and th.created_at between $2 and $3
+		where s.tutor_id = $1 and th.confirmed_at between $2 and $3
 	`
 
 	args := []interface{}{

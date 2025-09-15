@@ -27,7 +27,7 @@ func (s StudentDAO) ToDomain() dto.Student {
 		ParentPhone:     s.ParentPhone,
 		ParentTg:        s.ParentTg,
 		IsFinishedTrial: s.IsFinishedTrial,
-		ParentTgID:      s.ParentTgID,
+		ParentTgID:      s.ParentTgID.Int64,
 	}
 }
 
@@ -63,4 +63,32 @@ func (w Wallet) ToDomain() dto.Wallet {
 		StudentID: w.StudentID,
 		Balance:   convert.NumericToDecimal(w.Balance),
 	}
+}
+
+type StudentWithTransactions struct {
+	StudentID         int64          `db:"student_id"`
+	TutorID           int64          `db:"tutor_id"`
+	IsFinishedTrial   bool           `db:"is_finished_trial"`
+	TransactionsCount int64          `db:"transactions_count"`
+	Balance           pgtype.Numeric `db:"balance"`
+}
+
+type StudentsWithTransactions []StudentWithTransactions
+
+func (s StudentWithTransactions) ToDomain() dto.StudentWithTransactions {
+	return dto.StudentWithTransactions{
+		StudentID:         s.StudentID,
+		TutorID:           s.TutorID,
+		IsFinishedTrial:   s.IsFinishedTrial,
+		TransactionsCount: s.TransactionsCount,
+		Balance:           convert.NumericToDecimal(s.Balance),
+	}
+}
+
+func (s StudentsWithTransactions) ToDomain() []dto.StudentWithTransactions {
+	domain := make([]dto.StudentWithTransactions, 0, len(s))
+	for _, student := range s {
+		domain = append(domain, student.ToDomain())
+	}
+	return domain
 }

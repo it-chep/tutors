@@ -20,7 +20,7 @@ func NewHandler(adminModule *admin.Module) *Handler {
 		router: chi.NewRouter(),
 	}
 
-	//h.setupMiddleware()
+	h.setupMiddleware()
 	h.setupHandlerAggregator(adminModule)
 	h.setupRoutes(adminModule)
 
@@ -29,6 +29,7 @@ func NewHandler(adminModule *admin.Module) *Handler {
 
 func (h *Handler) setupMiddleware() {
 	h.router.Use(middleware.LoggerMiddleware)
+	h.router.Use(middleware.CORSMiddleware)
 }
 
 func (h *Handler) setupHandlerAggregator(adminModule *admin.Module) {

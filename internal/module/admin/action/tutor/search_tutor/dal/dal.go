@@ -24,7 +24,7 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 // Search поиск репетитора по фио
 func (r *Repository) Search(ctx context.Context, query string) ([]dto.Tutor, error) {
 	sql := `
-		select * from tutors where full_name ilike $1
+		select t.*, u.* from tutors t join users u on t.id = u.tutor_id where u.full_name ilike $1
 	`
 
 	searchQuery := fmt.Sprintf("%%%s%%", strings.TrimSpace(query))

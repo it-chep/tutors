@@ -30,7 +30,7 @@ func (r *Repository) GetSubjectName(ctx context.Context, subjectID int64) (strin
 
 func (r *Repository) GetTutorName(ctx context.Context, tutorID int64) (string, error) {
 	sql := `
-		select full_name from tutors where id = $1
+		select full_name from users where tutor_id = $1
 	`
 	var name string
 	err := pgxscan.Get(ctx, r.pool, &name, sql, tutorID)

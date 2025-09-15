@@ -11,6 +11,10 @@ type Tutor struct {
 	SubjectID   int64
 	SubjectName string
 	AdminID     int64
+
+	HasBalanceNegative bool
+	HasOnlyTrial       bool
+	HasNewBie          bool
 }
 
 type TutorFinance struct {

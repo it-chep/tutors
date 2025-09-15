@@ -41,7 +41,7 @@ func (a *Action) Do(ctx context.Context, tutorID int64, from, to string) (dto.Tu
 		fromTime.Day(),
 		0, 0, 0, 0,
 		loc,
-	)
+	).Add(24 * time.Hour)
 
 	// Устанавливаем время для toTime: 23:59:59 в текущей локации
 	toTime = time.Date(
@@ -50,15 +50,7 @@ func (a *Action) Do(ctx context.Context, tutorID int64, from, to string) (dto.Tu
 		toTime.Day(),
 		23, 59, 59, 0,
 		loc,
-	)
-
-	if toTime.Before(fromTime) {
-		return dto.TutorFinance{}, errors.New("'ДО' раньше 'ОТ'")
-	}
-
-	if toTime.After(time.Now()) {
-		return dto.TutorFinance{}, errors.New("'ДО' раньше чем сейчас")
-	}
+	).Add(24 * time.Hour)
 
 	return a.dal.GetFinanceInfo(ctx, tutorID, fromTime, toTime)
 }

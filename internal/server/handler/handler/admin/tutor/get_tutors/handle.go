@@ -53,9 +53,9 @@ func (h *Handler) prepareResponse(students []dto.Tutor) Response {
 				ID:                 item.ID,
 				FullName:           item.FullName,
 				Tg:                 item.Tg,
-				HasBalanceNegative: false,
-				HasOnlyTrial:       false,
-				HasNewBie:          false,
+				HasBalanceNegative: item.HasBalanceNegative,
+				HasOnlyTrial:       item.HasOnlyTrial,
+				HasNewBie:          item.HasNewBie,
 			}
 		}),
 	}

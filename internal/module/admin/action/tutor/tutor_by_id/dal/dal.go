@@ -23,9 +23,18 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 // GetTutor получение репетитора по ID
 func (r *Repository) GetTutor(ctx context.Context, tutorID int64) (dto.Tutor, error) {
 	sql := `
-		select t.*, s.name as "subject_name" 
+		select 
+            t.cost_per_hour,
+            t.subject_id,
+            t.admin_id,
+            u.full_name as full_name,
+            u.tutor_id as id,
+            t.tg,
+            t.phone,
+		 	s.name as "subject_name"
 		from tutors t 
 		    join subjects s on t.subject_id = s.id 
+			join users u on t.id = u.tutor_id
 		where t.id = $1
 	`
 

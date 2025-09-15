@@ -3,6 +3,7 @@
 package xo
 
 import (
+	"database/sql"
 	"fmt"
 	"reflect"
 	"strings"
@@ -12,21 +13,21 @@ import (
 
 // Student represents a row from 'public.students'.
 type Student struct {
-	ID              int64       `db:"id" json:"id"`                               // id bigint
-	FirstName       string      `db:"first_name" json:"first_name"`               // first_name text
-	LastName        string      `db:"last_name" json:"last_name"`                 // last_name text
-	MiddleName      string      `db:"middle_name" json:"middle_name"`             // middle_name text
-	Phone           string      `db:"phone" json:"phone"`                         // phone text
-	Tg              string      `db:"tg" json:"tg"`                               // tg text
-	CostPerHour     string      `db:"cost_per_hour" json:"cost_per_hour"`         // cost_per_hour money
-	SubjectID       int64       `db:"subject_id" json:"subject_id"`               // subject_id bigint
-	TutorID         int64       `db:"tutor_id" json:"tutor_id"`                   // tutor_id bigint
-	IsFinishedTrial bool        `db:"is_finished_trial" json:"is_finished_trial"` // is_finished_trial boolean
-	ParentFullName  string      `db:"parent_full_name" json:"parent_full_name"`   // parent_full_name text
-	ParentPhone     string      `db:"parent_phone" json:"parent_phone"`           // parent_phone text
-	ParentTg        string      `db:"parent_tg" json:"parent_tg"`                 // parent_tg text
-	ParentTgID      int64       `db:"parent_tg_id" json:"parent_tg_id"`           // parent_tg_id bigint
-	CreatedAt       pq.NullTime `db:"created_at" json:"created_at"`               // created_at timestamp without time zone
+	ID              int64         `db:"id" json:"id"`                               // id bigint
+	FirstName       string        `db:"first_name" json:"first_name"`               // first_name text
+	LastName        string        `db:"last_name" json:"last_name"`                 // last_name text
+	MiddleName      string        `db:"middle_name" json:"middle_name"`             // middle_name text
+	Phone           string        `db:"phone" json:"phone"`                         // phone text
+	Tg              string        `db:"tg" json:"tg"`                               // tg text
+	CostPerHour     string        `db:"cost_per_hour" json:"cost_per_hour"`         // cost_per_hour numeric
+	SubjectID       int64         `db:"subject_id" json:"subject_id"`               // subject_id bigint
+	TutorID         int64         `db:"tutor_id" json:"tutor_id"`                   // tutor_id bigint
+	IsFinishedTrial bool          `db:"is_finished_trial" json:"is_finished_trial"` // is_finished_trial boolean
+	ParentFullName  string        `db:"parent_full_name" json:"parent_full_name"`   // parent_full_name text
+	ParentPhone     string        `db:"parent_phone" json:"parent_phone"`           // parent_phone text
+	ParentTg        string        `db:"parent_tg" json:"parent_tg"`                 // parent_tg text
+	ParentTgID      sql.NullInt64 `db:"parent_tg_id" json:"parent_tg_id"`           // parent_tg_id bigint
+	CreatedAt       pq.NullTime   `db:"created_at" json:"created_at"`               // created_at timestamp without time zone
 }
 
 // zeroStudent zero value of dto
@@ -62,14 +63,14 @@ func (t Student) SelectColumnsWithCoalesce() []string {
 		fmt.Sprintf("COALESCE(s.middle_name, '%v') as middle_name", zeroStudent.MiddleName),
 		fmt.Sprintf("COALESCE(s.phone, '%v') as phone", zeroStudent.Phone),
 		fmt.Sprintf("COALESCE(s.tg, '%v') as tg", zeroStudent.Tg),
-		fmt.Sprintf("COALESCE(s.cost_per_hour, '%v') as cost_per_hour", zeroStudent.CostPerHour),
+		fmt.Sprintf("COALESCE(s.cost_per_hour, %v) as cost_per_hour", zeroStudent.CostPerHour),
 		fmt.Sprintf("COALESCE(s.subject_id, %v) as subject_id", zeroStudent.SubjectID),
 		fmt.Sprintf("COALESCE(s.tutor_id, %v) as tutor_id", zeroStudent.TutorID),
 		fmt.Sprintf("COALESCE(s.is_finished_trial, %v) as is_finished_trial", zeroStudent.IsFinishedTrial),
 		fmt.Sprintf("COALESCE(s.parent_full_name, '%v') as parent_full_name", zeroStudent.ParentFullName),
 		fmt.Sprintf("COALESCE(s.parent_phone, '%v') as parent_phone", zeroStudent.ParentPhone),
 		fmt.Sprintf("COALESCE(s.parent_tg, '%v') as parent_tg", zeroStudent.ParentTg),
-		fmt.Sprintf("COALESCE(s.parent_tg_id, %v) as parent_tg_id", zeroStudent.ParentTgID),
+		"s.parent_tg_id",
 		"s.created_at",
 	}
 }

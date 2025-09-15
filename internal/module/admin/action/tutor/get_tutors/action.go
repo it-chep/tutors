@@ -2,6 +2,7 @@ package get_tutors
 
 import (
 	"context"
+	"github.com/samber/lo"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/get_tutors/dal"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
@@ -20,7 +21,33 @@ func New(pool *pgxpool.Pool) *Action {
 
 func (a *Action) Do(ctx context.Context) (tutors []dto.Tutor, err error) {
 	tutors, err = a.dal.GetTutors(ctx)
-	// todo доделать красный желтый зеленый
 
-	return tutors, err
+	tutorsIDs := make([]int64, 0, len(tutors))
+	tutorsMap := make(map[int64]dto.Tutor, len(tutors))
+	for _, tutor := range tutors {
+		tutorsIDs = append(tutorsIDs, tutor.ID)
+		tutorsMap[tutor.ID] = tutor
+	}
+
+	students, err := a.dal.GetTutorsStudents(ctx, tutorsIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, student := range students {
+		isNewBie := student.TransactionsCount == 0 && !student.IsFinishedTrial
+		isOnlyTrialFinished := student.IsFinishedTrial && student.TransactionsCount == 0
+		isBalanceNegative := student.Balance.IsNegative()
+
+		tutor := tutorsMap[student.TutorID]
+
+		// Тут либо у него это уже true либо мы ставим true
+		tutor.HasNewBie = tutor.HasNewBie || isNewBie
+		tutor.HasBalanceNegative = tutor.HasBalanceNegative || isBalanceNegative
+		tutor.HasOnlyTrial = tutor.HasOnlyTrial || isOnlyTrialFinished
+
+		tutorsMap[student.TutorID] = tutor
+	}
+
+	return lo.Values(tutorsMap), err
 }

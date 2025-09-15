@@ -40,3 +40,11 @@ type Wallet struct {
 	StudentID int64
 	Balance   decimal.Decimal
 }
+
+type StudentWithTransactions struct {
+	StudentID         int64
+	TutorID           int64
+	IsFinishedTrial   bool
+	TransactionsCount int64
+	Balance           decimal.Decimal
+}

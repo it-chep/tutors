@@ -34,7 +34,7 @@ func (r *Repository) GetStudent(ctx context.Context, studentID int64) (dto.Stude
 
 func (r *Repository) GetTutor(ctx context.Context, tutorID int64) (dto.Tutor, error) {
 	sql := `
-		select * from tutors where id = $1
+		select t.*, u.* from tutors t join users u on t.id = u.tutor_id where t.id = $1
 	`
 
 	args := []interface{}{

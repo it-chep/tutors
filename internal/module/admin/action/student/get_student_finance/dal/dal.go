@@ -26,7 +26,7 @@ func (r *Repository) GetFinanceInfo(ctx context.Context, studentID int64, from, 
 	sql := `
 		select count(*) as count, sum(amount) as amount
 		from transactions_history 
-		where student_id = $1 and created_at between $2 and $3
+		where student_id = $1 and confirmed_at between $2 and $3
 	`
 
 	args := []interface{}{

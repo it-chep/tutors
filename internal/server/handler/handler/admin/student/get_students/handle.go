@@ -54,6 +54,7 @@ func (h *Handler) prepareResponse(students []dto.Student) Response {
 				FirstName:           item.FirstName,
 				LastName:            item.LastName,
 				MiddleName:          item.MiddleName,
+				ParentFullName:      item.ParentFullName,
 				Tg:                  item.Tg,
 				IsOnlyTrialFinished: item.IsOnlyTrialFinished,
 				IsBalanceNegative:   item.IsBalanceNegative,

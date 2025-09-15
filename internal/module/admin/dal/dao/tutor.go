@@ -4,13 +4,18 @@ import (
 	"database/sql"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/convert"
-	"github.com/it-chep/tutors.git/pkg/xo"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/samber/lo"
 )
 
 type TutorDAO struct {
-	xo.Tutor
+	TutorID     sql.NullInt64 `db:"id"`
+	CostPerHour string        `db:"cost_per_hour" json:"cost_per_hour"`
+	SubjectID   int64         `db:"subject_id"`
+	AdminID     int64         `db:"admin_id"`
+	FullName    string        `db:"full_name"`
+	Tg          string        `db:"tg"`
+	Phone       string        `db:"phone"`
 }
 
 type TutorWithSubjectName struct {
@@ -20,10 +25,10 @@ type TutorWithSubjectName struct {
 
 func (t TutorDAO) ToDomain() dto.Tutor {
 	return dto.Tutor{
-		ID: t.ID,
-		//FullName:    t.FullName,
-		//Phone:       t.Phone,
-		//Tg:          t.Tg,
+		ID:          t.TutorID.Int64,
+		FullName:    t.FullName,
+		Phone:       t.Phone,
+		Tg:          t.Tg,
 		CostPerHour: t.CostPerHour,
 		SubjectID:   t.SubjectID,
 		AdminID:     t.AdminID,
