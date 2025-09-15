@@ -20,7 +20,7 @@ func New(pool *pgxpool.Pool) *Action {
 	}
 }
 
-func (a *Action) Do(ctx context.Context, tutorID, studentID int64, duration int64) error {
+func (a *Action) Do(ctx context.Context, tutorID, studentID int64, durationInMinutes int64) error {
 	// Получаем репетитора
 	tutor, err := a.dal.GetTutor(ctx, tutorID)
 	if err != nil {
@@ -47,5 +47,9 @@ func (a *Action) Do(ctx context.Context, tutorID, studentID int64, duration int6
 	}
 	// ---- todo
 
+	err = a.dal.ConductLesson(ctx, tutorID, studentID, durationInMinutes)
+	if err != nil {
+		return err
+	}
 	return a.dal.UpdateStudentWallet(ctx, studentID, fmt.Sprintf("%s", wallet.Balance.String()))
 }

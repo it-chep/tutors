@@ -75,3 +75,20 @@ func (r *Repository) UpdateStudentWallet(ctx context.Context, studentID int64, r
 	_, err := r.pool.Exec(ctx, sql, args...)
 	return err
 }
+
+// ConductLesson помечаем что урок проведен
+func (r *Repository) ConductLesson(ctx context.Context, studentID, tutorID, durationInMinutes int64) error {
+	sql := `
+		insert into conducted_lessons(student_id, tutor_id, duration_in_minutes, is_trial)
+		values ($1, $2, $3, false)
+	`
+
+	args := []interface{}{
+		studentID,
+		tutorID,
+		durationInMinutes,
+	}
+
+	_, err := r.pool.Exec(ctx, sql, args...)
+	return err
+}

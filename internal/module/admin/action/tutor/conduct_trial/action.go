@@ -19,7 +19,11 @@ func New(pool *pgxpool.Pool) *Action {
 }
 
 func (a *Action) Do(ctx context.Context, tutorID, studentID int64) error {
-	// todo надо ли хранить время конца триалки либо будем смотреть по первой оплате и дате создания
-	// todo надо проверять ролевку чтобы случайно другой репетитор не поставил студенту триалку
+
+	// запоминаем что триалка проведена
+	err := a.dal.ConductTrialLesson(ctx, studentID, tutorID)
+	if err != nil {
+		return err
+	}
 	return a.dal.MarkStudentTrialDone(ctx, studentID)
 }
