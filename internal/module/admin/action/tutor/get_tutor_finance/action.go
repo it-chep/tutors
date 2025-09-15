@@ -2,12 +2,10 @@ package get_tutor_finance
 
 import (
 	"context"
-	"time"
-
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/get_tutor_finance/dal"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
+	"github.com/it-chep/tutors.git/internal/pkg/convert"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/pkg/errors"
 )
 
 type Action struct {
@@ -21,36 +19,30 @@ func New(pool *pgxpool.Pool) *Action {
 }
 
 func (a *Action) Do(ctx context.Context, tutorID int64, from, to string) (dto.TutorFinance, error) {
-	fromTime, err := time.Parse(time.DateOnly, from)
+	fromTime, toTime, err := convert.StringsIntervalToTime(from, to)
 	if err != nil {
-		return dto.TutorFinance{}, errors.New("Неправильно указан формат даты 'ОТ'")
+		return dto.TutorFinance{}, err
 	}
 
-	toTime, err := time.Parse(time.DateOnly, to)
+	lessons, err := a.dal.GetLessons(ctx, tutorID, fromTime, toTime)
 	if err != nil {
-		return dto.TutorFinance{}, errors.New("Неправильно указан формат даты 'ДО'")
+		return dto.TutorFinance{}, err
 	}
 
-	// Используем текущую временную зону
-	loc := time.Now().Location()
+	conversion, err := a.dal.GetConversion(ctx, tutorID, fromTime, toTime)
+	if err != nil {
+		return dto.TutorFinance{}, err
+	}
+	amount, err := a.dal.GetFinanceInfo(ctx, tutorID, fromTime, toTime)
+	if err != nil {
+		return dto.TutorFinance{}, err
+	}
 
-	// Устанавливаем время для fromTime: 00:00:00 в текущей локации
-	fromTime = time.Date(
-		fromTime.Year(),
-		fromTime.Month(),
-		fromTime.Day(),
-		0, 0, 0, 0,
-		loc,
-	).Add(24 * time.Hour)
-
-	// Устанавливаем время для toTime: 23:59:59 в текущей локации
-	toTime = time.Date(
-		toTime.Year(),
-		toTime.Month(),
-		toTime.Day(),
-		23, 59, 59, 0,
-		loc,
-	).Add(24 * time.Hour)
-
-	return a.dal.GetFinanceInfo(ctx, tutorID, fromTime, toTime)
+	return dto.TutorFinance{
+		Conversion: conversion,
+		Count:      lessons.LessonsCount,
+		BaseCount:  lessons.BaseCount,
+		TrialCount: lessons.TrialCount,
+		Amount:     amount,
+	}, nil
 }

@@ -3,9 +3,6 @@ package dao
 import (
 	"database/sql"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
-	"github.com/it-chep/tutors.git/internal/pkg/convert"
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/samber/lo"
 )
 
 type TutorDAO struct {
@@ -45,16 +42,16 @@ func (ts TutorsDao) ToDomain() []dto.Tutor {
 	return domain
 }
 
-type TutorFinance struct {
-	Conversion *int64          `db:"conversion" json:"conversion"`
-	Count      *int64          `db:"count" json:"count"`
-	Amount     *pgtype.Numeric `db:"amount" json:"amount"`
+type TutorLessonsCountDao struct {
+	LessonsCount int64 `db:"lessons_count" json:"lessons_count"`
+	TrialCount   int64 `db:"trial_count" json:"trial_lessons"`
+	BaseCount    int64 `db:"base_count" json:"base_lessons"`
 }
 
-func (t TutorFinance) ToDomain() dto.TutorFinance {
-	return dto.TutorFinance{
-		Conversion: lo.FromPtr(t.Conversion),
-		Count:      lo.FromPtr(t.Count),
-		Amount:     convert.NumericToDecimal(lo.FromPtr(t.Amount)),
+func (l TutorLessonsCountDao) ToDomain() dto.TutorLessons {
+	return dto.TutorLessons{
+		TrialCount:   l.TrialCount,
+		BaseCount:    l.BaseCount,
+		LessonsCount: l.LessonsCount,
 	}
 }

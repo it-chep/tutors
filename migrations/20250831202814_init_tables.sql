@@ -86,6 +86,17 @@ create table if not exists subjects
     id   bigserial,
     name text not null unique
 );
+
+-- Таблица проведенных занятий
+create table if not exists conducted_lessons
+(
+    id                  bigserial,
+    created_at          timestamp default now(), -- дата создания
+    tutor_id            bigint not null,         -- какой репетитор провел занятие
+    student_id          bigint not null,         -- кому провели занятие
+    duration_in_minutes bigint not null,         -- продолжительность занятия в минутах
+    is_trial            bool                     -- занятие является демо уроком
+);
 -- +goose StatementEnd
 
 -- +goose Down
@@ -97,4 +108,5 @@ drop table if exists roles_permissions;
 drop table if exists tutors;
 drop table if exists students;
 drop table if exists subjects;
+drop table if exists conducted_lessons;
 -- +goose StatementEnd

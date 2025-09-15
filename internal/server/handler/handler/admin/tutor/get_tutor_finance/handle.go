@@ -56,9 +56,11 @@ func (h *Handler) Handle() http.HandlerFunc {
 func (h *Handler) prepareResponse(financeInfo dto.TutorFinance) Response {
 	return Response{
 		Finance: Finance{
-			Conversion: financeInfo.Conversion,
+			Conversion: int64(financeInfo.Conversion),
 			Count:      financeInfo.Count,
 			Amount:     financeInfo.Amount.String(),
+			BaseCount:  financeInfo.BaseCount,
+			TrialCount: financeInfo.TrialCount,
 		},
 	}
 }

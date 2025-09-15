@@ -2,6 +2,7 @@ package get_all_finance
 
 import (
 	"encoding/json"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance/dto"
 	"net/http"
 
 	"github.com/it-chep/tutors.git/internal/module/admin"
@@ -19,9 +20,21 @@ func NewHandler(adminModule *admin.Module) *Handler {
 
 func (h *Handler) Handle() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_ = r.Context()
+		ctx := r.Context()
 
-		response := h.prepareResponse()
+		var req Request
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "failed to decode request: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		finance, err := h.adminModule.Actions.GetAllFinance.Do(ctx, req.From, req.To)
+		if err != nil {
+			http.Error(w, "failed to get user data: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		response := h.prepareResponse(finance)
 
 		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(response); err != nil {
@@ -31,8 +44,15 @@ func (h *Handler) Handle() http.HandlerFunc {
 	}
 }
 
-func (h *Handler) prepareResponse() Response {
+func (h *Handler) prepareResponse(finance dto.GetAllFinanceDto) Response {
 	return Response{
-		Finance: Finance{},
+		Finance: Finance{
+			Profit:            finance.Profit,
+			CashFlow:          finance.CashFlow,
+			Conversion:        finance.Conversion,
+			LessonsCount:      finance.CountLessons,
+			CountBaseLessons:  finance.CountBaseLessons,
+			CountTrialLessons: finance.CountTrialLessons,
+		},
 	}
 }
