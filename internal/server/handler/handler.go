@@ -55,15 +55,18 @@ func (h *Handler) setupRoutes(adminModule *admin.Module) {
 			r.Post("/", h.adminAgg.Auth.Login.LoginHandler())        // POST /auth/login
 			r.Post("/verify", h.adminAgg.Auth.Login.VerifyHandler()) // POST /auth/login/verify
 		})
-	})
-
-	h.router.Route("/admin", func(r chi.Router) {
-		r.Use(middleware.Auth(adminModule))
 
 		// Аутентификация
 		r.Route("/auth", func(r chi.Router) {
-			r.Post("/refresh", h.adminAgg.Auth.Refresh.RefreshHandler()) // POST /admin/auth/refresh
+			r.Post("/refresh", h.adminAgg.Auth.Refresh.RefreshHandler()) // POST /auth/refresh
 		})
+	})
+
+	h.router.Route("/admin", func(r chi.Router) {
+		r.Use(middleware.Auth(adminModule)) // TODO: я не знаю для чего это
+		r.Use(h.adminAgg.Auth.CheckPathPermission.AuthMiddleware())
+
+		r.Get("/user", h.adminAgg.Auth.GetUserInfo.Handle()) // GET /admin/user
 
 		// Админы
 		r.Route("/admins", func(r chi.Router) {

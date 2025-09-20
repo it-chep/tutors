@@ -42,6 +42,13 @@ type TokenPair struct {
 	refreshToken string
 }
 
+func NewTokenPair(accessToken, refreshToken string) TokenPair {
+	return TokenPair{
+		AccessToken:  accessToken,
+		refreshToken: refreshToken,
+	}
+}
+
 func (p TokenPair) Refresh() string {
 	return p.refreshToken
 }

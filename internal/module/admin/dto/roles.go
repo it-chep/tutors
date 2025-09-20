@@ -32,6 +32,19 @@ func (r Role) String() string {
 	}
 }
 
+func (r Role) FrontString() string {
+	switch r {
+	case SuperAdminRole:
+		return "super_admin"
+	case AdminRole:
+		return "admin"
+	case TutorRole:
+		return "tutor"
+	default:
+		return "unknown"
+	}
+}
+
 func IsTutorRole(ctx context.Context) bool {
 	roleID, _ := pkgContext.GetUserRole(ctx)
 	if roleID == int8(TutorRole) {

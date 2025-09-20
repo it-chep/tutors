@@ -11,3 +11,8 @@ type User struct {
 
 	Role Role
 }
+
+type UserInfo struct {
+	ID   int64
+	Role Role
+}
