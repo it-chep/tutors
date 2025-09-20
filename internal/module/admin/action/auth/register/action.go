@@ -27,7 +27,7 @@ type Action struct {
 func New(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, jwt config.JwtConfig) *Action {
 	return &Action{
 		jwt:   jwt,
-		codes: cache.NewCache[string, register_dto.CodeRegister](1000, time.Minute),
+		codes: cache.NewCache[string, register_dto.CodeRegister](1000, 3*time.Minute),
 		repo:  register_dal.NewRepository(pool),
 		smtp:  smtp,
 	}
@@ -66,7 +66,7 @@ func (a *Action) RegisterHandler() http.HandlerFunc {
 		code := smtp.GenerateCode()
 		a.codes.Put(req.Email, register_dto.CodeRegister{Password: string(passHash), Code: code})
 		err = a.smtp.SendEmail(smtp.EmailParams{
-			Body: fmt.Sprintf("Ваш код %d", code), Destination: req.Email,
+			Body: fmt.Sprintf("Ваш код %s", code), Destination: req.Email,
 			Subject: "Регистрация в системе 100rep.ru",
 		})
 		if err != nil {

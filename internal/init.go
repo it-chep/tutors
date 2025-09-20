@@ -8,6 +8,8 @@ import (
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/bot"
+	alfa "github.com/it-chep/tutors.git/internal/pkg/alpha"
+	"github.com/it-chep/tutors.git/internal/pkg/alpha/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
 	"github.com/it-chep/tutors.git/internal/server"
 	"github.com/it-chep/tutors.git/internal/server/handler"
@@ -45,6 +47,15 @@ func (a *App) initSmtp(context.Context) *App {
 	return a
 }
 
+func (a *App) initAlfa(context.Context) *App {
+	a.alfa = alfa.NewClient(dto.Credentials{
+		BaseURL:  a.config.PaymentConfig.BaseUrl,
+		UserName: a.config.PaymentConfig.User,
+		Password: a.config.PaymentConfig.Password,
+	})
+	return a
+}
+
 func (a *App) initTgBot(context.Context) *App {
 	if !a.config.BotIsActive() {
 		return a
@@ -60,7 +71,7 @@ func (a *App) initTgBot(context.Context) *App {
 
 func (a *App) initModules(context.Context) *App {
 	a.modules = Modules{
-		Bot:   bot.New(a.pool, a.bot),
+		Bot:   bot.New(a.pool, a.bot, a.alfa),
 		Admin: admin.New(a.pool, a.smtp, a.config.JwtConfig),
 	}
 	return a

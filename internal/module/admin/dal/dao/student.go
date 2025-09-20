@@ -20,7 +20,7 @@ func (s StudentDAO) ToDomain() dto.Student {
 		MiddleName:      s.MiddleName,
 		Phone:           s.Phone,
 		Tg:              s.Tg,
-		CostPerHour:     s.CostPerHour,
+		CostPerHour:     convert.NumericToDecimal(s.CostPerHour).String(),
 		SubjectID:       s.SubjectID,
 		TutorID:         s.TutorID,
 		ParentFullName:  s.ParentFullName,

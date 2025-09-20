@@ -22,7 +22,7 @@ func NewClient(cred dto.Credentials) *Client {
 	}
 }
 
-func (c *Client) RegisterOrder(ctx context.Context, request dto.OrderRequest) (*dto.OrderResponse, error) {
+func (c *Client) RegisterOrder(ctx context.Context, request *dto.OrderRequest) (*dto.OrderResponse, error) {
 	req, err := request.FormData(ctx, c.cred)
 	if err != nil {
 		return nil, err

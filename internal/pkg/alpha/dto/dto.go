@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	rub = "810"
+	rub = "643"
 	ru  = "ru"
 )
 

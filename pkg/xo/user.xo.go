@@ -15,7 +15,7 @@ import (
 type User struct {
 	ID         int64          `db:"id" json:"id"`                   // id bigint
 	Email      string         `db:"email" json:"email"`             // email character varying(255)
-	Password   string         `db:"password" json:"password"`       // password character varying(255)
+	Password   sql.NullString `db:"password" json:"password"`       // password character varying(255)
 	FullName   sql.NullString `db:"full_name" json:"full_name"`     // full_name character varying(100)
 	IsActive   sql.NullBool   `db:"is_active" json:"is_active"`     // is_active boolean
 	ActivateAt pq.NullTime    `db:"activate_at" json:"activate_at"` // activate_at timestamp without time zone
@@ -47,7 +47,7 @@ func (t User) SelectColumnsWithCoalesce() []string {
 	return []string{
 		fmt.Sprintf("COALESCE(u.id, %v) as id", zeroUser.ID),
 		fmt.Sprintf("COALESCE(u.email, '%v') as email", zeroUser.Email),
-		fmt.Sprintf("COALESCE(u.password, '%v') as password", zeroUser.Password),
+		"u.password",
 		"u.full_name",
 		fmt.Sprintf("COALESCE(u.is_active, %v) as is_active", zeroUser.IsActive),
 		"u.activate_at",

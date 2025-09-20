@@ -4,11 +4,11 @@
 -- transactions/finance
 create table transactions_history
 (
-    id           uuid   not null,         -- order number
-    created_at   timestamp default now(), -- время совершения транзакции
-    confirmed_at timestamp,               -- время подтверждения транзакции
-    amount       numeric,                 -- стоимость
-    student_id   bigint not null          -- студент чья оплата
+    id           uuid      not null,               -- order number
+    created_at   timestamp not null default now(), -- время совершения транзакции
+    confirmed_at timestamp,                        -- время подтверждения транзакции
+    amount       numeric,                          -- стоимость
+    student_id   bigint    not null                -- студент чья оплата
 -- остальная логика
 );
 

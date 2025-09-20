@@ -8,26 +8,27 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/lib/pq"
 )
 
 // Student represents a row from 'public.students'.
 type Student struct {
-	ID              int64         `db:"id" json:"id"`                               // id bigint
-	FirstName       string        `db:"first_name" json:"first_name"`               // first_name text
-	LastName        string        `db:"last_name" json:"last_name"`                 // last_name text
-	MiddleName      string        `db:"middle_name" json:"middle_name"`             // middle_name text
-	Phone           string        `db:"phone" json:"phone"`                         // phone text
-	Tg              string        `db:"tg" json:"tg"`                               // tg text
-	CostPerHour     string        `db:"cost_per_hour" json:"cost_per_hour"`         // cost_per_hour numeric
-	SubjectID       int64         `db:"subject_id" json:"subject_id"`               // subject_id bigint
-	TutorID         int64         `db:"tutor_id" json:"tutor_id"`                   // tutor_id bigint
-	IsFinishedTrial bool          `db:"is_finished_trial" json:"is_finished_trial"` // is_finished_trial boolean
-	ParentFullName  string        `db:"parent_full_name" json:"parent_full_name"`   // parent_full_name text
-	ParentPhone     string        `db:"parent_phone" json:"parent_phone"`           // parent_phone text
-	ParentTg        string        `db:"parent_tg" json:"parent_tg"`                 // parent_tg text
-	ParentTgID      sql.NullInt64 `db:"parent_tg_id" json:"parent_tg_id"`           // parent_tg_id bigint
-	CreatedAt       pq.NullTime   `db:"created_at" json:"created_at"`               // created_at timestamp without time zone
+	ID              int64          `db:"id" json:"id"`                               // id bigint
+	FirstName       string         `db:"first_name" json:"first_name"`               // first_name text
+	LastName        string         `db:"last_name" json:"last_name"`                 // last_name text
+	MiddleName      string         `db:"middle_name" json:"middle_name"`             // middle_name text
+	Phone           string         `db:"phone" json:"phone"`                         // phone text
+	Tg              string         `db:"tg" json:"tg"`                               // tg text
+	CostPerHour     pgtype.Numeric `db:"cost_per_hour" json:"cost_per_hour"`         // cost_per_hour numeric
+	SubjectID       int64          `db:"subject_id" json:"subject_id"`               // subject_id bigint
+	TutorID         int64          `db:"tutor_id" json:"tutor_id"`                   // tutor_id bigint
+	IsFinishedTrial bool           `db:"is_finished_trial" json:"is_finished_trial"` // is_finished_trial boolean
+	ParentFullName  string         `db:"parent_full_name" json:"parent_full_name"`   // parent_full_name text
+	ParentPhone     string         `db:"parent_phone" json:"parent_phone"`           // parent_phone text
+	ParentTg        string         `db:"parent_tg" json:"parent_tg"`                 // parent_tg text
+	ParentTgID      sql.NullInt64  `db:"parent_tg_id" json:"parent_tg_id"`           // parent_tg_id bigint
+	CreatedAt       pq.NullTime    `db:"created_at" json:"created_at"`               // created_at timestamp without time zone
 }
 
 // zeroStudent zero value of dto

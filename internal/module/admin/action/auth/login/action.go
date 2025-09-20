@@ -26,7 +26,7 @@ type Action struct {
 func New(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, jwt config.JwtConfig) *Action {
 	return &Action{
 		jwt:   jwt,
-		codes: cache.NewCache[string, string](1000, time.Minute),
+		codes: cache.NewCache[string, string](1000, 3*time.Minute),
 		repo:  login_dal.NewRepository(pool),
 		smtp:  smtp,
 	}

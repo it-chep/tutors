@@ -6,7 +6,7 @@ create table if not exists users
 (
     id          bigserial,
     email       varchar(255) not null unique, -- email
-    password    varchar(255) not null,        -- пароль
+    password    varchar(255),                 -- пароль
     full_name   VARCHAR(100),                 -- фио
     is_active   bool,                         -- активный ли пользователь
     activate_at timestamp,                    -- дата активации юзера
@@ -14,6 +14,14 @@ create table if not exists users
     role_id     bigint,                       -- ID роли (админ, суперадмин, репетитор)
     tutor_id    bigint
 );
+
+-- Пользователи на регистрации
+create table if not exists registration
+(
+    tg_id bigint not null,
+    unique (tg_id)
+);
+
 
 -- Роли
 create table if not exists roles

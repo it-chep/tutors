@@ -9,6 +9,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/bot"
 	"github.com/it-chep/tutors.git/internal/module/bot/dto"
+	alfa "github.com/it-chep/tutors.git/internal/pkg/alpha"
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
 	"github.com/it-chep/tutors.git/internal/server"
@@ -23,6 +24,7 @@ type App struct {
 	server *server.Server
 	bot    *tg_bot.Bot
 	smtp   *smtp.ClientSmtp
+	alfa   *alfa.Client
 
 	modules Modules
 }
@@ -40,6 +42,8 @@ func New(ctx context.Context) *App {
 	}
 
 	app.initDB(ctx).
+		initSmtp(ctx).
+		initAlfa(ctx).
 		initTgBot(ctx).
 		initModules(ctx).
 		initServer(ctx)

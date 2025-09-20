@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -15,7 +16,7 @@ import (
 // TransactionsHistory represents a row from 'public.transactions_history'.
 type TransactionsHistory struct {
 	ID          uuid.UUID      `db:"id" json:"id"`                     // id uuid
-	CreatedAt   pq.NullTime    `db:"created_at" json:"created_at"`     // created_at timestamp without time zone
+	CreatedAt   time.Time      `db:"created_at" json:"created_at"`     // created_at timestamp without time zone
 	ConfirmedAt pq.NullTime    `db:"confirmed_at" json:"confirmed_at"` // confirmed_at timestamp without time zone
 	Amount      pgtype.Numeric `db:"amount" json:"amount"`             // amount numeric
 	StudentID   int64          `db:"student_id" json:"student_id"`     // student_id bigint
@@ -39,7 +40,7 @@ const (
 func (t TransactionsHistory) SelectColumnsWithCoalesce() []string {
 	return []string{
 		fmt.Sprintf("COALESCE(th.id, %v) as id", zeroTransactionsHistory.ID),
-		"th.created_at",
+		fmt.Sprintf("COALESCE(th.created_at, '%v') as created_at", zeroTransactionsHistory.CreatedAt.Format(time.RFC3339)),
 		"th.confirmed_at",
 		fmt.Sprintf("COALESCE(th.amount, %v) as amount", zeroTransactionsHistory.Amount),
 		fmt.Sprintf("COALESCE(th.student_id, %v) as student_id", zeroTransactionsHistory.StudentID),
