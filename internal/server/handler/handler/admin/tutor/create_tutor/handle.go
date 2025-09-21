@@ -46,6 +46,7 @@ func (h *Handler) Handle() http.HandlerFunc {
 			Tg:          req.Tg,
 			CostPerHour: req.CostPerHour,
 			SubjectID:   req.SubjectID,
+			Email:       req.Email,
 		}, adminID)
 		if err != nil {
 			http.Error(w, "failed to create tutor: "+err.Error(), http.StatusInternalServerError)
