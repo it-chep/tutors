@@ -58,8 +58,6 @@ func (h *Handler) setupRoutes(cfg Config) {
 		r.Post(fmt.Sprintf("/%s/", cfg.Token()), h.bot())
 	})
 
-	h.router.Get("/roles", h.adminAgg.GetAvailableRoles.Handle()) // GET /roles
-
 	h.router.Route("/auth", func(r chi.Router) {
 		// Регистрация
 		r.Route("/register", func(r chi.Router) {
