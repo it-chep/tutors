@@ -1,6 +1,9 @@
 package handler
 
 import (
+	"fmt"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/it-chep/tutors.git/internal/module/bot"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -9,20 +12,34 @@ import (
 	"github.com/it-chep/tutors.git/internal/server/middleware"
 )
 
+type Config interface {
+	Token() string
+}
+
+// TgHookParser .
+type TgHookParser interface {
+	HandleUpdate(r *http.Request) (*tgbotapi.Update, error)
+}
+
 type Handler struct {
-	router *chi.Mux
+	router    *chi.Mux
+	botParser TgHookParser
+
+	botModule *bot.Bot
 
 	adminAgg *adminHandler.HandlerAggregator
 }
 
-func NewHandler(adminModule *admin.Module) *Handler {
+func NewHandler(botParser TgHookParser, botModule *bot.Bot, adminModule *admin.Module, cfg Config) *Handler {
 	h := &Handler{
-		router: chi.NewRouter(),
+		router:    chi.NewRouter(),
+		botParser: botParser,
+		botModule: botModule,
 	}
 
 	h.setupMiddleware()
 	h.setupHandlerAggregator(adminModule)
-	h.setupRoutes(adminModule)
+	h.setupRoutes(cfg)
 
 	return h
 }
@@ -36,9 +53,9 @@ func (h *Handler) setupHandlerAggregator(adminModule *admin.Module) {
 	h.adminAgg = adminHandler.NewAggregator(adminModule)
 }
 
-func (h *Handler) setupRoutes(adminModule *admin.Module) {
+func (h *Handler) setupRoutes(cfg Config) {
 	h.router.Route("/", func(r chi.Router) {
-		//r.Post(fmt.Sprintf("/%s/", cfg.Token()), h.bot())
+		r.Post(fmt.Sprintf("/%s/", cfg.Token()), h.bot())
 	})
 
 	h.router.Get("/roles", h.adminAgg.GetAvailableRoles.Handle()) // GET /roles

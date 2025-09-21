@@ -21,12 +21,14 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 
 func (r *Repository) CreateAdmin(ctx context.Context, createDTO dto.CreateRequest) error {
 	sql := `
-		insert into users (email, full_name, role_id) values ($1, $2, $3)
+		insert into users (email, full_name, role_id, phone, tg) values ($1, $2, $3, $4, $5)
 	`
 	args := []interface{}{
 		createDTO.Email,
 		createDTO.FullName,
 		indto.AdminRole,
+		createDTO.Phone,
+		createDTO.Tg,
 	}
 	_, err := r.pool.Exec(ctx, sql, args...)
 	return err

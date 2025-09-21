@@ -12,7 +12,9 @@ create table if not exists users
     activate_at timestamp,                    -- дата активации юзера
     created_at  timestamp default now(),      -- дата создания в системе
     role_id     bigint,                       -- ID роли (админ, суперадмин, репетитор)
-    tutor_id    bigint
+    tutor_id    bigint,
+    tg          text         not null,        -- телега
+    phone       text         not null         -- номер телефона
 );
 
 -- Пользователи на регистрации
@@ -55,9 +57,7 @@ create table if not exists tutors
     id            bigserial,
     cost_per_hour numeric not null, --  стоимость часа работы репетитора
     subject_id    bigint  not null, -- учебный предмет
-    admin_id      bigint  not null, -- админ репетитора
-    tg            text    not null, -- телега студента
-    phone         text    not null  -- номер телефона студента
+    admin_id      bigint  not null  -- админ репетитора
 );
 
 -- Таблица студентов

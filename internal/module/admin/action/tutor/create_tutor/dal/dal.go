@@ -22,14 +22,12 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 // CreateTutor создание репетитора
 func (r *Repository) CreateTutor(ctx context.Context, createDTO dto.Request, adminID int64) (int64, error) {
 	sql := `
-		insert into tutors (phone, tg, cost_per_hour, subject_id, admin_id)  
-		values ($1, $2, $3, $4, $5)
+		insert into tutors (cost_per_hour, subject_id, admin_id)  
+		values ($1, $2, $3)
 		returning id;
 	`
 
 	args := []interface{}{
-		createDTO.Phone,
-		createDTO.Tg,
 		createDTO.CostPerHour,
 		createDTO.SubjectID,
 		adminID,
@@ -43,12 +41,13 @@ func (r *Repository) CreateTutor(ctx context.Context, createDTO dto.Request, adm
 // CreateUser создание пользователя
 func (r *Repository) CreateUser(ctx context.Context, createDTO dto.Request, tutorID int64) error {
 	sql := `
-		insert into users (email, password, full_name, is_active, role_id, tutor_id)
-		values ($1, $2, $3, false, $4)
+		insert into users (phone, tg, email, full_name, is_active, role_id, tutor_id)
+		values ($1, $2, $3, $4, false, $5, $6)
 	`
 	args := []interface{}{
+		createDTO.Phone,
+		createDTO.Tg,
 		createDTO.Email,
-		// password ?
 		createDTO.FullName,
 		indto.TutorRole,
 		tutorID,

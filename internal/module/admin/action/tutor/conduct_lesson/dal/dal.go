@@ -42,8 +42,8 @@ func (r *Repository) GetTutor(ctx context.Context, tutorID int64) (dto.Tutor, er
 			t.subject_id,
 			t.admin_id,
 			u.full_name,
-			t.tg,
-			t.phone 
+			u.tg,
+			u.phone 
 		from tutors t 
 		    join users u on t.id = u.tutor_id 
 		where t.id = $1

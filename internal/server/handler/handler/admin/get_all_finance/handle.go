@@ -2,6 +2,7 @@ package get_all_finance
 
 import (
 	"encoding/json"
+	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"net/http"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance/dto"
@@ -26,6 +27,11 @@ func (h *Handler) Handle() http.HandlerFunc {
 		var req Request
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, "failed to decode request: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if indto.IsTutorRole(ctx) {
+			http.Error(w, "authorization required", http.StatusUnauthorized)
 			return
 		}
 

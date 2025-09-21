@@ -42,12 +42,12 @@ func (a *App) initDB(ctx context.Context) *App {
 	return a
 }
 
-func (a *App) initSmtp(context.Context) *App {
+func (a *App) initSmtp(_ context.Context) *App {
 	a.smtp = smtp.NewClientSmtp(a.config.SMTPConfig.Address, a.config.SMTPConfig.PassKey)
 	return a
 }
 
-func (a *App) initAlfa(context.Context) *App {
+func (a *App) initAlfa(_ context.Context) *App {
 	a.alfa = alfa.NewClient(dto.Credentials{
 		BaseURL:  a.config.PaymentConfig.BaseUrl,
 		UserName: a.config.PaymentConfig.User,
@@ -56,7 +56,7 @@ func (a *App) initAlfa(context.Context) *App {
 	return a
 }
 
-func (a *App) initTgBot(context.Context) *App {
+func (a *App) initTgBot(_ context.Context) *App {
 	if !a.config.BotIsActive() {
 		return a
 	}
@@ -69,17 +69,16 @@ func (a *App) initTgBot(context.Context) *App {
 	return a
 }
 
-func (a *App) initModules(context.Context) *App {
+func (a *App) initModules(_ context.Context) *App {
 	a.modules = Modules{
 		Bot:   bot.New(a.pool, a.bot, a.alfa),
-		Admin: admin.New(a.pool, a.smtp, a.config.JwtConfig),
+		Admin: admin.New(a.pool, a.smtp, a.config.JwtConfig, a.bot),
 	}
 	return a
 }
 
-func (a *App) initServer(context.Context) *App {
-	// todo: в NewHandler передаем сервис для админки или бота
-	h := handler.NewHandler(a.modules.Admin)
+func (a *App) initServer(_ context.Context) *App {
+	h := handler.NewHandler(a.bot, a.modules.Bot, a.modules.Admin, a.config)
 	srv := server.New(h)
 	a.server = srv
 	return a

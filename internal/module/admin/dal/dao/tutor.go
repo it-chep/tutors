@@ -2,6 +2,7 @@ package dao
 
 import (
 	"database/sql"
+	"strings"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 )
@@ -26,7 +27,7 @@ func (t TutorDAO) ToDomain() dto.Tutor {
 		ID:          t.TutorID.Int64,
 		FullName:    t.FullName,
 		Phone:       t.Phone,
-		Tg:          t.Tg,
+		Tg:          TgLink(t.Tg),
 		CostPerHour: t.CostPerHour,
 		SubjectID:   t.SubjectID,
 		AdminID:     t.AdminID,
@@ -55,4 +56,20 @@ func (l TutorLessonsCountDao) ToDomain() dto.TutorLessons {
 		BaseCount:    l.BaseCount,
 		LessonsCount: l.LessonsCount,
 	}
+}
+
+func TgLink(tg string) string {
+	if tg == "" {
+		return ""
+	}
+
+	// Удаляем @ в начале, если есть
+	tgURL := strings.TrimPrefix(tg, "@")
+
+	// Если URL не содержит http/https, формируем полный URL
+	if !strings.HasPrefix(tgURL, "http") {
+		tgURL = "https://t.me/" + tgURL
+	}
+
+	return tgURL
 }

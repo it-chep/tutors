@@ -7,4 +7,5 @@ type Request struct {
 	CostPerHour string `json:"cost_per_hour"`
 	SubjectID   int64  `json:"subject_id"`
 	Email       string `json:"email"`
+	AdminID     int64  `json:"admin_id"`
 }

@@ -16,8 +16,6 @@ type Tutor struct {
 	CostPerHour pgtype.Numeric `db:"cost_per_hour" json:"cost_per_hour"` // cost_per_hour numeric
 	SubjectID   int64          `db:"subject_id" json:"subject_id"`       // subject_id bigint
 	AdminID     int64          `db:"admin_id" json:"admin_id"`           // admin_id bigint
-	Tg          string         `db:"tg" json:"tg"`                       // tg text
-	Phone       string         `db:"phone" json:"phone"`                 // phone text
 }
 
 // zeroTutor zero value of dto
@@ -32,8 +30,6 @@ const (
 	Field_Tutor_CostPerHour = "cost_per_hour"
 	Field_Tutor_SubjectID   = "subject_id"
 	Field_Tutor_AdminID     = "admin_id"
-	Field_Tutor_Tg          = "tg"
-	Field_Tutor_Phone       = "phone"
 )
 
 func (t Tutor) SelectColumnsWithCoalesce() []string {
@@ -42,8 +38,6 @@ func (t Tutor) SelectColumnsWithCoalesce() []string {
 		fmt.Sprintf("COALESCE(t.cost_per_hour, %v) as cost_per_hour", zeroTutor.CostPerHour),
 		fmt.Sprintf("COALESCE(t.subject_id, %v) as subject_id", zeroTutor.SubjectID),
 		fmt.Sprintf("COALESCE(t.admin_id, %v) as admin_id", zeroTutor.AdminID),
-		fmt.Sprintf("COALESCE(t.tg, '%v') as tg", zeroTutor.Tg),
-		fmt.Sprintf("COALESCE(t.phone, '%v') as phone", zeroTutor.Phone),
 	}
 }
 
@@ -53,13 +47,11 @@ func (t Tutor) SelectColumns() []string {
 		"t.cost_per_hour",
 		"t.subject_id",
 		"t.admin_id",
-		"t.tg",
-		"t.phone",
 	}
 }
 
 func (t Tutor) Columns(without ...string) []string {
-	var str = "id, cost_per_hour, subject_id, admin_id, tg, phone"
+	var str = "id, cost_per_hour, subject_id, admin_id"
 	for _, exc := range without {
 		str = strings.Replace(str+", ", exc+", ", "", 1)
 	}
@@ -84,8 +76,6 @@ func (t *Tutor) ToMap() map[string]interface{} {
 		"cost_per_hour": t.CostPerHour,
 		"subject_id":    t.SubjectID,
 		"admin_id":      t.AdminID,
-		"tg":            t.Tg,
-		"phone":         t.Phone,
 	}
 }
 

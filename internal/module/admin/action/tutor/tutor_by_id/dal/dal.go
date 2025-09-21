@@ -29,8 +29,8 @@ func (r *Repository) GetTutor(ctx context.Context, tutorID int64) (dto.Tutor, er
             t.admin_id,
             u.full_name as full_name,
             u.tutor_id as id,
-            t.tg,
-            t.phone,
+            u.tg,
+            u.phone,
 		 	s.name as "subject_name"
 		from tutors t 
 		    join subjects s on t.subject_id = s.id 

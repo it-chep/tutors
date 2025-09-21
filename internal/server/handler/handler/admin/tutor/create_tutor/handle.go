@@ -35,7 +35,10 @@ func (h *Handler) Handle() http.HandlerFunc {
 			return
 		}
 
-		adminID := userCtx.UserIDFromContext(ctx)
+		adminID := req.AdminID
+		if req.AdminID <= 0 {
+			adminID = userCtx.UserIDFromContext(ctx)
+		}
 
 		err := h.adminModule.Actions.CreateTutor.Do(ctx, dto.Request{
 			FullName:    req.FullName,

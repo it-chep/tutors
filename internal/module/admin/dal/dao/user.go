@@ -14,6 +14,8 @@ func (u *User) UserDto() dto.User {
 		ID:       u.ID,
 		Email:    u.Email,
 		Password: u.Password.String,
+		Phone:    u.Phone,
+		Tg:       TgLink(u.Tg),
 		FullName: u.FullName.String,
 		IsActive: u.IsActive.Bool,
 		Role:     dto.Role(u.RoleID.Int64),

@@ -27,8 +27,8 @@ func (r *Repository) GetTutorsByAdmin(ctx context.Context, adminID int64) ([]dto
             t.admin_id,
             u.full_name as full_name,
             u.tutor_id as id,
-            t.tg,
-            t.phone
+            u.tg,
+            u.phone
 		from tutors t 
 		    join users u on t.id = u.tutor_id 
 		where t.admin_id = $1
@@ -50,8 +50,8 @@ func (r *Repository) GetTutors(ctx context.Context) ([]dto.Tutor, error) {
             t.admin_id,
             u.full_name as full_name,
             u.tutor_id as id,
-            t.tg,
-            t.phone
+            u.tg,
+            u.phone
 		from tutors t 
 		    join users u on t.id = u.tutor_id 
 		order by t.id
