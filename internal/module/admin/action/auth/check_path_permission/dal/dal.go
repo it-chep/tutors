@@ -37,8 +37,11 @@ func (r *Repository) CheckPathPermission(ctx context.Context, roleID int8, path 
 }
 
 func (r *Repository) GetUser(ctx context.Context, email string) (*dto.UserInfo, error) {
+	sql := `
+		select * from users where email = $1
+	`
 	userDao := &dao.User{}
-	if err := pgxscan.Select(ctx, r.pool, userDao, "select * from users where email = $1", email); err != nil {
+	if err := pgxscan.Get(ctx, r.pool, userDao, sql, email); err != nil {
 		return nil, err
 	}
 

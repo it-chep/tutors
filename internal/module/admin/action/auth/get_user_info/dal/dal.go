@@ -20,8 +20,9 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 }
 
 func (r *Repository) GetUser(ctx context.Context, userID int64) (*dto.UserInfo, error) {
+	sql := "select * from users where id = $1"
 	userDao := &dao.User{}
-	if err := pgxscan.Select(ctx, r.pool, userDao, "select * from users where id = $1", userID); err != nil {
+	if err := pgxscan.Get(ctx, r.pool, userDao, sql, userID); err != nil {
 		return nil, err
 	}
 

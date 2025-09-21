@@ -35,6 +35,7 @@ func (a *Action) Handle() http.HandlerFunc {
 		user, err := a.dal.GetUser(ctx, userCtx.UserFromContext(ctx))
 		if err != nil {
 			http.Error(w, "Что-то пошло не так, попробуйте позже", http.StatusInternalServerError)
+			return
 		}
 
 		resp := Response{
@@ -43,6 +44,10 @@ func (a *Action) Handle() http.HandlerFunc {
 				Role: user.Role.FrontString(),
 			},
 		}
-		_ = json.NewEncoder(w).Encode(resp)
+		w.Header().Set("Content-Type", "application/json")
+		if err = json.NewEncoder(w).Encode(resp); err != nil {
+			http.Error(w, "Что-то пошло не так, попробуйте позже", http.StatusInternalServerError)
+			return
+		}
 	}
 }
