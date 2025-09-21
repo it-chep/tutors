@@ -23,7 +23,7 @@ func New(pool *pgxpool.Pool) *Action {
 	}
 }
 
-func (a *Action) Do(ctx context.Context, from, to string) (dto.GetAllFinanceDto, error) {
+func (a *Action) Do(ctx context.Context, from, to string, adminID int64) (dto.GetAllFinanceDto, error) {
 	fromTime, toTime, err := convert.StringsIntervalToTime(from, to)
 	if err != nil {
 		return dto.GetAllFinanceDto{}, err
@@ -41,7 +41,7 @@ func (a *Action) Do(ctx context.Context, from, to string) (dto.GetAllFinanceDto,
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		gCashFlow, gErr := a.dal.GetCashFlow(ctx, fromTime, toTime)
+		gCashFlow, gErr := a.dal.GetCashFlow(ctx, fromTime, toTime, adminID)
 		if gErr != nil {
 			logger.Error(ctx, "Ошибка при получении оборота", gErr)
 			return
@@ -53,7 +53,7 @@ func (a *Action) Do(ctx context.Context, from, to string) (dto.GetAllFinanceDto,
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		gExpenses, gErr := a.dal.GetExpenses(ctx, fromTime, toTime)
+		gExpenses, gErr := a.dal.GetExpenses(ctx, fromTime, toTime, adminID)
 		if gErr != nil {
 			logger.Error(ctx, "Ошибка при расходов на зп", gErr)
 			return
@@ -65,7 +65,7 @@ func (a *Action) Do(ctx context.Context, from, to string) (dto.GetAllFinanceDto,
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		gLessonsCount, gErr := a.dal.GetLessons(ctx, fromTime, toTime)
+		gLessonsCount, gErr := a.dal.GetLessons(ctx, fromTime, toTime, adminID)
 		if gErr != nil {
 			logger.Error(ctx, "Ошибка при получении оплаченных уроков", gErr)
 			return
@@ -77,7 +77,7 @@ func (a *Action) Do(ctx context.Context, from, to string) (dto.GetAllFinanceDto,
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		gConversion, gErr := a.dal.GetTutorsConversion(ctx, fromTime, toTime)
+		gConversion, gErr := a.dal.GetTutorsConversion(ctx, fromTime, toTime, adminID)
 		if gErr != nil {
 			logger.Error(ctx, "Ошибка при получении конверсии", gErr)
 			return

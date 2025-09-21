@@ -3,6 +3,7 @@ package get_all_finance
 import (
 	"encoding/json"
 	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
 	"net/http"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance/dto"
@@ -35,7 +36,13 @@ func (h *Handler) Handle() http.HandlerFunc {
 			return
 		}
 
-		finance, err := h.adminModule.Actions.GetAllFinance.Do(ctx, req.From, req.To)
+		// суперадмин отправит ID админа в теле
+		adminID := req.AdminID
+		if indto.IsAdminRole(ctx) {
+			adminID = userCtx.UserIDFromContext(ctx)
+		}
+
+		finance, err := h.adminModule.Actions.GetAllFinance.Do(ctx, req.From, req.To, adminID)
 		if err != nil {
 			http.Error(w, "failed to get user data: "+err.Error(), http.StatusInternalServerError)
 			return

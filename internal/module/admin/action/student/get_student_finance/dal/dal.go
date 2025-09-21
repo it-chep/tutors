@@ -22,11 +22,18 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 
 // GetFinanceInfo получаем количество занятий и прибыль по студенту
 func (r *Repository) GetFinanceInfo(ctx context.Context, studentID int64, from, to time.Time) (dto.StudentFinance, error) {
-	// todo подумать должны ли учитываться неоплаченные занятия ?
 	sql := `
-		select count(*) as count, sum(amount) as amount
-		from transactions_history 
-		where student_id = $1 and confirmed_at between $2 and $3
+		select count(*) as count,
+			   sum(
+					   case
+						   when cl.is_trial = false then (cl.duration_in_minutes / 60.0) * s.cost_per_hour
+						   else 0
+						   end
+			   )        as amount
+		from conducted_lessons cl
+				 join students s on cl.student_id = s.id
+		where cl.student_id = $1
+		  and cl.created_at between $2 and $3
 	`
 
 	args := []interface{}{

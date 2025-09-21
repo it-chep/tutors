@@ -41,7 +41,6 @@ func (a *Action) getAllStudents(ctx context.Context) ([]dto.Student, error) {
 				ID:         student.ID,
 				FirstName:  student.FirstName,
 				MiddleName: student.MiddleName,
-				SubjectID:  student.SubjectID, // todo мб name сделать
 			})
 		}
 
@@ -66,7 +65,6 @@ func (a *Action) getStudentsByTutor(ctx context.Context, tutorID int64) ([]dto.S
 				ID:         student.ID,
 				FirstName:  student.FirstName,
 				MiddleName: student.MiddleName,
-				SubjectID:  student.SubjectID, // todo мб name сделать
 			})
 		}
 

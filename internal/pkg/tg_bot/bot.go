@@ -153,8 +153,6 @@ func (b *Bot) SendMessageWithContentType(msg bot_dto.Message) error {
 		message = voiceMsg
 	}
 
-	// todo сделать кнопки ?
-
 	_, err := b.bot.Send(message)
 	return err
 }

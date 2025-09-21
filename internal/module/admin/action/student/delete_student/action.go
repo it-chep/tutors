@@ -18,6 +18,9 @@ func New(pool *pgxpool.Pool) *Action {
 }
 
 func (a *Action) Do(ctx context.Context, studentID int64) error {
-	// todo надо ли чистить кошелек и тд
+	err := a.dal.DeleteWallet(ctx, studentID)
+	if err != nil {
+		return err
+	}
 	return a.dal.DeleteStudent(ctx, studentID)
 }

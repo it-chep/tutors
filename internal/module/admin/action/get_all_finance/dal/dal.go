@@ -25,21 +25,21 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 }
 
 // GetExpenses получение расходов на ЗП репетиторов
-func (r *Repository) GetExpenses(ctx context.Context, from, to time.Time) (decimal.Decimal, error) {
+func (r *Repository) GetExpenses(ctx context.Context, from, to time.Time, adminID int64) (decimal.Decimal, error) {
 	sql := `
-		SELECT 
-			SUM((cl.duration_in_minutes / 60.0) * t.cost_per_hour) as total_tutor_payout
-		FROM conducted_lessons cl
-		JOIN tutors t ON cl.tutor_id = t.id
-		WHERE cl.created_at BETWEEN $1 AND $2
+		select 
+			sum((cl.duration_in_minutes / 60.0) * t.cost_per_hour) as total_tutor_payout
+		from conducted_lessons cl
+		join tutors t on cl.tutor_id = t.id
+		where t.admin_id = $3 and cl.created_at between $1 and $2
 	`
 
 	args := []interface{}{
 		from,
 		to,
+		adminID,
 	}
 
-	// todo добавить связь с админом
 	var amount pgtype.Numeric
 	err := pgxscan.Get(ctx, r.pool, &amount, sql, args...)
 	if err != nil {
@@ -50,17 +50,20 @@ func (r *Repository) GetExpenses(ctx context.Context, from, to time.Time) (decim
 }
 
 // GetTutorsConversion считаем конверсию оплат после триалок у репетиторов
-func (r *Repository) GetTutorsConversion(ctx context.Context, from, to time.Time) (float64, error) {
+func (r *Repository) GetTutorsConversion(ctx context.Context, from, to time.Time, adminID int64) (float64, error) {
 	sql := `
 		WITH trial_lessons AS (SELECT cl.student_id,
 									  cl.created_at as trial_date,
 									  cl.tutor_id
 							   FROM conducted_lessons cl
-							   WHERE cl.is_trial = true
+										join tutors t on cl.tutor_id = t.id
+							   WHERE t.admin_id = $3 and cl.is_trial = true
 								 AND cl.created_at BETWEEN $1 AND $2),
 			 paid_students AS (SELECT DISTINCT th.student_id
 							   FROM transactions_history th
-							   WHERE th.confirmed_at BETWEEN $1 AND $2
+									join students s on th.student_id = s.id
+									join tutors t on s.tutor_id = t.id
+							   WHERE t.admin_id = $3 and th.confirmed_at BETWEEN $1 AND $2
 								 AND th.amount > 0),
 			 conversion_data AS (SELECT COUNT(DISTINCT tl.student_id) as total_trial_students,
 										COUNT(DISTINCT ps.student_id) as converted_students,
@@ -75,10 +78,10 @@ func (r *Repository) GetTutorsConversion(ctx context.Context, from, to time.Time
 		FROM conversion_data
 	`
 
-	// todo добавить связь с админом
 	args := []interface{}{
 		from,
 		to,
+		adminID,
 	}
 
 	var conversion float64
@@ -91,17 +94,21 @@ func (r *Repository) GetTutorsConversion(ctx context.Context, from, to time.Time
 }
 
 // GetCashFlow получение оборота
-func (r *Repository) GetCashFlow(ctx context.Context, from, to time.Time) (decimal.Decimal, error) {
+func (r *Repository) GetCashFlow(ctx context.Context, from, to time.Time, adminID int64) (decimal.Decimal, error) {
 	sql := `
-		select sum(amount) from transactions_history where confirmed_at between $1 and $2
+		select sum(th.amount) 
+		from transactions_history th 
+			join students s on th.student_id = s.id
+			join tutors t on s.tutor_id = t.id
+		where t.admin_id = $3 and th.confirmed_at between $1 and $2
 	`
 
 	args := []interface{}{
 		from,
 		to,
+		adminID,
 	}
 
-	// todo добавить связь с админом
 	var amount pgtype.Numeric
 	err := pgxscan.Get(ctx, r.pool, &amount, sql, args...)
 	if err != nil {
@@ -112,22 +119,23 @@ func (r *Repository) GetCashFlow(ctx context.Context, from, to time.Time) (decim
 }
 
 // GetLessons количество проведенных занятий
-func (r *Repository) GetLessons(ctx context.Context, from, to time.Time) (dto.TutorLessons, error) {
+func (r *Repository) GetLessons(ctx context.Context, from, to time.Time, adminID int64) (dto.TutorLessons, error) {
 	sql := `
 		select
 			count(*) as lessons_count,
 			count(*) filter (where is_trial = false) as base_lessons,
 			count(*) filter (where is_trial = true) as trial_lessons
-		from conducted_lessons
-		where created_at between $1 and $2
+		from conducted_lessons cl
+		join tutors t on cl.tutor_id = t.id
+		where t.admin_id = $3 and created_at between $1 and $2
 	`
 
 	args := []interface{}{
 		from,
 		to,
+		adminID,
 	}
 
-	// todo добавить связь с админом
 	var lessons dao.TutorLessonsCountDao
 	err := pgxscan.Get(ctx, r.pool, &lessons, sql, args...)
 	if err != nil {
