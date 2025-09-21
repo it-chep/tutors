@@ -19,5 +19,8 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 }
 
 func (r *Repository) GetUser(ctx context.Context, email string) (user *register_dto.User, _ error) {
-	return user, pgxscan.Select(ctx, r.pool, user, "select * from users where email = $1", email)
+	sql := `select * from users where email = $1`
+	user = &register_dto.User{}
+
+	return user, pgxscan.Get(ctx, r.pool, user, sql, email)
 }

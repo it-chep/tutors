@@ -35,6 +35,8 @@ func New(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, jwt config.JwtConfig) *Actio
 func (a *Action) LoginHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req register_dto.LoginRequest
+		w.Header().Set("Content-Type", "application/json")
+
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, "invalid request", http.StatusBadRequest)
 			return
@@ -58,7 +60,8 @@ func (a *Action) LoginHandler() http.HandlerFunc {
 			Subject: "Авторизация в системе 100rep.ru",
 		})
 		if err != nil {
-			http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusInternalServerError)
+			http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusOK)
+			return
 		}
 
 		w.WriteHeader(http.StatusOK)
@@ -86,13 +89,16 @@ func (a *Action) VerifyHandler() http.HandlerFunc {
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
 		http.SetCookie(w, &http.Cookie{
 			Name:     register_dto.RefreshCookie,
 			Value:    tokens.Refresh(),
 			Expires:  time.Now().UTC().Add(14 * 24 * time.Hour),
 			HttpOnly: true,
+			Path:     "/",
+			SameSite: http.SameSiteLaxMode,
 		})
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(tokens)
 	}
 }

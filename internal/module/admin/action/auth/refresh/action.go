@@ -23,6 +23,7 @@ func (a *Action) RefreshHandler() http.HandlerFunc {
 		claims, err := tkn.RefreshClaimsFromRequest(r, a.jwt.RefreshSecret)
 		if err != nil {
 			http.Error(w, "Кажется, что вам нужно перезайти в лк", http.StatusUnauthorized)
+			return
 		}
 
 		tokens, err := tkn.GenerateTokens(claims.Email, a.jwt.JwtSecret, a.jwt.RefreshSecret)

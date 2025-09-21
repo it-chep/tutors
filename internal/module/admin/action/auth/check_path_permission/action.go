@@ -32,16 +32,19 @@ func (a *Action) AuthMiddleware() func(http.Handler) http.Handler {
 			claims, err := token.AccessClaimsFromRequest(r, a.jwt.JwtSecret)
 			if err != nil {
 				http.Error(w, "authorization required", http.StatusUnauthorized)
+				return
 			}
 
 			user, err := a.dal.GetUser(ctx, claims.Email)
 			if err != nil {
 				http.Error(w, "authorization required", http.StatusUnauthorized)
+				return
 			}
 
 			has, err := a.hasPermissions(ctx, int8(user.Role), r.URL.Path)
 			if err != nil || !has {
 				http.Error(w, "authorization required", http.StatusUnauthorized)
+				return
 			}
 
 			ctx = userCtx.CtxWithUser(ctx, user.ID)
