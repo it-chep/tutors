@@ -3,6 +3,9 @@ package get_tutors
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
+
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
 
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
@@ -23,14 +26,17 @@ func (h *Handler) Handle() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		//tutorIDStr := r.URL.Query().Get("admin_id")
-		//_, err := strconv.ParseInt(tutorIDStr, 10, 64)
-		//if err != nil {
-		//	http.Error(w, "invalid admin ID", http.StatusBadRequest)
-		//	return
-		//}
+		adminIDStr := r.URL.Query().Get("admin_id")
+		adminID, err := strconv.ParseInt(adminIDStr, 10, 64)
+		if err != nil {
+			adminID = 0
+		}
 
-		baseData, err := h.adminModule.Actions.GetTutors.Do(ctx)
+		if adminID == 0 && dto.IsAdminRole(ctx) {
+			adminID = userCtx.UserIDFromContext(ctx)
+		}
+
+		baseData, err := h.adminModule.Actions.GetTutors.Do(ctx, adminID)
 		if err != nil {
 			http.Error(w, "failed to get tutors data: "+err.Error(), http.StatusInternalServerError)
 			return

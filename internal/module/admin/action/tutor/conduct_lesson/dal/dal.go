@@ -3,6 +3,8 @@ package dal
 import (
 	"context"
 
+	"github.com/shopspring/decimal"
+
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/it-chep/tutors.git/internal/module/admin/dal/dao"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
@@ -34,7 +36,17 @@ func (r *Repository) GetStudent(ctx context.Context, studentID int64) (dto.Stude
 
 func (r *Repository) GetTutor(ctx context.Context, tutorID int64) (dto.Tutor, error) {
 	sql := `
-		select t.*, u.* from tutors t join users u on t.id = u.tutor_id where t.id = $1
+		select 
+		    t.id,
+			t.cost_per_hour,
+			t.subject_id,
+			t.admin_id,
+			u.full_name,
+			t.tg,
+			t.phone 
+		from tutors t 
+		    join users u on t.id = u.tutor_id 
+		where t.id = $1
 	`
 
 	args := []interface{}{
@@ -42,7 +54,7 @@ func (r *Repository) GetTutor(ctx context.Context, tutorID int64) (dto.Tutor, er
 	}
 
 	var tutor dao.TutorDAO
-	err := pgxscan.Get(ctx, r.pool, &tutor, sql, args)
+	err := pgxscan.Get(ctx, r.pool, &tutor, sql, args...)
 	if err != nil {
 		return dto.Tutor{}, err
 	}
@@ -62,7 +74,7 @@ func (r *Repository) GetStudentWallet(ctx context.Context, studentID int64) (dto
 	return wallet.ToDomain(), nil
 }
 
-func (r *Repository) UpdateStudentWallet(ctx context.Context, studentID int64, remain string) error {
+func (r *Repository) UpdateStudentWallet(ctx context.Context, studentID int64, remain decimal.Decimal) error {
 	sql := `
 		update wallet set balance = $1 where student_id = $2
 	`

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
+
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/create_tutor/dto"
 )
@@ -33,13 +35,15 @@ func (h *Handler) Handle() http.HandlerFunc {
 			return
 		}
 
+		adminID := userCtx.UserIDFromContext(ctx)
+
 		err := h.adminModule.Actions.CreateTutor.Do(ctx, dto.Request{
 			FullName:    req.FullName,
 			Phone:       req.Phone,
 			Tg:          req.Tg,
 			CostPerHour: req.CostPerHour,
 			SubjectID:   req.SubjectID,
-		}, 0) // todo admin_id
+		}, adminID)
 		if err != nil {
 			http.Error(w, "failed to create tutor: "+err.Error(), http.StatusInternalServerError)
 			return

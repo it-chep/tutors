@@ -6,4 +6,5 @@ type Request struct {
 	Tg          string
 	CostPerHour string
 	SubjectID   int64
+	Email       string
 }

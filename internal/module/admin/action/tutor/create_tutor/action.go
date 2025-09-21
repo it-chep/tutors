@@ -19,5 +19,10 @@ func New(pool *pgxpool.Pool) *Action {
 }
 
 func (a *Action) Do(ctx context.Context, createDTO dto.Request, adminID int64) error {
-	return a.dal.CreateTutor(ctx, createDTO, adminID)
+	tutorID, err := a.dal.CreateTutor(ctx, createDTO, adminID)
+	if err != nil {
+		return err
+	}
+
+	return a.dal.CreateUser(ctx, createDTO, tutorID)
 }

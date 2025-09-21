@@ -36,6 +36,7 @@ func (r *Repository) CheckPathPermission(ctx context.Context, roleID int8, path 
 	return exists, nil
 }
 
+// GetUser получение пользователя
 func (r *Repository) GetUser(ctx context.Context, email string) (*dto.UserInfo, error) {
 	sql := `
 		select * from users where email = $1

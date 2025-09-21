@@ -6,6 +6,7 @@ type User struct {
 	Email    string
 	Password string
 	FullName string
+	Tg       string
 
 	IsActive bool
 
@@ -13,6 +14,8 @@ type User struct {
 }
 
 type UserInfo struct {
-	ID   int64
+	ID      int64
+	TutorID int64
+
 	Role Role
 }

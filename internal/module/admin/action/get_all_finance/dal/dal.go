@@ -2,12 +2,13 @@ package dal
 
 import (
 	"context"
+	"time"
+
 	"github.com/it-chep/tutors.git/internal/module/admin/dal/dao"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/convert"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/shopspring/decimal"
-	"time"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5/pgxpool"

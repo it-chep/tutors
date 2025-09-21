@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/it-chep/tutors.git/internal/module/admin/dto"
+
 	"github.com/it-chep/tutors.git/internal/config"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/auth/check_path_permission/dal"
 	userCtx "github.com/it-chep/tutors.git/pkg/context"
@@ -47,8 +49,11 @@ func (a *Action) AuthMiddleware() func(http.Handler) http.Handler {
 				return
 			}
 
-			ctx = userCtx.CtxWithUser(ctx, user.ID)
-
+			ctx = userCtx.WithUserID(ctx, user.ID)
+			ctx = userCtx.WithUserRole(ctx, int8(user.Role))
+			if user.Role == dto.TutorRole {
+				ctx = userCtx.WithTutorID(ctx, user.TutorID)
+			}
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

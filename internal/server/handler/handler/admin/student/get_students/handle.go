@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
+
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/samber/lo"
@@ -28,6 +30,10 @@ func (h *Handler) Handle() http.HandlerFunc {
 		tutorID, err := strconv.ParseInt(tutorIDStr, 10, 64)
 		if err != nil {
 			tutorID = 0
+		}
+
+		if dto.IsTutorRole(ctx) {
+			tutorID = userCtx.GetTutorID(ctx)
 		}
 
 		baseData, err := h.adminModule.Actions.GetStudents.Do(ctx, tutorID)

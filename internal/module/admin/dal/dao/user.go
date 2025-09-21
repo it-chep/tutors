@@ -22,7 +22,18 @@ func (u *User) UserDto() dto.User {
 
 func (u *User) UserInfo() *dto.UserInfo {
 	return &dto.UserInfo{
-		ID:   u.ID,
-		Role: dto.Role(u.RoleID.Int64),
+		ID:      u.ID,
+		TutorID: u.TutorID.Int64,
+		Role:    dto.Role(u.RoleID.Int64),
 	}
+}
+
+type Users []User
+
+func (u Users) ToDomain() []dto.User {
+	domain := make([]dto.User, 0, len(u))
+	for _, user := range u {
+		domain = append(domain, user.UserDto())
+	}
+	return domain
 }

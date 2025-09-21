@@ -3,7 +3,7 @@ package dto
 import (
 	"context"
 
-	pkgContext "github.com/it-chep/tutors.git/internal/pkg/context"
+	pkgContext "github.com/it-chep/tutors.git/pkg/context"
 )
 
 type Role int8

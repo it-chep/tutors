@@ -1,8 +1,9 @@
 package convert
 
 import (
-	"github.com/pkg/errors"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 func StringsIntervalToTime(from, to string) (time.Time, time.Time, error) {

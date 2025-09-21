@@ -19,6 +19,29 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 	}
 }
 
+func (r *Repository) GetTutorsByAdmin(ctx context.Context, adminID int64) ([]dto.Tutor, error) {
+	sql := `
+		select 
+            t.cost_per_hour,
+            t.subject_id,
+            t.admin_id,
+            u.full_name as full_name,
+            u.tutor_id as id,
+            t.tg,
+            t.phone
+		from tutors t 
+		    join users u on t.id = u.tutor_id 
+		where t.admin_id = $1
+		order by t.id
+	`
+	var tutors dao.TutorsDao
+	if err := pgxscan.Select(ctx, r.pool, &tutors, sql, adminID); err != nil {
+		return nil, err
+	}
+
+	return tutors.ToDomain(), nil
+}
+
 func (r *Repository) GetTutors(ctx context.Context) ([]dto.Tutor, error) {
 	sql := `
 		select 
@@ -29,7 +52,9 @@ func (r *Repository) GetTutors(ctx context.Context) ([]dto.Tutor, error) {
             u.tutor_id as id,
             t.tg,
             t.phone
-		from tutors t join users u on t.id = u.tutor_id order by t.id
+		from tutors t 
+		    join users u on t.id = u.tutor_id 
+		order by t.id
 	`
 	var tutors dao.TutorsDao
 	if err := pgxscan.Select(ctx, r.pool, &tutors, sql); err != nil {

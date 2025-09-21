@@ -3,6 +3,8 @@ package dal
 import (
 	"context"
 
+	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
+
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/create_admin/dto"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -19,12 +21,12 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 
 func (r *Repository) CreateAdmin(ctx context.Context, createDTO dto.CreateRequest) error {
 	sql := `
-		insert into admins (full_name, phone, tg) values ($1, $2, $3)
+		insert into users (email, full_name, role_id) values ($1, $2, $3)
 	`
 	args := []interface{}{
+		createDTO.Email,
 		createDTO.FullName,
-		createDTO.Phone,
-		createDTO.Tg,
+		indto.AdminRole,
 	}
 	_, err := r.pool.Exec(ctx, sql, args...)
 	return err

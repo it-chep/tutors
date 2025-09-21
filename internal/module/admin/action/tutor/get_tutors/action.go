@@ -2,6 +2,7 @@ package get_tutors
 
 import (
 	"context"
+
 	"github.com/samber/lo"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/get_tutors/dal"
@@ -19,8 +20,13 @@ func New(pool *pgxpool.Pool) *Action {
 	}
 }
 
-func (a *Action) Do(ctx context.Context) (tutors []dto.Tutor, err error) {
-	tutors, err = a.dal.GetTutors(ctx)
+func (a *Action) Do(ctx context.Context, adminID int64) (tutors []dto.Tutor, err error) {
+	if dto.IsSuperAdminRole(ctx) && adminID == 0 {
+		tutors, err = a.dal.GetTutors(ctx)
+	}
+	if adminID != 0 {
+		tutors, err = a.dal.GetTutorsByAdmin(ctx, adminID)
+	}
 
 	tutorsIDs := make([]int64, 0, len(tutors))
 	tutorsMap := make(map[int64]dto.Tutor, len(tutors))

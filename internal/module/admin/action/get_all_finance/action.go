@@ -2,6 +2,8 @@ package get_all_finance
 
 import (
 	"context"
+	"sync"
+
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance/dal"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance/dto"
 	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
@@ -9,7 +11,6 @@ import (
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/shopspring/decimal"
-	"sync"
 )
 
 type Action struct {

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/it-chep/tutors.git/internal/config"
-	"github.com/it-chep/tutors.git/internal/module/admin/action/auth/dto"
+	register_dto "github.com/it-chep/tutors.git/internal/module/admin/action/auth/dto"
 	login_dal "github.com/it-chep/tutors.git/internal/module/admin/action/auth/login/dal"
 	"github.com/it-chep/tutors.git/pkg/cache"
 	"github.com/it-chep/tutors.git/pkg/smtp"

@@ -18,6 +18,9 @@ func New(pool *pgxpool.Pool) *Action {
 }
 
 func (a *Action) Do(ctx context.Context, adminID int64) error {
-	// todo очистка репов
-	return a.dal.DeleteAdmin(ctx, adminID)
+	err := a.dal.DeleteAdmin(ctx, adminID)
+	if err != nil {
+		return err
+	}
+	return a.dal.UpdateTutorsAdmin(ctx, adminID)
 }

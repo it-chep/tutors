@@ -3,6 +3,8 @@ package get_admin_by_id
 import (
 	"context"
 
+	"github.com/it-chep/tutors.git/internal/module/admin/dto"
+
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/get_admin_by_id/dal"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -17,6 +19,6 @@ func New(pool *pgxpool.Pool) *Action {
 	}
 }
 
-func (a *Action) Do(ctx context.Context, adminID int64) error {
+func (a *Action) Do(ctx context.Context, adminID int64) (dto.User, error) {
 	return a.dal.GetAdminByID(ctx, adminID)
 }
