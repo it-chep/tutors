@@ -14,34 +14,9 @@ type Client struct {
 }
 
 func NewClient(cred dto.Credentials) *Client {
-	//path := "/Users/duzyanov/govno/tutors/internal/pkg/alpha/cert/"
-	//cert, err := tls.LoadX509KeyPair(path+"client_fullchain.pem", path+"sandbox_key_2026_nopass.key")
-	//if err != nil {
-	//	log.Fatal("client cert load error:", err)
-	//}
-	//
-	//caCert, err := ioutil.ReadFile(path + "alfa_root_bundle.pem")
-	//if err != nil {
-	//	log.Fatalf("failed to read CA bundle: %v", err)
-	//}
-	//caPool := x509.NewCertPool()
-	//if !caPool.AppendCertsFromPEM(caCert) {
-	//	log.Fatal("failed to append CA bundle")
-	//}
-	//
-	//tr := &http.Transport{
-	//	TLSClientConfig: &tls.Config{
-	//		Certificates:       []tls.Certificate{cert},
-	//		RootCAs:            caPool,
-	//		MinVersion:         tls.VersionTLS12,
-	//		InsecureSkipVerify: true,
-	//	},
-	//}
-
 	return &Client{
 		cred: cred,
 		httpClient: &http.Client{
-			//Transport: tr,
 			Timeout: 30 * time.Second,
 		},
 	}
