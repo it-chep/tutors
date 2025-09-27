@@ -23,6 +23,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/get_tutors"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/search_tutor"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/tutor_by_id"
+	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
 	"github.com/it-chep/tutors.git/pkg/smtp"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -62,7 +63,7 @@ type Aggregator struct {
 	GetAdminByID *get_admin_by_id.Action
 }
 
-func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtConfig) *Aggregator {
+func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtConfig, bot *tg_bot.Bot) *Aggregator {
 	return &Aggregator{
 		// Репетитор
 		CreateTutor:     create_tutor.New(pool),
@@ -72,7 +73,7 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 		SearchTutor:     search_tutor.New(pool),
 		GetTutorByID:    tutor_by_id.New(pool),
 		ConductTrial:    conduct_trial.New(pool),
-		ConductLesson:   conduct_lesson.New(pool),
+		ConductLesson:   conduct_lesson.New(pool, bot),
 
 		// Студент
 		CreateStudent:     create_student.New(pool),

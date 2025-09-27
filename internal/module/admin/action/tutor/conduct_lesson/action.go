@@ -6,6 +6,8 @@ import (
 	"strconv"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
+	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
+	"github.com/it-chep/tutors.git/internal/pkg/tg_bot/bot_dto"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/conduct_lesson/dal"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -15,11 +17,13 @@ import (
 // Action провести обычное занятие
 type Action struct {
 	dal *dal.Repository
+	bot *tg_bot.Bot
 }
 
-func New(pool *pgxpool.Pool) *Action {
+func New(pool *pgxpool.Pool, bot *tg_bot.Bot) *Action {
 	return &Action{
 		dal: dal.NewRepository(pool),
+		bot: bot,
 	}
 }
 
@@ -42,16 +46,20 @@ func (a *Action) Do(ctx context.Context, tutorID, studentID int64, durationInMin
 		return err
 	}
 
-	// ---- todo
 	if remain.LessThan(decimal.NewFromInt(0)) {
 		student, err := a.dal.GetStudent(ctx, studentID)
 		if err != nil {
 			return err
 		}
 		_ = student
-		// пушим в бота сообщение студенту
+
+		err = a.bot.SendMessages([]bot_dto.Message{
+			{
+				Chat: student.ParentTgID,
+				Text: "Добрый день, на вашем балансе закончились деньги. Пожалуйста пополните свой баланс и мы сможем продолжить уроки)",
+			},
+		})
 	}
-	// ---- todo
 
 	// Помечаем урок проведенным
 	err = a.dal.ConductLesson(ctx, tutorID, studentID, durationInMinutes)

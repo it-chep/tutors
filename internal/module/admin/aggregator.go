@@ -18,11 +18,12 @@ type Module struct {
 }
 
 func New(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtConfig, bot *tg_bot.Bot) *Module {
-	actions := action.NewAggregator(pool, smtp, config)
+	actions := action.NewAggregator(pool, smtp, config, bot)
 
 	return &Module{
 		Actions: actions,
 
-		AlphaHook: alpha.NewWebHookAlpha(alpha_dal.NewRepository(pool)),
+		// TODO: уточнить секрет, точно ли альфа может передавать статичный Bearer?
+		AlphaHook: alpha.NewWebHookAlpha(alpha_dal.NewRepository(pool), ""),
 	}
 }
