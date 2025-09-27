@@ -21,7 +21,7 @@ func (r *Repository) UpdateBalance(ctx context.Context, orderNumber string) erro
 		with upd as (
 			update transactions_history 
 				set confirmed_at = now() 
-			where id = $1
+			where id = $1 and confirmed_at is null
 			returning student_id, amount
 		)
 		update wallet w set  

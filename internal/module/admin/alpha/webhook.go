@@ -2,82 +2,65 @@ package alpha
 
 import (
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
-	"encoding/json"
 	"io"
 	"net/http"
+	"strings"
 
 	alpha_dal "github.com/it-chep/tutors.git/internal/module/admin/alpha/dal"
-	"github.com/samber/lo"
 )
 
 type WebHookAlpha struct {
-	dal *alpha_dal.Repository
+	dal    *alpha_dal.Repository
+	secret string
 }
 
-func NewWebHookAlpha(dal *alpha_dal.Repository) *WebHookAlpha {
-	return &WebHookAlpha{dal: dal}
+func NewWebHookAlpha(dal *alpha_dal.Repository, secret string) *WebHookAlpha {
+	return &WebHookAlpha{dal: dal, secret: secret}
 }
 
 func (hook *WebHookAlpha) Handle() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		body, err := io.ReadAll(r.Body)
+		if !hook.checkBearer(r) {
+			http.Error(w, "Invalid auth", http.StatusUnauthorized)
+			return
+		}
+
+		webhook, err := hook.webHook(r)
 		if err != nil {
-			http.Error(w, "Bad request", http.StatusBadRequest)
-			return
-		}
-		defer func() {
-			_ = r.Body.Close()
-		}()
-
-		secretKey := "your-webhook-secret-key"
-		signature := r.Header.Get("X-Signature-SHA256")
-
-		if !verifyWebhookSignature(body, signature, secretKey) {
-			http.Error(w, "Invalid signature", http.StatusUnauthorized)
-			return
-		}
-
-		var webhook WebhookRequest
-		if err = json.Unmarshal(body, &webhook); err != nil {
-			http.Error(w, "Invalid JSON format", http.StatusBadRequest)
-			return
-		}
-
-		if err = webhook.Validate(); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			http.Error(w, "Invalid request", http.StatusBadRequest)
 			return
 		}
 
 		if err = hook.processWebhook(r.Context(), webhook); err != nil {
 			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
 		}
 
 		w.WriteHeader(http.StatusOK)
 	}
 }
 
-func verifyWebhookSignature(body []byte, signature, secret string) bool {
-	if signature == "" {
+func (hook *WebHookAlpha) checkBearer(r *http.Request) bool {
+	auth := r.Header.Get("Authorization")
+	if !strings.HasPrefix(auth, "Bearer ") {
 		return false
 	}
-
-	h := hmac.New(sha256.New, []byte(secret))
-	h.Write(body)
-	expectedSign := hex.EncodeToString(h.Sum(nil))
-
-	return hmac.Equal([]byte(expectedSign), []byte(signature))
+	return strings.TrimPrefix(auth, "Bearer ") == hook.secret
 }
 
-func (hook *WebHookAlpha) processWebhook(ctx context.Context, webhook WebhookRequest) error {
-	if webhook.EventType != "ORDER_STATUS_UPDATED" {
-		return nil
+func (hook *WebHookAlpha) webHook(r *http.Request) (*WebhookEnvelope, error) {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		return nil, err
 	}
-	if !lo.Contains([]string{"APPROVED", "CONFIRMED"}, webhook.Data.Order.Status) {
-		return nil
-	}
+	defer func() {
+		_ = r.Body.Close()
+	}()
 
-	return hook.dal.UpdateBalance(ctx, webhook.Data.Order.OrderNumber)
+	webhook := &WebhookEnvelope{}
+	return webhook, webhook.UnmarshalJSON(body)
+}
+
+func (hook *WebHookAlpha) processWebhook(ctx context.Context, webhook *WebhookEnvelope) error {
+	return hook.dal.UpdateBalance(ctx, webhook.OrderNumber())
 }

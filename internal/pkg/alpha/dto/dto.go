@@ -12,7 +12,8 @@ import (
 
 const (
 	rub = "643"
-	ru  = "ru"
+	//rub = "810"
+	ru = "ru"
 )
 
 type Credentials struct {
@@ -46,7 +47,7 @@ func (r OrderRequest) FormData(ctx context.Context, cred Credentials) (*http.Req
 	formData.Set("userName", cred.UserName)
 	formData.Set("password", cred.Password)
 	formData.Set("orderNumber", r.orderNumber)
-	formData.Set("amount", fmt.Sprintf("%d", r.amount))
+	formData.Set("amount", fmt.Sprintf("%d", r.amount*100))
 	formData.Set("returnUrl", r.returnURL)
 	formData.Set("description", r.description)
 	formData.Set("currency", r.currency) // RUB

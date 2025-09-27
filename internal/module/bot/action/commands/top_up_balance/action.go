@@ -66,7 +66,10 @@ func (a *Action) SetAmount(ctx context.Context, msg dto.Message) error {
 
 	resp, err := a.alfa.RegisterOrder(ctx, alfadto.NewOrderRequest(transaction.ID, amount))
 	if err != nil {
-		logger.Error(ctx, fmt.Sprintf("ошибка при создании платежки в альфабанке: %s", resp.ErrorMessage), err)
+		if resp != nil {
+			err = fmt.Errorf("%s: %s", err.Error(), resp.ErrorMessage)
+		}
+		logger.Error(ctx, "ошибка при создании платежки в альфабанке", err)
 		if err = a.dal.DropTransaction(ctx, transaction.ID); err != nil {
 			logger.Error(ctx, "ошибка при удалении транзакции при ошибке от альфабанка", err)
 			return err
