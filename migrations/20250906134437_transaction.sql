@@ -5,6 +5,7 @@
 create table transactions_history
 (
     id           uuid      not null,               -- order number
+    order_id     text,
     created_at   timestamp not null default now(), -- время совершения транзакции
     confirmed_at timestamp,                        -- время подтверждения транзакции
     amount       numeric,                          -- стоимость

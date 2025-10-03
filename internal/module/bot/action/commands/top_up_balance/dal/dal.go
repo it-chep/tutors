@@ -70,6 +70,17 @@ func (d *Dal) SetTransactionAmount(ctx context.Context, transactionID string, am
 	return err
 }
 
+func (d *Dal) SetOrderID(ctx context.Context, transactionID, orderID string) error {
+	sql := `
+		update transactions_history 
+			set order_id = $2
+		where id = $1
+	`
+
+	_, err := d.pool.Exec(ctx, sql, transactionID, orderID)
+	return err
+}
+
 func (d *Dal) DropTransaction(ctx context.Context, transactionID string) error {
 	sql := `
 		delete from transactions_history where id = $1

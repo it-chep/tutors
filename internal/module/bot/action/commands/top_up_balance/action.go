@@ -61,6 +61,7 @@ func (a *Action) SetAmount(ctx context.Context, msg dto.Message) error {
 	}
 
 	if err = a.dal.SetTransactionAmount(ctx, transaction.ID, int64(amount)); err != nil {
+		logger.Error(ctx, "ошибка при установке суммы пополнения", err)
 		return err
 	}
 
@@ -77,6 +78,11 @@ func (a *Action) SetAmount(ctx context.Context, msg dto.Message) error {
 		return a.bot.SendMessages([]bot_dto.Message{
 			{Chat: msg.ChatID, Text: "У банка возникли технические неполадки, пожалуйста, попробуйте чуть позже"},
 		})
+	}
+
+	if err = a.dal.SetOrderID(ctx, transaction.ID, resp.OrderID); err != nil {
+		logger.Error(ctx, "ошибка при сохранении идентификатора заказа", err)
+		return err
 	}
 
 	return a.bot.SendMessages([]bot_dto.Message{

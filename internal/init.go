@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/georgysavva/scany/v2/dbscan"
 	"github.com/georgysavva/scany/v2/pgxscan"
@@ -11,6 +12,7 @@ import (
 	alfa "github.com/it-chep/tutors.git/internal/pkg/alpha"
 	"github.com/it-chep/tutors.git/internal/pkg/alpha/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
+	"github.com/it-chep/tutors.git/internal/pkg/worker"
 	"github.com/it-chep/tutors.git/internal/server"
 	"github.com/it-chep/tutors.git/internal/server/handler"
 	"github.com/it-chep/tutors.git/pkg/smtp"
@@ -69,11 +71,13 @@ func (a *App) initTgBot(_ context.Context) *App {
 	return a
 }
 
-func (a *App) initModules(_ context.Context) *App {
+func (a *App) initModules(ctx context.Context) *App {
 	a.modules = Modules{
 		Bot:   bot.New(a.pool, a.bot, a.alfa),
-		Admin: admin.New(a.pool, a.smtp, a.config.JwtConfig, a.bot),
+		Admin: admin.New(a.pool, a.smtp, a.config.JwtConfig, a.bot, a.alfa),
 	}
+
+	a.workers = append(a.workers, worker.NewWorker(ctx, a.modules.Admin.Checker.Start, 5*time.Minute, 1))
 	return a
 }
 

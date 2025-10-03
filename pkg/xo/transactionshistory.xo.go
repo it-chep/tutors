@@ -3,6 +3,7 @@
 package xo
 
 import (
+	"database/sql"
 	"fmt"
 	"reflect"
 	"strings"
@@ -16,6 +17,7 @@ import (
 // TransactionsHistory represents a row from 'public.transactions_history'.
 type TransactionsHistory struct {
 	ID          uuid.UUID      `db:"id" json:"id"`                     // id uuid
+	OrderID     sql.NullString `db:"order_id" json:"order_id"`         // order_id text
 	CreatedAt   time.Time      `db:"created_at" json:"created_at"`     // created_at timestamp without time zone
 	ConfirmedAt pq.NullTime    `db:"confirmed_at" json:"confirmed_at"` // confirmed_at timestamp without time zone
 	Amount      pgtype.Numeric `db:"amount" json:"amount"`             // amount numeric
@@ -31,6 +33,7 @@ const (
 	Table_TransactionsHistory_With_Alias  = "transactions_history AS th"
 	Table_TransactionsHistory             = "transactions_history"
 	Field_TransactionsHistory_ID          = "id"
+	Field_TransactionsHistory_OrderID     = "order_id"
 	Field_TransactionsHistory_CreatedAt   = "created_at"
 	Field_TransactionsHistory_ConfirmedAt = "confirmed_at"
 	Field_TransactionsHistory_Amount      = "amount"
@@ -40,6 +43,7 @@ const (
 func (t TransactionsHistory) SelectColumnsWithCoalesce() []string {
 	return []string{
 		fmt.Sprintf("COALESCE(th.id, %v) as id", zeroTransactionsHistory.ID),
+		"th.order_id",
 		fmt.Sprintf("COALESCE(th.created_at, '%v') as created_at", zeroTransactionsHistory.CreatedAt.Format(time.RFC3339)),
 		"th.confirmed_at",
 		fmt.Sprintf("COALESCE(th.amount, %v) as amount", zeroTransactionsHistory.Amount),
@@ -50,6 +54,7 @@ func (t TransactionsHistory) SelectColumnsWithCoalesce() []string {
 func (t TransactionsHistory) SelectColumns() []string {
 	return []string{
 		"th.id",
+		"th.order_id",
 		"th.created_at",
 		"th.confirmed_at",
 		"th.amount",
@@ -58,7 +63,7 @@ func (t TransactionsHistory) SelectColumns() []string {
 }
 
 func (t TransactionsHistory) Columns(without ...string) []string {
-	var str = "id, created_at, confirmed_at, amount, student_id"
+	var str = "id, order_id, created_at, confirmed_at, amount, student_id"
 	for _, exc := range without {
 		str = strings.Replace(str+", ", exc+", ", "", 1)
 	}
@@ -80,6 +85,7 @@ func (t TransactionsHistory) Join(rightColumnTable string, leftColumnTable strin
 func (t *TransactionsHistory) ToMap() map[string]interface{} {
 	return map[string]interface{}{
 		"id":           t.ID,
+		"order_id":     t.OrderID,
 		"created_at":   t.CreatedAt,
 		"confirmed_at": t.ConfirmedAt,
 		"amount":       t.Amount,

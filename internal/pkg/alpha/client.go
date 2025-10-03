@@ -40,7 +40,7 @@ func (c *Client) RegisterOrder(ctx context.Context, request *dto.OrderRequest) (
 	return response, response.FromHttp(resp.Body)
 }
 
-func (c *Client) GetOrderStatus(ctx context.Context, request dto.StatusRequest) (*dto.StatusResponse, error) {
+func (c *Client) GetOrderStatus(ctx context.Context, request *dto.StatusRequest) (*dto.StatusResponse, error) {
 	req, err := request.FormData(ctx, c.cred)
 	if err != nil {
 		return nil, err

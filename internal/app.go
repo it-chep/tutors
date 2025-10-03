@@ -12,10 +12,13 @@ import (
 	alfa "github.com/it-chep/tutors.git/internal/pkg/alpha"
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
+	"github.com/it-chep/tutors.git/internal/pkg/worker"
 	"github.com/it-chep/tutors.git/internal/server"
 	"github.com/it-chep/tutors.git/pkg/smtp"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+type Workers []worker.Worker
 
 type App struct {
 	config *config.Config
@@ -27,6 +30,7 @@ type App struct {
 	alfa   *alfa.Client
 
 	modules Modules
+	workers Workers
 }
 
 type Modules struct {
@@ -54,6 +58,9 @@ func New(ctx context.Context) *App {
 func (a *App) Run(ctx context.Context) {
 	fmt.Println("start server http://localhost:8080")
 	ctx = logger.ContextWithLogger(ctx, logger.New())
+	for _, w := range a.workers {
+		w.Start(ctx)
+	}
 
 	if !a.config.BotIsActive() {
 		log.Fatal(a.server.ListenAndServe())

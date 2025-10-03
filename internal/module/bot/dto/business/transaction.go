@@ -7,7 +7,10 @@ import (
 )
 
 type Transaction struct {
-	ID          string
+	// OrderNumber
+	ID string
+	// OrderID
+	OrderID     *string
 	CreatedAt   time.Time
 	ConfirmedAt *time.Time
 	Amount      *decimal.Decimal

@@ -3,6 +3,8 @@ package alpha
 import (
 	"encoding/json"
 	"time"
+
+	"github.com/shopspring/decimal"
 )
 
 type WebhookTransactionData struct {
@@ -108,16 +110,16 @@ func (e *WebhookEnvelope) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, e)
 }
 
-func (e *WebhookEnvelope) OrderNumber() string {
+func (e *WebhookEnvelope) Amount() decimal.Decimal {
 	switch e.Object {
 	case "jp_sbp_incoming_payments":
 		internalData := &WebhookSBPPaymentData{}
 		_ = json.Unmarshal(e.Data, &internalData)
-		return ""
+		return decimal.NewFromInt(internalData.Amount)
 	case "ul_transaction_default":
 		internalData := &WebhookTransactionData{}
 		_ = json.Unmarshal(e.Data, &internalData)
-		return internalData.Number
+		return decimal.NewFromFloat(internalData.AmountRub.Amount)
 	}
-	return ""
+	return decimal.Zero
 }

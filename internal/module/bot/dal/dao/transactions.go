@@ -7,6 +7,14 @@ import (
 	"github.com/samber/lo"
 )
 
+type TransactionDAOs []*TransactionDAO
+
+func (daos TransactionDAOs) ToDomain() []*business.Transaction {
+	return lo.Map(daos, func(dao *TransactionDAO, _ int) *business.Transaction {
+		return dao.ToDomain()
+	})
+}
+
 type TransactionDAO struct {
 	xo.TransactionsHistory
 }
@@ -22,6 +30,9 @@ func (s *TransactionDAO) ToDomain() *business.Transaction {
 	}
 	if s.Amount.Valid {
 		transaction.Amount = lo.ToPtr(convert.NumericToDecimal(s.Amount))
+	}
+	if s.OrderID.Valid {
+		transaction.OrderID = lo.ToPtr(s.OrderID.String)
 	}
 	return transaction
 }

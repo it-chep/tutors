@@ -91,14 +91,12 @@ func (r *OrderResponse) FromHttp(reader io.Reader) error {
 }
 
 type StatusRequest struct {
-	orderID     string
-	orderNumber string
+	orderID string
 }
 
-func NewStatusRequest(orderID, orderNumber string) *StatusRequest {
+func NewStatusRequest(orderID string) *StatusRequest {
 	return &StatusRequest{
-		orderID:     orderID,
-		orderNumber: orderNumber,
+		orderID: orderID,
 	}
 }
 
@@ -107,7 +105,6 @@ func (r StatusRequest) FormData(ctx context.Context, cred Credentials) (*http.Re
 	formData.Set("userName", cred.UserName)
 	formData.Set("password", cred.Password)
 	formData.Set("orderId", r.orderID)
-	formData.Set("orderNumber", r.orderNumber)
 
 	req, err := http.NewRequestWithContext(ctx, "POST", cred.BaseURL+"/getOrderStatus.do", strings.NewReader(formData.Encode()))
 	if err != nil {
@@ -118,11 +115,17 @@ func (r StatusRequest) FormData(ctx context.Context, cred Credentials) (*http.Re
 	return req, nil
 }
 
+type OrderStatus int
+
+func (r OrderStatus) Confirmed() bool {
+	return r == 2
+}
+
 type StatusResponse struct {
-	OrderNumber  string `json:"orderNumber"`
-	OrderStatus  int    `json:"orderStatus"`
-	ErrorCode    string `json:"errorCode"`
-	ErrorMessage string `json:"errorMessage"`
+	OrderNumber  string      `json:"OrderNumber"`
+	OrderStatus  OrderStatus `json:"OrderStatus"`
+	ErrorCode    string      `json:"ErrorCode"`
+	ErrorMessage string      `json:"ErrorMessage"`
 }
 
 func (r *StatusResponse) FromHttp(reader io.Reader) error {
