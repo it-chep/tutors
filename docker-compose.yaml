@@ -23,17 +23,15 @@ services:
   app:
     build: .
     ports:
-      - "8000:8000"
+      - "8080:8080"
     expose:
-      - 8000
+      - 8080
     container_name: app
+    restart: always
     networks:
       - network
     depends_on:
       - postgres
-    environment:
-      - C_FORCE_ROOT='true'
-      - ENVIRONMENT_TYPE=docker
 
   pgadmin:
     container_name: pgadmin
