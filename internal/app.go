@@ -62,7 +62,7 @@ func (a *App) Run(ctx context.Context) {
 		w.Start(ctx)
 	}
 
-	if !a.config.BotIsActive() {
+	if !a.config.BotIsActive() || (a.config.UseWebhook() && a.config.BotIsActive()) {
 		log.Fatal(a.server.ListenAndServe())
 	} else {
 		go func() {
