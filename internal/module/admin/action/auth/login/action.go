@@ -3,6 +3,7 @@ package login
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	"net/http"
 	"time"
 
@@ -60,7 +61,8 @@ func (a *Action) LoginHandler() http.HandlerFunc {
 			Subject: "Авторизация в системе 100rep.ru",
 		})
 		if err != nil {
-			http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusOK)
+			http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusInternalServerError)
+			logger.Error(r.Context(), "Ошибка при отправке кода", err)
 			return
 		}
 
