@@ -13,17 +13,24 @@ func (h *Handler) bot() http.HandlerFunc {
 			return
 		}
 
-		msg := dto.Message{
-			User:   event.SentFrom().ID,
-			ChatID: event.FromChat().ID,
-		}
-		if event.Message != nil {
-			msg.Text = event.Message.Text
-		} else if event.CallbackQuery != nil {
-			msg.Text = event.CallbackQuery.Data
-		} else {
+		if event.SentFrom() == nil ||
+			event.FromChat() == nil {
 			return
 		}
+
+		txt := ""
+		if event.Message != nil {
+			txt = event.Message.Text
+		} else if event.CallbackQuery != nil {
+			txt = event.CallbackQuery.Data
+		}
+
+		msg := dto.Message{
+			User:   event.SentFrom().ID,
+			Text:   txt,
+			ChatID: event.FromChat().ID,
+		}
+
 		if err = h.botModule.Route(r.Context(), msg); err != nil {
 			w.WriteHeader(http.StatusBadGateway)
 			return

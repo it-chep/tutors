@@ -55,9 +55,7 @@ func (h *Handler) setupHandlerAggregator(adminModule *admin.Module) {
 }
 
 func (h *Handler) setupRoutes(cfg Config) {
-	h.router.Route("/", func(r chi.Router) {
-		r.Post(fmt.Sprintf("/%s/", cfg.Token()), h.bot())
-	})
+	h.router.Post(fmt.Sprintf("/%s/", cfg.Token()), h.bot())
 
 	h.router.Route("/auth", func(r chi.Router) {
 		// Регистрация
