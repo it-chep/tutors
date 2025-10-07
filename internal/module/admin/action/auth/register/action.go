@@ -58,14 +58,12 @@ func (a *Action) RegisterHandler() http.HandlerFunc {
 		}
 
 		passHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-		fmt.Println(string(passHash))
 		if err != nil {
 			http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusInternalServerError)
 			return
 		}
 
 		code := smtp.GenerateCode()
-		fmt.Println("code:", code)
 
 		a.codes.Put(req.Email, register_dto.CodeRegister{Password: string(passHash), Code: code})
 		err = a.smtp.SendEmail(smtp.EmailParams{

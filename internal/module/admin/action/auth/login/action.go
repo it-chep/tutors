@@ -56,7 +56,7 @@ func (a *Action) LoginHandler() http.HandlerFunc {
 		code := smtp.GenerateCode()
 		a.codes.Put(req.Email, code)
 		err = a.smtp.SendEmail(smtp.EmailParams{
-			Body: fmt.Sprintf("Ваш код %d", code), Destination: req.Email,
+			Body: fmt.Sprintf("Ваш код %s", code), Destination: req.Email,
 			Subject: "Авторизация в системе 100rep.ru",
 		})
 		if err != nil {
