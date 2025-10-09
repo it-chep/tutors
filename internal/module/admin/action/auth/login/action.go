@@ -45,12 +45,12 @@ func (a *Action) LoginHandler() http.HandlerFunc {
 
 		user, err := a.repo.GetUser(r.Context(), req.Email)
 		if err != nil {
-			http.Error(w, "Не нашли такого пользователя", http.StatusUnauthorized)
+			http.Error(w, "Не нашли такого пользователя", http.StatusBadRequest)
 			return
 		}
 
 		if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-			http.Error(w, "неверный email или пароль", http.StatusUnauthorized)
+			http.Error(w, "неверный email или пароль", http.StatusBadRequest)
 			return
 		}
 

@@ -74,6 +74,11 @@ func (h *Handler) setupRoutes(cfg Config) {
 		r.Route("/auth", func(r chi.Router) {
 			r.Get("/refresh", h.adminAgg.Auth.Refresh.RefreshHandler()) // GET /auth/refresh
 		})
+
+		// Выход
+		r.Route("/logout", func(r chi.Router) {
+			r.Post("/", h.adminAgg.Auth.Logout.DeleteCookieHandler())
+		})
 	})
 
 	h.router.Route("/admin", func(r chi.Router) {
