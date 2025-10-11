@@ -18,9 +18,12 @@ func New(pool *pgxpool.Pool) *Action {
 }
 
 func (a *Action) Do(ctx context.Context, adminID int64) error {
+	_ = a.dal.DeleteWallets(ctx, adminID)
+	_ = a.dal.DeleteStudents(ctx, adminID)
+	_ = a.dal.DeleteTutors(ctx, adminID)
 	err := a.dal.DeleteAdmin(ctx, adminID)
 	if err != nil {
 		return err
 	}
-	return a.dal.UpdateTutorsAdmin(ctx, adminID)
+	return nil
 }
