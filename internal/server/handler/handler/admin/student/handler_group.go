@@ -6,6 +6,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/delete_student"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/get_student_finance"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/get_students"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/move_student"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/search_student"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/student_by_id"
 )
@@ -19,6 +20,7 @@ type HandlerGroup struct {
 	DeleteStudent *delete_student.Handler
 
 	GetStudentFinance *get_student_finance.Handler
+	MoveStudent       *move_student.Handler
 }
 
 func NewGroup(adminModule *admin.Module) *HandlerGroup {
@@ -31,5 +33,6 @@ func NewGroup(adminModule *admin.Module) *HandlerGroup {
 		DeleteStudent: delete_student.NewHandler(adminModule),
 
 		GetStudentFinance: get_student_finance.NewHandler(adminModule),
+		MoveStudent:       move_student.NewHandler(adminModule),
 	}
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/delete_student"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_student_finance"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_students"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/student/move_students"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/search_student"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/student_by_id"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/conduct_lesson"
@@ -46,6 +47,7 @@ type Aggregator struct {
 	GetStudents       *get_students.Action
 	SearchStudent     *search_student.Action
 	GetStudentByID    *student_by_id.Action
+	MoveStudents      *move_students.Action
 
 	// Финансы
 	GetAllFinance *get_all_finance.Action
@@ -82,6 +84,7 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 		GetStudents:       get_students.New(pool),
 		SearchStudent:     search_student.New(pool),
 		GetStudentByID:    student_by_id.New(pool),
+		MoveStudents:      move_students.New(pool),
 
 		// Финансы
 		GetAllFinance: get_all_finance.New(pool),

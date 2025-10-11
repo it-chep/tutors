@@ -114,6 +114,7 @@ func (h *Handler) setupRoutes(cfg Config) {
 			r.Post("/", h.adminAgg.Students.CreateStudent.Handle())                         // POST /admin/students
 			r.Delete("/{student_id}", h.adminAgg.Students.DeleteStudent.Handle())           // DELETE /admin/students/{id}
 			r.Post("/{student_id}/finance", h.adminAgg.Students.GetStudentFinance.Handle()) // POST /admin/students/{id}/finance
+			r.Post("/move", h.adminAgg.Students.MoveStudent.Handle())                       // POST /admin/students/move
 		})
 
 		r.Get("/subjects", h.adminAgg.GetAllSubjects.Handle()) // GET /admin/subjects

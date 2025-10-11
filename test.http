@@ -99,6 +99,26 @@ Content-Type: application/json
 ### Удаление студента
 DELETE http://localhost:8080/admin/students/1
 
+### Перенос студентов между репами
+POST http://localhost:8080/admin/students/move
+Content-Type: application/json
+
+{
+  "old_tutor_id": 1,
+  "new_tutor_id": 2,
+  "student_id": 3
+}
+
+### Перенос студентов между репами
+POST http://localhost:8080/admin/students/move
+Content-Type: application/json
+
+{
+  "old_tutor_id": 2,
+  "new_tutor_id": 3
+}
+
+
 ### Получение информации по финансам студента
 POST http://localhost:8080/admin/students/1/finance
 Content-Type: application/json
@@ -110,6 +130,3 @@ Content-Type: application/json
 
 ###
 # Админы
-
-### Получение информации по админам
-GET

@@ -2,6 +2,8 @@ package dal
 
 import (
 	"context"
+	"github.com/jackc/pgx/v5"
+	"github.com/pkg/errors"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/it-chep/tutors.git/internal/module/admin/dal/dao"
@@ -34,6 +36,12 @@ func (r *Repository) GetTutorName(ctx context.Context, tutorID int64) (string, e
 	`
 	var name string
 	err := pgxscan.Get(ctx, r.pool, &name, sql, tutorID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", nil
+		}
+		return "", err
+	}
 	return name, err
 }
 

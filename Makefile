@@ -15,7 +15,7 @@ infra:
 	docker-compose up -d --build
 
 .PHONY: minfra
-minfra-up: infra
+minfra-up:
 	sleep 2s && \
 	$(LOCAL_BIN)/goose postgres "user=${DB_USER} password=${DB_PASSWORD} host=${DB_HOST} dbname=${DB_NAME} sslmode=disable" -dir=./migrations up
 
