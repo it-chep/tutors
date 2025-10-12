@@ -46,6 +46,7 @@ func New(ctx context.Context) *App {
 	}
 
 	app.initDB(ctx).
+		initPaymentCredConf(ctx).
 		initSmtp(ctx).
 		initAlfa(ctx).
 		initTgBot(ctx).

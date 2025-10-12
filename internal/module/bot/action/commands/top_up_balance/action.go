@@ -65,7 +65,15 @@ func (a *Action) SetAmount(ctx context.Context, msg dto.Message) error {
 		return err
 	}
 
-	resp, err := a.alfa.RegisterOrder(ctx, alfadto.NewOrderRequest(transaction.ID, amount))
+	adminID, err := a.dal.AdminIDByParent(ctx, msg.User)
+	if err != nil {
+		logger.Error(ctx, "ошибка при получении админа от тутора родителя", err)
+		return a.bot.SendMessages([]bot_dto.Message{
+			{Chat: msg.ChatID, Text: "Извините, но мы не нашли вашего репетитора. Обратитесь за помощью в поддержку"},
+		})
+	}
+
+	resp, err := a.alfa.RegisterOrder(ctx, alfadto.NewOrderRequest(adminID, transaction.ID, amount))
 	if err != nil {
 		if resp != nil {
 			err = fmt.Errorf("%s: %s", err.Error(), resp.ErrorMessage)

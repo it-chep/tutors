@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -24,7 +25,12 @@ type BotConfig struct {
 }
 
 type PaymentConfig struct {
-	User, Password, BaseUrl string
+	BaseUrl   string
+	AdminCred map[int64]UserConf
+}
+
+type UserConf struct {
+	User, Password string
 }
 
 type JwtConfig struct {
@@ -37,24 +43,28 @@ type SMTPConfig struct {
 	PassKey string
 }
 
-func (c Config) PgConn() string {
+func (c *Config) PgConn() string {
 	return c.pgConn
 }
 
-func (c Config) Token() string {
+func (c *Config) Token() string {
 	return c.token
 }
 
-func (c Config) WebhookURL() string {
+func (c *Config) WebhookURL() string {
 	return c.webhookURL
 }
 
-func (c Config) UseWebhook() bool {
+func (c *Config) UseWebhook() bool {
 	return c.useWebhook
 }
 
-func (c Config) BotIsActive() bool {
+func (c *Config) BotIsActive() bool {
 	return c.isActive
+}
+
+type PaymentConfProvider interface {
+	PaymentCred(ctx context.Context) map[int64]UserConf
 }
 
 func NewConfig() *Config {
@@ -76,11 +86,6 @@ func NewConfig() *Config {
 			os.Getenv("DB_HOST"),
 			os.Getenv("DB_NAME"),
 		),
-		PaymentConfig: PaymentConfig{
-			User:     os.Getenv("PAYMENT_USER"),
-			Password: os.Getenv("PAYMENT_PASSWORD"),
-			BaseUrl:  os.Getenv("PAYMENT_BASE_URL"),
-		},
 		JwtConfig: JwtConfig{
 			JwtSecret:     os.Getenv("JWT_SECRET_KEY"),
 			RefreshSecret: os.Getenv("REFRESH_JWT_SECRET_KEY"),
@@ -89,5 +94,12 @@ func NewConfig() *Config {
 			Address: os.Getenv("ADMIN_EMAIL"),
 			PassKey: os.Getenv("PASS_KEY"),
 		},
+	}
+}
+
+func (c *Config) EnrichPayment(ctx context.Context, provider PaymentConfProvider) {
+	c.PaymentConfig = PaymentConfig{
+		BaseUrl:   os.Getenv("PAYMENT_BASE_URL"),
+		AdminCred: provider.PaymentCred(ctx),
 	}
 }

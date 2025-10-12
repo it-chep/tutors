@@ -2,6 +2,7 @@ package top_up_balance_dal
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/google/uuid"
@@ -88,4 +89,30 @@ func (d *Dal) DropTransaction(ctx context.Context, transactionID string) error {
 
 	_, err := d.pool.Exec(ctx, sql, transactionID)
 	return err
+}
+
+func (d *Dal) AdminIDByParent(ctx context.Context, parentTG int64) (int64, error) {
+	var (
+		adminID int64
+		sql     = `
+			with tutor_id_sel as (
+    			select tutor_id 
+					from students 
+				where parent_tg_id = $1
+			)
+			select admin_id
+				from tutors
+			where id = (select tutor_id from tutor_id_sel)
+		`
+	)
+
+	if err := d.pool.QueryRow(ctx, sql, parentTG).Scan(&adminID); err != nil {
+		return 0, err
+	}
+
+	if adminID == 0 {
+		return 0, fmt.Errorf("admin id is zero")
+	}
+
+	return adminID, nil
 }

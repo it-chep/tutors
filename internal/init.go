@@ -9,6 +9,7 @@ import (
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/bot"
+	"github.com/it-chep/tutors.git/internal/module/bot/dal"
 	alfa "github.com/it-chep/tutors.git/internal/pkg/alpha"
 	"github.com/it-chep/tutors.git/internal/pkg/alpha/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
@@ -44,6 +45,11 @@ func (a *App) initDB(ctx context.Context) *App {
 	return a
 }
 
+func (a *App) initPaymentCredConf(ctx context.Context) *App {
+	a.config.EnrichPayment(ctx, dal.NewDal(a.pool))
+	return a
+}
+
 func (a *App) initSmtp(_ context.Context) *App {
 	a.smtp = smtp.NewClientSmtp(a.config.SMTPConfig.Address, a.config.SMTPConfig.PassKey)
 	return a
@@ -51,9 +57,8 @@ func (a *App) initSmtp(_ context.Context) *App {
 
 func (a *App) initAlfa(_ context.Context) *App {
 	a.alfa = alfa.NewClient(dto.Credentials{
-		BaseURL:  a.config.PaymentConfig.BaseUrl,
-		UserName: a.config.PaymentConfig.User,
-		Password: a.config.PaymentConfig.Password,
+		BaseURL:   a.config.PaymentConfig.BaseUrl,
+		UsersConf: a.config.PaymentConfig.AdminCred,
 	})
 	return a
 }

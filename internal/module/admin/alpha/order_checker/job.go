@@ -39,8 +39,19 @@ func (c *TransactionChecker) UpdateTransactionsByAmount(ctx context.Context, amo
 		}
 		return true
 	})
+
+	studentIDs := lo.Map(transactions, func(item *business.Transaction, _ int) int64 {
+		return item.StudentID
+	})
+
+	adminByStudent, err := c.dal.AdminIDByStudents(ctx, studentIDs)
+	if err != nil {
+		logger.Error(ctx, "ошибка получения админов по студентам в вебхуке", err)
+		return err
+	}
+
 	for _, transaction := range transactions {
-		status, errG := c.alfa.GetOrderStatus(ctx, dto.NewStatusRequest(lo.FromPtr(transaction.OrderID)))
+		status, errG := c.alfa.GetOrderStatus(ctx, dto.NewStatusRequest(adminByStudent[transaction.StudentID], lo.FromPtr(transaction.OrderID)))
 		if errG != nil {
 			logger.Error(ctx, "ошибка получения статуса заказа", err)
 			return errG
@@ -66,8 +77,18 @@ func (c *TransactionChecker) Start(ctx context.Context) {
 		return
 	}
 
+	studentIDs := lo.Map(transactions, func(item *business.Transaction, _ int) int64 {
+		return item.StudentID
+	})
+
+	adminByStudent, err := c.dal.AdminIDByStudents(ctx, studentIDs)
+	if err != nil {
+		logger.Error(ctx, "ошибка получения админов по студентам в джобе", err)
+		return
+	}
+
 	for _, transaction := range transactions {
-		status, err := c.alfa.GetOrderStatus(ctx, dto.NewStatusRequest(lo.FromPtr(transaction.OrderID)))
+		status, err := c.alfa.GetOrderStatus(ctx, dto.NewStatusRequest(adminByStudent[transaction.StudentID], lo.FromPtr(transaction.OrderID)))
 		if err != nil {
 			logger.Error(ctx, "ошибка получения статуса заказа", err)
 		}

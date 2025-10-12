@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/it-chep/tutors.git/internal/config"
 )
 
 const (
@@ -17,9 +19,8 @@ const (
 )
 
 type Credentials struct {
-	BaseURL  string
-	UserName string
-	Password string
+	BaseURL   string
+	UsersConf map[int64]config.UserConf
 }
 
 type OrderRequest struct {
@@ -29,9 +30,11 @@ type OrderRequest struct {
 	returnURL   string
 	description string
 	language    string
+
+	adminID int64
 }
 
-func NewOrderRequest(orderNumber string, amount int) *OrderRequest {
+func NewOrderRequest(adminID int64, orderNumber string, amount int) *OrderRequest {
 	return &OrderRequest{
 		orderNumber: orderNumber,
 		amount:      amount,
@@ -39,13 +42,14 @@ func NewOrderRequest(orderNumber string, amount int) *OrderRequest {
 		returnURL:   fmt.Sprintf("https://t.me/Payments_A_bot"),
 		description: "Оплата консультаций репетитора",
 		language:    ru,
+		adminID:     adminID,
 	}
 }
 
 func (r OrderRequest) FormData(ctx context.Context, cred Credentials) (*http.Request, error) {
 	formData := url.Values{}
-	formData.Set("userName", cred.UserName)
-	formData.Set("password", cred.Password)
+	formData.Set("userName", cred.UsersConf[r.adminID].User)
+	formData.Set("password", cred.UsersConf[r.adminID].Password)
 	formData.Set("orderNumber", r.orderNumber)
 	formData.Set("amount", fmt.Sprintf("%d", r.amount*100))
 	formData.Set("returnUrl", r.returnURL)
@@ -92,18 +96,20 @@ func (r *OrderResponse) FromHttp(reader io.Reader) error {
 
 type StatusRequest struct {
 	orderID string
+	adminID int64
 }
 
-func NewStatusRequest(orderID string) *StatusRequest {
+func NewStatusRequest(adminID int64, orderID string) *StatusRequest {
 	return &StatusRequest{
 		orderID: orderID,
+		adminID: adminID,
 	}
 }
 
 func (r StatusRequest) FormData(ctx context.Context, cred Credentials) (*http.Request, error) {
 	formData := url.Values{}
-	formData.Set("userName", cred.UserName)
-	formData.Set("password", cred.Password)
+	formData.Set("userName", cred.UsersConf[r.adminID].User)
+	formData.Set("password", cred.UsersConf[r.adminID].Password)
 	formData.Set("orderId", r.orderID)
 
 	req, err := http.NewRequestWithContext(ctx, "POST", cred.BaseURL+"/getOrderStatus.do", strings.NewReader(formData.Encode()))

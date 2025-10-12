@@ -2,6 +2,7 @@ package alpha_dal
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/it-chep/tutors.git/internal/module/bot/dal/dao"
@@ -67,4 +68,40 @@ func (r *Repository) GetUnconfirmedOrders(ctx context.Context) ([]*business.Tran
 	}
 
 	return daos.ToDomain(), nil
+}
+
+func (r *Repository) AdminIDByStudents(ctx context.Context, studentIDs []int64) (map[int64]int64, error) {
+	var (
+		adminIDByStudent = make(map[int64]int64, len(studentIDs))
+		sql              = `
+			with tutor_data as (
+    			select id as student_id, tutor_id 
+					from students 
+				where id = any($1)
+			)
+			select td.student_id, t.admin_id
+				from tutor_data td
+					join tutors t on t.id = td.tutor_id
+		`
+	)
+
+	rows, err := r.pool.Query(ctx, sql, studentIDs)
+	if err != nil {
+		return nil, fmt.Errorf("ошибка запроса получения админов по студентам: %s", err.Error())
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var studentID, adminID int64
+		if err = rows.Scan(&studentID, &adminID); err != nil {
+			return nil, fmt.Errorf("ошибка скана админов и студентов: %s", err.Error())
+		}
+		adminIDByStudent[studentID] = adminID
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("ошибка итерации получения админов и студентов: %s", err.Error())
+	}
+
+	return adminIDByStudent, nil
 }
