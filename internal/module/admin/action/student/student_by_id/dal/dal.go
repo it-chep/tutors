@@ -58,6 +58,19 @@ func (r *Repository) GetStudent(ctx context.Context, studentID int64) (dto.Stude
 	return student.ToDomain(), nil
 }
 
+func (r *Repository) GetStudentAdminID(ctx context.Context, studentID int64) (int64, error) {
+	sql := `
+		select t.admin_id from students s join tutors t on s.tutor_id = t.id where s.id = $1
+	`
+	var adminID int64
+	err := pgxscan.Get(ctx, r.pool, &adminID, sql, studentID)
+	if err != nil {
+		return 0, err
+	}
+
+	return adminID, nil
+}
+
 // GetStudentWalletInfo получение информации о кошельке студента
 func (r *Repository) GetStudentWalletInfo(ctx context.Context, studentID int64) (dto.Wallet, error) {
 	sql := `
