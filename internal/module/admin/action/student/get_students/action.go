@@ -2,6 +2,7 @@ package get_students
 
 import (
 	"context"
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_students/dal"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
@@ -21,30 +22,68 @@ func New(pool *pgxpool.Pool) *Action {
 }
 
 func (a *Action) Do(ctx context.Context, tutorID int64) (_ []dto.Student, err error) {
-	if tutorID == 0 {
-		return a.getAllStudents(ctx)
+	if dto.IsAdminRole(ctx) {
+		userID := userCtx.UserIDFromContext(ctx)
+
+		if tutorID == 0 {
+			return a.getAllStudentsForAdmin(ctx, userID)
+		}
+
+		return a.getStudentsByTutorForAdmin(ctx, userID, tutorID)
 	}
 
-	return a.getStudentsByTutor(ctx, tutorID)
+	if dto.IsSuperAdminRole(ctx) {
+		if tutorID == 0 {
+			return a.getAllStudentsForSuperAdmin(ctx)
+		}
+
+		return a.getStudentsByTutorForSuperAdmin(ctx, tutorID)
+	}
+
+	if dto.IsTutorRole(ctx) {
+		return a.getStudentsByTutor(ctx, tutorID)
+	}
+
+	return nil, nil
 }
 
-func (a *Action) getAllStudents(ctx context.Context) ([]dto.Student, error) {
-	students, err := a.dal.GetAllStudents(ctx)
+func (a *Action) getAllStudentsForSuperAdmin(ctx context.Context) ([]dto.Student, error) {
+	students, err := a.dal.GetAllStudentsForSuperAdmin(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	if dto.IsTutorRole(ctx) {
-		studentsForTutor := make([]dto.Student, 0, len(students))
-		for _, student := range students {
-			studentsForTutor = append(studentsForTutor, dto.Student{
-				ID:         student.ID,
-				FirstName:  student.FirstName,
-				MiddleName: student.MiddleName,
-			})
-		}
+	a.enrichStudents(ctx, students)
 
-		return studentsForTutor, nil
+	return students, nil
+}
+
+func (a *Action) getStudentsByTutorForSuperAdmin(ctx context.Context, tutorID int64) ([]dto.Student, error) {
+	students, err := a.dal.GetTutorStudents(ctx, tutorID)
+	if err != nil {
+		return nil, err
+	}
+
+	a.enrichStudents(ctx, students)
+
+	return students, nil
+}
+
+func (a *Action) getAllStudentsForAdmin(ctx context.Context, adminID int64) ([]dto.Student, error) {
+	students, err := a.dal.GetAllStudentsForAdmin(ctx, adminID)
+	if err != nil {
+		return nil, err
+	}
+
+	a.enrichStudents(ctx, students)
+
+	return students, nil
+}
+
+func (a *Action) getStudentsByTutorForAdmin(ctx context.Context, adminID, tutorID int64) ([]dto.Student, error) {
+	students, err := a.dal.GetTutorStudentsForAdmin(ctx, adminID, tutorID)
+	if err != nil {
+		return nil, err
 	}
 
 	a.enrichStudents(ctx, students)
@@ -58,22 +97,16 @@ func (a *Action) getStudentsByTutor(ctx context.Context, tutorID int64) ([]dto.S
 		return nil, err
 	}
 
-	if dto.IsTutorRole(ctx) {
-		studentsForTutor := make([]dto.Student, 0, len(students))
-		for _, student := range students {
-			studentsForTutor = append(studentsForTutor, dto.Student{
-				ID:         student.ID,
-				FirstName:  student.FirstName,
-				MiddleName: student.MiddleName,
-			})
-		}
-
-		return studentsForTutor, nil
+	studentsForTutor := make([]dto.Student, 0, len(students))
+	for _, student := range students {
+		studentsForTutor = append(studentsForTutor, dto.Student{
+			ID:         student.ID,
+			FirstName:  student.FirstName,
+			MiddleName: student.MiddleName,
+		})
 	}
 
-	a.enrichStudents(ctx, students)
-
-	return students, nil
+	return studentsForTutor, nil
 }
 
 func (a *Action) enrichStudents(ctx context.Context, students []dto.Student) {

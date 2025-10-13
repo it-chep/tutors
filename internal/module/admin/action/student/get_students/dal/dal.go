@@ -19,12 +19,38 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r *Repository) GetAllStudents(ctx context.Context) ([]dto.Student, error) {
+func (r *Repository) GetAllStudentsForAdmin(ctx context.Context, adminID int64) ([]dto.Student, error) {
+	sql := `
+		select * from students s join tutors t on s.tutor_id = t.id where t.admin_id = $1
+	`
+	var students dao.StudentsDAO
+	err := pgxscan.Select(ctx, r.pool, &students, sql, adminID)
+	if err != nil {
+		return nil, err
+	}
+
+	return students.ToDomain(), nil
+}
+
+func (r *Repository) GetAllStudentsForSuperAdmin(ctx context.Context) ([]dto.Student, error) {
 	sql := `
 		select * from students
 	`
 	var students dao.StudentsDAO
 	err := pgxscan.Select(ctx, r.pool, &students, sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return students.ToDomain(), nil
+}
+
+func (r *Repository) GetTutorStudentsForAdmin(ctx context.Context, adminID, tutorID int64) ([]dto.Student, error) {
+	sql := `
+		select * from students s join tutors t on s.tutor_id = t.id where t.admin_id = $1 and s.tutor_id = $2
+	`
+	var students dao.StudentsDAO
+	err := pgxscan.Select(ctx, r.pool, &students, sql, adminID, tutorID)
 	if err != nil {
 		return nil, err
 	}
