@@ -39,7 +39,12 @@ func (a *Action) MakeKnown(ctx context.Context, msg dto.Message) error {
 	}
 
 	if !ok {
-		return nil
+		return a.bot.SendMessages([]bot_dto.Message{
+			{
+				Chat: msg.ChatID,
+				Text: `Не смог вас распознать, нажмите на /start и попробуйте еще раз. Если проблема не решилась, напишите своему администратору`,
+			},
+		})
 	}
 
 	return a.bot.SendMessages([]bot_dto.Message{
