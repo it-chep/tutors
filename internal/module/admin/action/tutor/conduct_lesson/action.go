@@ -50,7 +50,7 @@ func (a *Action) Do(ctx context.Context, tutorID, studentID int64, durationInMin
 		err = a.bot.SendMessages([]bot_dto.Message{
 			{
 				Chat: student.ParentTgID,
-				Text: "Добрый день, на вашем балансе закончились деньги. Пожалуйста пополните свой баланс и мы сможем продолжить уроки)",
+				Text: "Добрый день! У вас возникла задолженность по оплате занятий, пополните пожалуйста баланс)",
 			},
 		})
 	}
