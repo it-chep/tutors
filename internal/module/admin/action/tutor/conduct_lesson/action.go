@@ -61,6 +61,11 @@ func (a *Action) Do(ctx context.Context, tutorID, studentID int64, durationInMin
 		return err
 	}
 
+	err = a.dal.FinishTrial(ctx, studentID)
+	if err != nil {
+		return err
+	}
+
 	return a.dal.UpdateStudentWallet(ctx, studentID, remain)
 }
 

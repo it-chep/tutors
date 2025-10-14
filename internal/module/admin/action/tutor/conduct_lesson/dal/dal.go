@@ -104,3 +104,12 @@ func (r *Repository) ConductLesson(ctx context.Context, studentID, tutorID, dura
 	_, err := r.pool.Exec(ctx, sql, args...)
 	return err
 }
+
+// FinishTrial помечаем что урок проведен
+func (r *Repository) FinishTrial(ctx context.Context, studentID int64) error {
+	sql := `
+		update students set is_finished_trial = true where id = $1
+	`
+	_, err := r.pool.Exec(ctx, sql, studentID)
+	return err
+}
