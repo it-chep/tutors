@@ -28,8 +28,8 @@ func New(pool *pgxpool.Pool, bot *tg_bot.Bot) *Action {
 }
 
 func (a *Action) Do(ctx context.Context, tutorID, studentID int64, durationInMinutes int64) error {
-	// Получаем репетитора
-	tutor, err := a.dal.GetTutor(ctx, tutorID)
+	// получаем студента
+	student, err := a.dal.GetStudent(ctx, studentID)
 	if err != nil {
 		return err
 	}
@@ -41,18 +41,12 @@ func (a *Action) Do(ctx context.Context, tutorID, studentID int64, durationInMin
 	}
 
 	// Вычисляем обновленное значение кошелька
-	remain, err := a.getRemainBalance(tutor, wallet, durationInMinutes)
+	remain, err := a.getRemainBalance(student, wallet, durationInMinutes)
 	if err != nil {
 		return err
 	}
 
 	if remain.LessThan(decimal.NewFromInt(0)) {
-		student, err := a.dal.GetStudent(ctx, studentID)
-		if err != nil {
-			return err
-		}
-		_ = student
-
 		err = a.bot.SendMessages([]bot_dto.Message{
 			{
 				Chat: student.ParentTgID,
@@ -70,8 +64,8 @@ func (a *Action) Do(ctx context.Context, tutorID, studentID int64, durationInMin
 	return a.dal.UpdateStudentWallet(ctx, studentID, remain)
 }
 
-func (a *Action) getRemainBalance(tutor dto.Tutor, userWallet dto.Wallet, durationInMinutes int64) (decimal.Decimal, error) {
-	costPerHour, err := strconv.ParseFloat(tutor.CostPerHour, 64)
+func (a *Action) getRemainBalance(student dto.Student, userWallet dto.Wallet, durationInMinutes int64) (decimal.Decimal, error) {
+	costPerHour, err := strconv.ParseFloat(student.CostPerHour, 64)
 	if err != nil {
 		return decimal.Zero, fmt.Errorf("invalid cost per hour: %w", err)
 	}
