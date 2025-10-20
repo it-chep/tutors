@@ -24,3 +24,8 @@ func (r *Repository) GetUser(ctx context.Context, email string) (user *register_
 
 	return user, pgxscan.Get(ctx, r.pool, user, sql, email)
 }
+
+func (r *Repository) SaveCode(ctx context.Context, email, code string) error {
+	_, err := r.pool.Exec(ctx, "update users set smtp_code=$1 where email=$2", code, email)
+	return err
+}

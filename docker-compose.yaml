@@ -20,28 +20,28 @@ services:
     ports:
       - "5432:5432"
 
-  app:
-    build: .
-    ports:
-      - "8080:8080"
-    expose:
-      - 8080
-    container_name: app
-    restart: always
-    networks:
-      - network
-    depends_on:
-      - postgres
+#  app:
+#    build: .
+#    ports:
+#      - "8080:8080"
+#    expose:
+#      - 8080
+#    container_name: app
+#    restart: always
+#    networks:
+#      - network
+#    depends_on:
+#      - postgres
 
-  pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
-      PGADMIN_LISTEN_PORT: 5050
-    ports:
-      - "5050:5050"
+#  pgadmin:
+#    container_name: pgadmin
+#    image: dpage/pgadmin4
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+#      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+#      PGADMIN_LISTEN_PORT: 5050
+#    ports:
+#      - "5050:5050"
 
 networks:
   network:
