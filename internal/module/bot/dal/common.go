@@ -21,7 +21,7 @@ func NewDal(pool *pgxpool.Pool) *CommonDAL {
 	}
 }
 
-func (d *CommonDAL) PaymentCred(ctx context.Context) map[int64]config.UserConf {
+func (d *CommonDAL) PaymentCred(ctx context.Context) config.PaymentConfig {
 	var (
 		sql = `
 			select * from payment_cred
@@ -33,5 +33,5 @@ func (d *CommonDAL) PaymentCred(ctx context.Context) map[int64]config.UserConf {
 		log.Fatal(fmt.Sprintf("не удалось достать креды платежек: %s", err.Error()))
 	}
 
-	return daos.ToDomain()
+	return daos.ToDomain(ctx)
 }

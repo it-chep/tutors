@@ -1,7 +1,6 @@
 package config
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
@@ -22,15 +21,6 @@ type BotConfig struct {
 	webhookURL string
 	useWebhook bool
 	isActive   bool
-}
-
-type PaymentConfig struct {
-	BaseUrl   string
-	AdminCred map[int64]UserConf
-}
-
-type UserConf struct {
-	User, Password string
 }
 
 type JwtConfig struct {
@@ -63,10 +53,6 @@ func (c *Config) BotIsActive() bool {
 	return c.isActive
 }
 
-type PaymentConfProvider interface {
-	PaymentCred(ctx context.Context) map[int64]UserConf
-}
-
 func NewConfig() *Config {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
@@ -94,12 +80,5 @@ func NewConfig() *Config {
 			Address: os.Getenv("ADMIN_EMAIL"),
 			PassKey: os.Getenv("PASS_KEY"),
 		},
-	}
-}
-
-func (c *Config) EnrichPayment(ctx context.Context, provider PaymentConfProvider) {
-	c.PaymentConfig = PaymentConfig{
-		BaseUrl:   os.Getenv("PAYMENT_BASE_URL"),
-		AdminCred: provider.PaymentCred(ctx),
 	}
 }

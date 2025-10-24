@@ -121,7 +121,8 @@ func (h *Handler) setupRoutes(cfg Config) {
 		r.Post("/finance", h.adminAgg.GetAllFinance.Handle())  // POST /admin/finance
 	})
 
-	h.router.Post("/webhook/alpha", h.adminAgg.AlphaHook.Handle()) // POST /alpha/hook
+	h.router.Post("/webhook/alpha", h.adminAgg.AlphaHook.Handle())      // POST /alpha/hook
+	h.router.Post("/callback/tbank", h.adminAgg.TbankCallBack.Handle()) // POST /callback/tbank
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

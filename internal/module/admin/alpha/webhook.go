@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/it-chep/tutors.git/internal/module/admin/alpha/order_checker"
+	"github.com/it-chep/tutors.git/internal/module/admin/job/order_checker"
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
 )
 
