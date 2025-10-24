@@ -11,6 +11,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/bot/dto"
 	alfa "github.com/it-chep/tutors.git/internal/pkg/alpha"
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
+	"github.com/it-chep/tutors.git/internal/pkg/tbank"
 	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
 	"github.com/it-chep/tutors.git/internal/pkg/worker"
 	"github.com/it-chep/tutors.git/internal/server"
@@ -28,6 +29,7 @@ type App struct {
 	bot    *tg_bot.Bot
 	smtp   *smtp.ClientSmtp
 	alfa   *alfa.Client
+	tBank  *tbank.Client
 
 	modules Modules
 	workers Workers
@@ -48,7 +50,7 @@ func New(ctx context.Context) *App {
 	app.initDB(ctx).
 		initPaymentCredConf(ctx).
 		initSmtp(ctx).
-		initAlfa(ctx).
+		initPaymentGateways(ctx).
 		initTgBot(ctx).
 		initModules(ctx).
 		initServer(ctx)

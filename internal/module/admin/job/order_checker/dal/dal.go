@@ -1,4 +1,4 @@
-package alpha_dal
+package job_dal
 
 import (
 	"context"
@@ -104,4 +104,13 @@ func (r *Repository) AdminIDByStudents(ctx context.Context, studentIDs []int64) 
 	}
 
 	return adminIDByStudent, nil
+}
+
+func (r *Repository) DropTransaction(ctx context.Context, transactionID string) error {
+	sql := `
+		delete from transactions_history where id = $1
+	`
+
+	_, err := r.pool.Exec(ctx, sql, transactionID)
+	return err
 }

@@ -20,7 +20,7 @@ const (
 
 type Credentials struct {
 	BaseURL   string
-	UsersConf map[int64]config.UserConf
+	UsersConf map[int64]config.AlphaCred
 }
 
 type OrderRequest struct {

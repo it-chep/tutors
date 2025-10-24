@@ -3,6 +3,7 @@
 package xo
 
 import (
+	"database/sql"
 	"fmt"
 	"reflect"
 	"strings"
@@ -10,9 +11,12 @@ import (
 
 // PaymentCred represents a row from 'public.payment_cred'.
 type PaymentCred struct {
-	AdminID     int64  `db:"admin_id" json:"admin_id"`         // admin_id bigint
-	UserPay     string `db:"user_pay" json:"user_pay"`         // user_pay text
-	PasswordPay string `db:"password_pay" json:"password_pay"` // password_pay text
+	AdminID     int64          `db:"admin_id" json:"admin_id"`         // admin_id bigint
+	UserPay     string         `db:"user_pay" json:"user_pay"`         // user_pay text
+	PasswordPay string         `db:"password_pay" json:"password_pay"` // password_pay text
+	Bank        sql.NullString `db:"bank" json:"bank"`                 // bank text
+	BaseURL     sql.NullString `db:"base_url" json:"base_url"`         // base_url text
+	Cred        []byte         `db:"cred" json:"cred"`                 // cred jsonb
 }
 
 // zeroPaymentCred zero value of dto
@@ -26,6 +30,9 @@ const (
 	Field_PaymentCred_AdminID     = "admin_id"
 	Field_PaymentCred_UserPay     = "user_pay"
 	Field_PaymentCred_PasswordPay = "password_pay"
+	Field_PaymentCred_Bank        = "bank"
+	Field_PaymentCred_BaseURL     = "base_url"
+	Field_PaymentCred_Cred        = "cred"
 )
 
 func (t PaymentCred) SelectColumnsWithCoalesce() []string {
@@ -33,6 +40,9 @@ func (t PaymentCred) SelectColumnsWithCoalesce() []string {
 		fmt.Sprintf("COALESCE(pc.admin_id, %v) as admin_id", zeroPaymentCred.AdminID),
 		fmt.Sprintf("COALESCE(pc.user_pay, '%v') as user_pay", zeroPaymentCred.UserPay),
 		fmt.Sprintf("COALESCE(pc.password_pay, '%v') as password_pay", zeroPaymentCred.PasswordPay),
+		"pc.bank",
+		"pc.base_url",
+		"pc.cred",
 	}
 }
 
@@ -41,11 +51,14 @@ func (t PaymentCred) SelectColumns() []string {
 		"pc.admin_id",
 		"pc.user_pay",
 		"pc.password_pay",
+		"pc.bank",
+		"pc.base_url",
+		"pc.cred",
 	}
 }
 
 func (t PaymentCred) Columns(without ...string) []string {
-	var str = "admin_id, user_pay, password_pay"
+	var str = "admin_id, user_pay, password_pay, bank, base_url, cred"
 	for _, exc := range without {
 		str = strings.Replace(str+", ", exc+", ", "", 1)
 	}
@@ -69,6 +82,9 @@ func (t *PaymentCred) ToMap() map[string]interface{} {
 		"admin_id":     t.AdminID,
 		"user_pay":     t.UserPay,
 		"password_pay": t.PasswordPay,
+		"bank":         t.Bank,
+		"base_url":     t.BaseURL,
+		"cred":         t.Cred,
 	}
 }
 

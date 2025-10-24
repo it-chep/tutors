@@ -12,6 +12,8 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/bot/dal"
 	alfa "github.com/it-chep/tutors.git/internal/pkg/alpha"
 	"github.com/it-chep/tutors.git/internal/pkg/alpha/dto"
+	"github.com/it-chep/tutors.git/internal/pkg/tbank"
+	tbankDto "github.com/it-chep/tutors.git/internal/pkg/tbank/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
 	"github.com/it-chep/tutors.git/internal/pkg/worker"
 	"github.com/it-chep/tutors.git/internal/server"
@@ -55,10 +57,14 @@ func (a *App) initSmtp(_ context.Context) *App {
 	return a
 }
 
-func (a *App) initAlfa(_ context.Context) *App {
+func (a *App) initPaymentGateways(_ context.Context) *App {
 	a.alfa = alfa.NewClient(dto.Credentials{
-		BaseURL:   a.config.PaymentConfig.BaseUrl,
-		UsersConf: a.config.PaymentConfig.AdminCred,
+		BaseURL:   a.config.PaymentConfig.AlphaConf.BaseUrl,
+		UsersConf: a.config.PaymentConfig.AlphaConf.CredByAdmin,
+	})
+	a.tBank = tbank.NewClient(tbankDto.Credentials{
+		BaseURL:   a.config.PaymentConfig.TBankConf.BaseUrl,
+		UsersConf: a.config.PaymentConfig.TBankConf.CredByAdmin,
 	})
 	return a
 }
@@ -78,8 +84,8 @@ func (a *App) initTgBot(_ context.Context) *App {
 
 func (a *App) initModules(ctx context.Context) *App {
 	a.modules = Modules{
-		Bot:   bot.New(a.pool, a.bot, a.alfa),
-		Admin: admin.New(a.pool, a.smtp, a.config.JwtConfig, a.bot, a.alfa),
+		Bot:   bot.New(a.pool, a.config, a.bot, a.alfa, a.tBank),
+		Admin: admin.New(a.pool, a.smtp, a.config, a.bot, a.alfa, a.tBank),
 	}
 
 	a.workers = append(a.workers, worker.NewWorker(ctx, a.modules.Admin.Checker.Start, 5*time.Minute, 1))
