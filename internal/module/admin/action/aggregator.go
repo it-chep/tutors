@@ -9,18 +9,23 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/auth"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_subjects"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/lessons/update_lesson"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/create_student"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/delete_student"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_student_finance"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_student_lessons"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_students"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/move_students"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/search_student"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/student_by_id"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/student/update_student"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/student/update_wallet"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/conduct_lesson"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/conduct_trial"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/create_tutor"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/delete_tutor"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/get_tutor_finance"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/get_tutor_lessons"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/get_tutors"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/search_tutor"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/tutor_by_id"
@@ -39,6 +44,7 @@ type Aggregator struct {
 	GetTutorByID    *tutor_by_id.Action
 	ConductTrial    *conduct_trial.Action
 	ConductLesson   *conduct_lesson.Action
+	GetTutorLessons *get_tutor_lessons.Action
 
 	// Студент
 	CreateStudent     *create_student.Action
@@ -48,6 +54,9 @@ type Aggregator struct {
 	SearchStudent     *search_student.Action
 	GetStudentByID    *student_by_id.Action
 	MoveStudents      *move_students.Action
+	UpdateWallet      *update_wallet.Action
+	UpdateStudent     *update_student.Action
+	GetStudentLessons *get_student_lessons.Action
 
 	// Финансы
 	GetAllFinance *get_all_finance.Action
@@ -63,6 +72,9 @@ type Aggregator struct {
 	DeleteAdmin  *delete_admin.Action
 	GetAdmins    *get_admins.Action
 	GetAdminByID *get_admin_by_id.Action
+
+	// Уроки
+	UpdateLesson *update_lesson.Action
 }
 
 func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtConfig, bot *tg_bot.Bot) *Aggregator {
@@ -76,6 +88,7 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 		GetTutorByID:    tutor_by_id.New(pool),
 		ConductTrial:    conduct_trial.New(pool),
 		ConductLesson:   conduct_lesson.New(pool, bot),
+		GetTutorLessons: get_tutor_lessons.New(pool),
 
 		// Студент
 		CreateStudent:     create_student.New(pool),
@@ -85,6 +98,9 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 		SearchStudent:     search_student.New(pool),
 		GetStudentByID:    student_by_id.New(pool),
 		MoveStudents:      move_students.New(pool),
+		UpdateWallet:      update_wallet.New(pool),
+		UpdateStudent:     update_student.New(pool),
+		GetStudentLessons: get_student_lessons.New(pool),
 
 		// Финансы
 		GetAllFinance: get_all_finance.New(pool),
@@ -100,5 +116,8 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 		DeleteAdmin:  delete_admin.New(pool),
 		GetAdmins:    get_admins.New(pool),
 		GetAdminByID: get_admin_by_id.New(pool),
+
+		// Уроки
+		UpdateLesson: update_lesson.New(pool, bot),
 	}
 }

@@ -2,6 +2,7 @@ package tutor
 
 import (
 	"github.com/it-chep/tutors.git/internal/module/admin"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/get_lessons"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/conduct_lesson"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/conduct_trial"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/create_tutor"
@@ -24,6 +25,7 @@ type HandlerGroup struct {
 
 	ConductTrial  *conduct_trial.Handler
 	ConductLesson *conduct_lesson.Handler
+	GetLessons    *get_lessons.Handler
 }
 
 func NewGroup(adminModule *admin.Module) *HandlerGroup {
@@ -39,5 +41,6 @@ func NewGroup(adminModule *admin.Module) *HandlerGroup {
 
 		ConductTrial:  conduct_trial.NewHandler(adminModule),
 		ConductLesson: conduct_lesson.NewHandler(adminModule),
+		GetLessons:    get_lessons.NewHandler(adminModule),
 	}
 }

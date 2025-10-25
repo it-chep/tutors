@@ -4,11 +4,14 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/create_student"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/delete_student"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/get_lessons"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/get_student_finance"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/get_students"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/move_student"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/search_student"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/student_by_id"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/update_student"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/update_wallet"
 )
 
 type HandlerGroup struct {
@@ -21,6 +24,10 @@ type HandlerGroup struct {
 
 	GetStudentFinance *get_student_finance.Handler
 	MoveStudent       *move_student.Handler
+
+	UpdateWallet  *update_wallet.Handler
+	GetLessons    *get_lessons.Handler
+	UpdateStudent *update_student.Handler
 }
 
 func NewGroup(adminModule *admin.Module) *HandlerGroup {
@@ -34,5 +41,9 @@ func NewGroup(adminModule *admin.Module) *HandlerGroup {
 
 		GetStudentFinance: get_student_finance.NewHandler(adminModule),
 		MoveStudent:       move_student.NewHandler(adminModule),
+
+		UpdateWallet:  update_wallet.NewHandler(adminModule),
+		GetLessons:    get_lessons.NewHandler(adminModule),
+		UpdateStudent: update_student.NewHandler(adminModule),
 	}
 }
