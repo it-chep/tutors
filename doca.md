@@ -72,10 +72,11 @@
   "lessons": [
     {
       "id": 1,
-      "student_id": "1",
+      "student_id": 1,
+      "tutor_id": 1,
       "student_full_name": "Нечепорк Максим Алексеевич",
-      "from": "2006-01-02T15:04:05Z07:00",
-      "to": "2006-01-02T15:04:05Z07:00"
+      "date": "2023-01-02",
+      "duration_minutes": 60
     }
   ]
 }
@@ -345,10 +346,11 @@
   "lessons": [
     {
       "id": 1,
-      "student_id": "1",
+      "student_id": 1,
+      "tutor_id": 1,
       "student_full_name": "Нечепорк Максим Алексеевич",
-      "from": "2006-01-02T15:04:05Z07:00",
-      "to": "2006-01-02T15:04:05Z07:00"
+      "date": "2023-01-02",
+      "duration_minutes": 60
     }
   ]
 }
@@ -367,7 +369,7 @@
 ```json
 {
   "date": "2023-01-02",
-  "duration": "2"
+  "duration": 2
 }
 ```
 
@@ -383,7 +385,6 @@
 
 ```json
 {
-  "student_id": 1,
   "balance": "1,500.00"
 }
 ```
