@@ -33,5 +33,5 @@ func (r *Repository) GetTutorLessons(ctx context.Context, tutorID int64, from, t
 		return nil, err
 	}
 
-	return lessons.ToDomain(), nil
+	return lessons.ToDomain(ctx), nil
 }
