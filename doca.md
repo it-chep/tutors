@@ -47,6 +47,42 @@
 
 </details>
 
+### Получить уроки репетитора по его ID
+
+`POST` http://localhost:8080/admin/tutors/1/lessons
+
+
+<details>
+<summary><b>Пример запроса</b></summary>
+
+```json
+{
+  "from": "2023-01-01",
+  "to": "2023-01-02"
+}
+```
+
+</details>
+
+<details>
+<summary><b>Пример ответа</b></summary>
+
+```json
+{
+  "lessons": [
+    {
+      "id": 1,
+      "student_id": "1",
+      "student_full_name": "Нечепорк Максим Алексеевич",
+      "from": "2006-01-02T15:04:05Z07:00",
+      "to": "2006-01-02T15:04:05Z07:00"
+    }
+  ]
+}
+```
+
+</details>
+
 ### Поиск по репетиторам
 
 `GET` http://localhost:8080/admin/tutors/search?search=Нечепорук
@@ -252,6 +288,103 @@
     "is_balance_negative": false,
     "is_newbie": false
   }
+}
+```
+
+</details>
+
+### Обновление информации о студенте
+
+`POST` http://localhost:8080/admin/students/1
+
+
+<details>
+<summary><b>Пример запроса</b></summary>
+
+```json
+{
+  "student": {
+    "id": 1,
+    "first_name": "Максим",
+    "last_name": "Нечепорук",
+    "middle_name": "Алексеевич",
+    "phone": "89826588317",
+    "tg": "https://t.me/maxim_jordan",
+    "cost_per_hour": "1,500.00",
+    "parent_full_name": "Нечепорук Алексей Владимирович",
+    "parent_phone": "89826588317",
+    "parent_tg": "https://t.me/maxim_jordan"
+  }
+}
+```
+
+</details>
+
+### Получить уроки студента по его ID
+
+`POST` http://localhost:8080/admin/students/1/lessons
+
+
+<details>
+<summary><b>Пример запроса</b></summary>
+
+```json
+{
+  "from": "2023-01-01",
+  "to": "2023-01-02"
+}
+```
+
+</details>
+
+<details>
+<summary><b>Пример ответа</b></summary>
+
+```json
+{
+  "lessons": [
+    {
+      "id": 1,
+      "student_id": "1",
+      "student_full_name": "Нечепорк Максим Алексеевич",
+      "from": "2006-01-02T15:04:05Z07:00",
+      "to": "2006-01-02T15:04:05Z07:00"
+    }
+  ]
+}
+```
+
+</details>
+
+### Изменить урок студента
+
+`POST` http://localhost:8080/admin/lessons/1
+
+
+<details>
+<summary><b>Пример запроса</b></summary>
+
+```json
+{
+  "date": "2023-01-02",
+  "duration": "2"
+}
+```
+
+</details>
+
+### Обновление баланса студента
+
+`POST` http://localhost:8080/admin/students/1/wallet
+
+
+<details>
+<summary><b>Пример запроса</b></summary>
+
+```json
+{
+  "student_id": 1,
+  "balance": "1,500.00"
 }
 ```
 
