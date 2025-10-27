@@ -2,6 +2,7 @@ package dal
 
 import (
 	"context"
+	"github.com/samber/lo"
 	"time"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/dal/dao"
@@ -121,11 +122,7 @@ func (r *Repository) GetCashFlow(ctx context.Context, from, to time.Time, adminI
 // GetLessons количество проведенных занятий
 func (r *Repository) GetLessons(ctx context.Context, from, to time.Time, adminID int64) (dto.TutorLessons, error) {
 	sql := `
-		select
-			count(*) as lessons_count,
-			count(*) filter (where is_trial = false) as base_lessons,
-			count(*) filter (where is_trial = true) as trial_lessons
-		from conducted_lessons cl
+		select cl.* from conducted_lessons cl
 		join tutors t on cl.tutor_id = t.id
 		where t.admin_id = $3 and created_at between $1 and $2
 	`
@@ -136,11 +133,141 @@ func (r *Repository) GetLessons(ctx context.Context, from, to time.Time, adminID
 		adminID,
 	}
 
-	var lessons dao.TutorLessonsCountDao
+	var lessons []dao.ConductedLessonDAO
 	err := pgxscan.Get(ctx, r.pool, &lessons, sql, args...)
 	if err != nil {
 		return dto.TutorLessons{}, err
 	}
 
-	return lessons.ToDomain(), nil
+	counters := dao.TutorLessonsCountDao{
+		LessonsCount: int64(len(lessons)),
+		TrialCount: int64(len(lo.Filter(lessons, func(item dao.ConductedLessonDAO, index int) bool {
+			return item.IsTrial.Bool
+		}))),
+		BaseCount: int64(len(lo.Filter(lessons, func(item dao.ConductedLessonDAO, index int) bool {
+			return !item.IsTrial.Bool
+		}))),
+	}
+	return counters.ToDomain(), nil
+}
+
+// GetFinanceInfo получаем прибыль по репетитору
+func (r *Repository) GetFinanceInfo(ctx context.Context, from, to time.Time, adminID int64) (decimal.Decimal, error) {
+	lessons, err := r.conductedNotTrialLessons(ctx, adminID, from, to)
+	if err != nil {
+		return decimal.NewFromFloat(0.0), err
+	}
+
+	sixty := decimal.NewFromInt(60)
+	allMoney := decimal.NewFromFloat(0.0)
+	salary := decimal.NewFromFloat(0.0)
+
+	studentsMap := lo.GroupBy(lessons, func(item dao.ConductedLessonDAO) int64 {
+		return item.StudentID
+	})
+
+	tutorsMap := lo.GroupBy(lessons, func(item dao.ConductedLessonDAO) int64 {
+		return item.TutorID
+	})
+
+	for _, studentInfo := range r.perStudentHours(ctx, adminID) {
+		studentLessons, ok := studentsMap[lo.FromPtr(studentInfo.StudentID)]
+		if !ok {
+			continue
+		}
+		// сколько отзанимался типочек
+		var minutesCount int64
+		for _, studentLesson := range studentLessons {
+			minutesCount += studentLesson.DurationInMinutes
+		}
+
+		// считаем сколько он занес
+		studentCostPerHour := convert.NumericToDecimal(lo.FromPtr(studentInfo.Student))
+		minutesDecimal := decimal.NewFromInt(int64(minutesCount))
+		userMoney := studentCostPerHour.Mul(minutesDecimal).Div(sixty)
+
+		allMoney = allMoney.Add(userMoney)
+	}
+
+	for _, tutorInfo := range r.perTutorHours(ctx, adminID) {
+		tutorsLessons, ok := tutorsMap[lo.FromPtr(tutorInfo.TutorID)]
+		if !ok {
+			continue
+		}
+
+		// сколько отвел занятий типочек
+		var minutesCount int64
+		for _, tutorLesson := range tutorsLessons {
+			minutesCount += tutorLesson.DurationInMinutes
+		}
+
+		// считаем сколько на него надо потратить
+		tutorCostPerHour := convert.NumericToDecimal(lo.FromPtr(tutorInfo.Tutor))
+		minutesDecimal := decimal.NewFromInt(int64(minutesCount))
+		tutorMoney := tutorCostPerHour.Mul(minutesDecimal).Div(sixty)
+
+		salary = salary.Add(tutorMoney)
+	}
+
+	amount := allMoney.Add(salary.Mul(decimal.NewFromInt(-1)))
+
+	return amount, nil
+}
+
+func (r *Repository) perStudentHours(ctx context.Context, adminID int64) (moneys []dao.StudentTutorMoney) {
+	perHourSQL := `
+		select distinct s.id            as student_id,
+			   s.cost_per_hour as student_cost_per_hour
+		from students s
+				 join tutors t on s.tutor_id = t.id
+		where t.admin_id = $1
+	`
+
+	err := pgxscan.Select(ctx, r.pool, &moneys, perHourSQL, adminID)
+	if err != nil {
+		return nil
+	}
+
+	return
+}
+
+func (r *Repository) perTutorHours(ctx context.Context, adminID int64) (moneys []dao.StudentTutorMoney) {
+	perHourSQL := `
+		select distinct s.tutor_id      as tutor_id,
+			   t.cost_per_hour as tutor_cost_per_hour
+		from students s
+				 join tutors t on s.tutor_id = t.id
+		where t.admin_id = $1
+	`
+
+	err := pgxscan.Select(ctx, r.pool, &moneys, perHourSQL, adminID)
+	if err != nil {
+		return nil
+	}
+
+	return
+}
+
+func (r *Repository) conductedNotTrialLessons(ctx context.Context, adminID int64, from, to time.Time) (dao.ConductedLessonDAOs, error) {
+	sql := `
+		select cl.* from conducted_lessons cl
+		         join tutors t on cl.tutor_id = t.id
+		where t.admin_id = $1
+		 	and cl.created_at between $2 and $3
+			and cl.is_trial = false
+	`
+
+	args := []interface{}{
+		adminID,
+		from,
+		to,
+	}
+
+	var lessons dao.ConductedLessonDAOs
+	err := pgxscan.Select(ctx, r.pool, &lessons, sql, args...)
+	if err != nil {
+		return lessons, err
+	}
+
+	return lessons, nil
 }

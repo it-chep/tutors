@@ -95,7 +95,7 @@ func (r *Repository) HasStudentsPayments(ctx context.Context, studentIDs []int64
 	sql := `
 		select student_id, count(*) > 0 as has_payments
         from transactions_history
-        where student_id = any ($1)
+        where student_id = any ($1) and confirmed_at is not null
         group by student_id
 	`
 

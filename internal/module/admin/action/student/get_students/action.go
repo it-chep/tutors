@@ -133,10 +133,11 @@ func (a *Action) enrichStudents(ctx context.Context, students []dto.Student) {
 		students[i].IsBalanceNegative = wallet.Balance.LessThan(decimal.NewFromFloat(0.0))
 
 		// Оплаты/новичок
-		hasPayments := payments[students[i].ID]
+		hasPayments, ok := payments[students[i].ID]
 		if ok {
 			students[i].IsNewbie = false
 			students[i].IsOnlyTrialFinished = false
+			continue
 		}
 		students[i].IsNewbie = !hasPayments && !students[i].IsFinishedTrial
 		students[i].IsOnlyTrialFinished = !hasPayments
