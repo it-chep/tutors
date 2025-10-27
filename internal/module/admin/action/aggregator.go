@@ -9,7 +9,8 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/auth"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_subjects"
-	"github.com/it-chep/tutors.git/internal/module/admin/action/lessons/update_lesson"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/lessons/delete_lesson"
+
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/create_student"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/delete_student"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_student_finance"
@@ -74,7 +75,7 @@ type Aggregator struct {
 	GetAdminByID *get_admin_by_id.Action
 
 	// Уроки
-	UpdateLesson *update_lesson.Action
+	DeleteLesson *delete_lesson.Action
 }
 
 func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtConfig, bot *tg_bot.Bot) *Aggregator {
@@ -118,6 +119,6 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 		GetAdminByID: get_admin_by_id.New(pool),
 
 		// Уроки
-		UpdateLesson: update_lesson.New(pool, bot),
+		DeleteLesson: delete_lesson.New(pool),
 	}
 }

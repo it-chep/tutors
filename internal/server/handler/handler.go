@@ -123,7 +123,7 @@ func (h *Handler) setupRoutes(cfg Config) {
 
 		// Уроки
 		r.Route("/lessons", func(r chi.Router) {
-			r.Post("/{lesson_id}", h.adminAgg.Lessons.UpdateLesson.Handle()) // POST /admin/lessons/{id}
+			r.Delete("/{lesson_id}", h.adminAgg.Lessons.DeleteLesson.Handle()) // POST /admin/lessons/{id}
 		})
 
 		r.Get("/subjects", h.adminAgg.GetAllSubjects.Handle()) // GET /admin/subjects

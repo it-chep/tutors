@@ -358,22 +358,9 @@
 
 </details>
 
-### Изменить урок студента
+### Удалить урок студента
 
-`POST` http://localhost:8080/admin/lessons/1
-
-
-<details>
-<summary><b>Пример запроса</b></summary>
-
-```json
-{
-  "date": "2023-01-02",
-  "duration": 2
-}
-```
-
-</details>
+`DELETE` http://localhost:8080/admin/lessons/1
 
 ### Обновление баланса студента
 
