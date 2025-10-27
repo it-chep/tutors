@@ -4,9 +4,11 @@ import (
 	"github.com/it-chep/tutors.git/internal/config"
 	"github.com/it-chep/tutors.git/internal/module/admin/action"
 	"github.com/it-chep/tutors.git/internal/module/admin/alpha"
-	"github.com/it-chep/tutors.git/internal/module/admin/alpha/order_checker"
-	alpha_dal "github.com/it-chep/tutors.git/internal/module/admin/alpha/order_checker/dal"
+	"github.com/it-chep/tutors.git/internal/module/admin/job/order_checker"
+	job_dal "github.com/it-chep/tutors.git/internal/module/admin/job/order_checker/dal"
+	tbankCallback "github.com/it-chep/tutors.git/internal/module/admin/tbank"
 	alfa "github.com/it-chep/tutors.git/internal/pkg/alpha"
+	"github.com/it-chep/tutors.git/internal/pkg/tbank"
 	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
 	"github.com/it-chep/tutors.git/pkg/smtp"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -16,18 +18,24 @@ import (
 type Module struct {
 	Actions *action.Aggregator
 
-	AlphaHook *alpha.WebHookAlpha
-	Checker   *order_checker.TransactionChecker
+	AlphaHook     *alpha.WebHookAlpha
+	TbankCallback *tbankCallback.CallbackTbank
+	Checker       *order_checker.TransactionChecker
 }
 
-func New(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtConfig, bot *tg_bot.Bot, client *alfa.Client) *Module {
-	actions := action.NewAggregator(pool, smtp, config, bot)
-	checker := order_checker.NewTransactionChecker(alpha_dal.NewRepository(pool), client)
+func New(
+	pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config *config.Config,
+	bot *tg_bot.Bot, alphaClient *alfa.Client,
+	tBankClient *tbank.Client,
+) *Module {
+	actions := action.NewAggregator(pool, smtp, config.JwtConfig, bot)
+	checker := order_checker.NewTransactionChecker(job_dal.NewRepository(pool), alphaClient, tBankClient, config.PaymentConfig.BankByAdmin)
 	return &Module{
 		Actions: actions,
 
 		// TODO: уточнить секрет, точно ли альфа может передавать статичный Bearer?
-		AlphaHook: alpha.NewWebHookAlpha(checker, ""),
-		Checker:   checker,
+		AlphaHook:     alpha.NewWebHookAlpha(checker, ""),
+		TbankCallback: tbankCallback.NewCallbackTbank(checker),
+		Checker:       checker,
 	}
 }

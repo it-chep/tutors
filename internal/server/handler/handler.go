@@ -104,6 +104,7 @@ func (h *Handler) setupRoutes(cfg Config) {
 			r.Post("/{tutor_id}/finance", h.adminAgg.Tutors.GetTutorFinance.Handle()) // POST /admin/tutors/{id}/finance
 			r.Post("/trial_lesson", h.adminAgg.Tutors.ConductTrial.Handle())          // POST /admin/tutors/trial_lesson
 			r.Post("/conduct_lesson", h.adminAgg.Tutors.ConductLesson.Handle())       // POST /admin/tutors/conduct_lesson
+			r.Post("/{tutor_id}/lessons", h.adminAgg.Tutors.GetLessons.Handle())      // POST /admin/tutors/{id}/lessons
 		})
 
 		// Студенты
@@ -115,13 +116,22 @@ func (h *Handler) setupRoutes(cfg Config) {
 			r.Delete("/{student_id}", h.adminAgg.Students.DeleteStudent.Handle())           // DELETE /admin/students/{id}
 			r.Post("/{student_id}/finance", h.adminAgg.Students.GetStudentFinance.Handle()) // POST /admin/students/{id}/finance
 			r.Post("/move", h.adminAgg.Students.MoveStudent.Handle())                       // POST /admin/students/move
+			r.Post("/{student_id}/wallet", h.adminAgg.Students.UpdateWallet.Handle())       // POST /admin/students/{id}/wallet
+			r.Post("/{student_id}/lessons", h.adminAgg.Students.GetLessons.Handle())        // POST /admin/students/{id}/lessons
+			r.Post("/{student_id}", h.adminAgg.Students.UpdateStudent.Handle())             // GET /admin/students/{id}
+		})
+
+		// Уроки
+		r.Route("/lessons", func(r chi.Router) {
+			r.Delete("/{lesson_id}", h.adminAgg.Lessons.DeleteLesson.Handle()) // POST /admin/lessons/{id}
 		})
 
 		r.Get("/subjects", h.adminAgg.GetAllSubjects.Handle()) // GET /admin/subjects
 		r.Post("/finance", h.adminAgg.GetAllFinance.Handle())  // POST /admin/finance
 	})
 
-	h.router.Post("/webhook/alpha", h.adminAgg.AlphaHook.Handle()) // POST /alpha/hook
+	h.router.Post("/webhook/alpha", h.adminAgg.AlphaHook.Handle())      // POST /alpha/hook
+	h.router.Post("/callback/tbank", h.adminAgg.TbankCallBack.Handle()) // POST /callback/tbank
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

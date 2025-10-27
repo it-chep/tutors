@@ -27,7 +27,7 @@ type Action struct {
 func New(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, jwt config.JwtConfig) *Action {
 	return &Action{
 		jwt:   jwt,
-		codes: cache.NewCache[string, string](1000, 3*time.Minute),
+		codes: cache.NewCache[string, string](1000, 15*time.Minute),
 		repo:  login_dal.NewRepository(pool),
 		smtp:  smtp,
 	}
@@ -66,6 +66,13 @@ func (a *Action) LoginHandler() http.HandlerFunc {
 			return
 		}
 
+		err = a.repo.SaveCode(r.Context(), req.Email, code)
+		if err != nil {
+			http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusInternalServerError)
+			logger.Error(r.Context(), "Ошибка при сохранении кода", err)
+			return
+		}
+
 		w.WriteHeader(http.StatusOK)
 	}
 }
@@ -94,7 +101,7 @@ func (a *Action) VerifyHandler() http.HandlerFunc {
 		http.SetCookie(w, &http.Cookie{
 			Name:     register_dto.RefreshCookie,
 			Value:    tokens.Refresh(),
-			Expires:  time.Now().UTC().Add(14 * 24 * time.Hour),
+			Expires:  time.Now().UTC().Add(60 * 24 * time.Hour),
 			HttpOnly: true,
 			Path:     "/",
 			SameSite: http.SameSiteLaxMode,

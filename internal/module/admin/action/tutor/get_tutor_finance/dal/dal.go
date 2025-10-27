@@ -63,27 +63,26 @@ func (r *Repository) GetConversion(ctx context.Context, tutorID int64, from, to 
 	return conversion, err
 }
 
-// GetLessons Получение информации об уроках
-func (r *Repository) GetLessons(ctx context.Context, tutorID int64, from, to time.Time) (dto.TutorLessons, error) {
-	sql := `
-		select
-			count(*) as lessons_count,
-			count(*) filter (where is_trial = false) as base_lessons,
-			count(*) filter (where is_trial = true) as trial_lessons
-		from conducted_lessons
-		where tutor_id = $1 and created_at between $2 and $3
-	`
-
-	var lessons dao.TutorLessonsCountDao
-	err := pgxscan.Get(ctx, r.pool, &lessons, sql, tutorID, from, to)
+// GetLessonsCounters Получение информации об уроках
+func (r *Repository) GetLessonsCounters(ctx context.Context, tutorID int64, from, to time.Time) (dto.TutorLessons, error) {
+	lessons, err := r.conductedNotTrialLessons(ctx, tutorID, from, to)
 	if err != nil {
 		return dto.TutorLessons{}, err
 	}
 
-	return lessons.ToDomain(), nil
+	counters := dao.TutorLessonsCountDao{
+		LessonsCount: int64(len(lessons)),
+		TrialCount: int64(len(lo.Filter(lessons, func(item dao.ConductedLessonDAO, index int) bool {
+			return item.IsTrial.Bool
+		}))),
+		BaseCount: int64(len(lo.Filter(lessons, func(item dao.ConductedLessonDAO, index int) bool {
+			return !item.IsTrial.Bool
+		}))),
+	}
+	return counters.ToDomain(), nil
 }
 
-// GetFinanceInfo получаем прибыль по студенту
+// GetFinanceInfo получаем прибыль по репетитору
 func (r *Repository) GetFinanceInfo(ctx context.Context, tutorID int64, from, to time.Time) (decimal.Decimal, error) {
 	lessons, err := r.conductedNotTrialLessons(ctx, tutorID, from, to)
 	if err != nil {

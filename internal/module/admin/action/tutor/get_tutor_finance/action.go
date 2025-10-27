@@ -25,7 +25,7 @@ func (a *Action) Do(ctx context.Context, tutorID int64, from, to string) (dto.Tu
 		return dto.TutorFinance{}, err
 	}
 
-	lessons, err := a.dal.GetLessons(ctx, tutorID, fromTime, toTime)
+	lessons, err := a.dal.GetLessonsCounters(ctx, tutorID, fromTime, toTime)
 	if err != nil {
 		return dto.TutorFinance{}, err
 	}

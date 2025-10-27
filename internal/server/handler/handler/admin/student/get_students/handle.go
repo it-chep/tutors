@@ -67,5 +67,6 @@ func (h *Handler) prepareResponse(students []dto.Student) Response {
 				IsNewbie:            item.IsNewbie,
 			}
 		}),
+		StudentsCount: int64(len(students)),
 	}
 }

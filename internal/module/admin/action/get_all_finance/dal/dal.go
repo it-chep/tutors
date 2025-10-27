@@ -133,8 +133,8 @@ func (r *Repository) GetLessons(ctx context.Context, from, to time.Time, adminID
 		adminID,
 	}
 
-	var lessons []dao.ConductedLessonDAO
-	err := pgxscan.Get(ctx, r.pool, &lessons, sql, args...)
+	var lessons dao.ConductedLessonDAOs
+	err := pgxscan.Select(ctx, r.pool, &lessons, sql, args...)
 	if err != nil {
 		return dto.TutorLessons{}, err
 	}

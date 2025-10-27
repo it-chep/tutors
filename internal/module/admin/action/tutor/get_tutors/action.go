@@ -1,7 +1,9 @@
 package get_tutors
 
 import (
+	"cmp"
 	"context"
+	"slices"
 
 	"github.com/samber/lo"
 
@@ -54,6 +56,9 @@ func (a *Action) Do(ctx context.Context, adminID int64) (tutors []dto.Tutor, err
 
 		tutorsMap[student.TutorID] = tutor
 	}
-
-	return lo.Values(tutorsMap), err
+	val := lo.Values(tutorsMap)
+	slices.SortFunc(val, func(a, b dto.Tutor) int {
+		return cmp.Compare(a.ID, b.ID)
+	})
+	return val, err
 }
