@@ -27,7 +27,7 @@ type Action struct {
 func New(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, jwt config.JwtConfig) *Action {
 	return &Action{
 		jwt:   jwt,
-		codes: cache.NewCache[string, register_dto.CodeRegister](1000, 3*time.Minute),
+		codes: cache.NewCache[string, register_dto.CodeRegister](1000, 15*time.Minute),
 		repo:  register_dal.NewRepository(pool),
 		smtp:  smtp,
 	}
@@ -36,6 +36,7 @@ func New(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, jwt config.JwtConfig) *Actio
 func (a *Action) RegisterHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req register_dto.RegisterRequest
+		ctx := r.Context()
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, "invalid request", http.StatusBadRequest)
 			return
@@ -46,9 +47,9 @@ func (a *Action) RegisterHandler() http.HandlerFunc {
 			return
 		}
 
-		exists, err := a.repo.IsEmailExists(r.Context(), req.Email)
+		exists, err := a.repo.IsEmailExists(ctx, req.Email)
 		if err != nil {
-			logger.Error(r.Context(), "произошла ошибка проверки email", err)
+			logger.Error(ctx, "произошла ошибка проверки email", err)
 			http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusInternalServerError)
 			return
 		}
@@ -76,6 +77,12 @@ func (a *Action) RegisterHandler() http.HandlerFunc {
 			return
 		}
 
+		err = a.repo.SaveCode(ctx, req.Email, code)
+		if err != nil {
+			http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusInternalServerError)
+			logger.Error(r.Context(), "Ошибка при сохранении кода", err)
+			return
+		}
 		w.WriteHeader(http.StatusOK)
 	}
 }
@@ -110,7 +117,7 @@ func (a *Action) VerifyHandler() http.HandlerFunc {
 		http.SetCookie(w, &http.Cookie{
 			Name:     register_dto.RefreshCookie,
 			Value:    tokens.Refresh(),
-			Expires:  time.Now().UTC().Add(14 * 24 * time.Hour),
+			Expires:  time.Now().UTC().Add(60 * 24 * time.Hour),
 			HttpOnly: true,
 		})
 		_ = json.NewEncoder(w).Encode(tokens)

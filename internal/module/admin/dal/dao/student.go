@@ -41,6 +41,19 @@ func (studs StudentsDAO) ToDomain() []dto.Student {
 	return domain
 }
 
+type ConductedLessonDAO struct {
+	xo.ConductedLesson
+}
+
+type ConductedLessonDAOs []ConductedLessonDAO
+
+type StudentTutorMoney struct {
+	StudentID int64           `db:"student_id"`
+	TutorID   int64           `db:"tutor_id"`
+	Student   *pgtype.Numeric `db:"student_cost_per_hour" json:"student_cost_per_hour"`
+	Tutor     *pgtype.Numeric `db:"tutor_cost_per_hour" json:"tutor_cost_per_hour"`
+}
+
 type StudentFinance struct {
 	Count  *int64          `db:"count" json:"count"`
 	Amount *pgtype.Numeric `db:"amount" json:"amount"`

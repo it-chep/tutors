@@ -30,3 +30,8 @@ func (r *Repository) SavePass(ctx context.Context, email, password string) error
 	_, err := r.pool.Exec(ctx, "update users set password=$1 where email=$2 and password is null", password, email)
 	return err
 }
+
+func (r *Repository) SaveCode(ctx context.Context, email, code string) error {
+	_, err := r.pool.Exec(ctx, "update users set smtp_code=$1 where email=$2", code, email)
+	return err
+}

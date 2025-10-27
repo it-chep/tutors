@@ -31,7 +31,7 @@ func (a *Action) Do(ctx context.Context, from, to string, adminID int64) (dto.Ge
 
 	var (
 		cashFlow     decimal.Decimal
-		expenses     decimal.Decimal
+		finance      decimal.Decimal
 		lessonsCount indto.TutorLessons
 		conversion   float64
 		wg           = sync.WaitGroup{}
@@ -53,12 +53,12 @@ func (a *Action) Do(ctx context.Context, from, to string, adminID int64) (dto.Ge
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		gExpenses, gErr := a.dal.GetExpenses(ctx, fromTime, toTime, adminID)
+		gfinance, gErr := a.dal.GetFinanceInfo(ctx, fromTime, toTime, adminID)
 		if gErr != nil {
 			logger.Error(ctx, "Ошибка при расходов на зп", gErr)
 			return
 		}
-		expenses = gExpenses
+		finance = gfinance
 	}()
 
 	// Получаем оплаченные уроки
@@ -87,10 +87,8 @@ func (a *Action) Do(ctx context.Context, from, to string, adminID int64) (dto.Ge
 
 	wg.Wait()
 
-	profit := cashFlow.Sub(expenses)
-
 	return dto.GetAllFinanceDto{
-		Profit:            profit.String(),
+		Profit:            finance.String(),
 		CashFlow:          cashFlow.String(),
 		Conversion:        conversion,
 		CountLessons:      lessonsCount.LessonsCount,
