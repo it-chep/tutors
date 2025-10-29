@@ -2,11 +2,11 @@ package tutor
 
 import (
 	"github.com/it-chep/tutors.git/internal/module/admin"
-	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/get_lessons"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/conduct_lesson"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/conduct_trial"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/create_tutor"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/delete_tutor"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/get_lessons"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/get_tutor_finance"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/get_tutors"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/search_tutor"

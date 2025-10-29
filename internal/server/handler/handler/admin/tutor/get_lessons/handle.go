@@ -2,11 +2,12 @@ package get_lessons
 
 import (
 	"encoding/json"
+	"github.com/go-chi/chi/v5"
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
 	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/samber/lo"
@@ -37,6 +38,10 @@ func (h *Handler) Handle() http.HandlerFunc {
 		if err != nil {
 			http.Error(w, "invalid user ID", http.StatusBadRequest)
 			return
+		}
+
+		if dto.IsTutorRole(ctx) {
+			tutorID = userCtx.GetTutorID(ctx)
 		}
 
 		from, to, err := req.ToTime()
