@@ -5,9 +5,13 @@ import (
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/create_student"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/delete_student"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/get_lessons"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/get_notification_history"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/get_student_finance"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/get_students"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/get_tg_admins_usernames"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/get_transaction_history"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/move_student"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/push_notification"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/search_student"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/student_by_id"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/update_student"
@@ -25,9 +29,13 @@ type HandlerGroup struct {
 	GetStudentFinance *get_student_finance.Handler
 	MoveStudent       *move_student.Handler
 
-	UpdateWallet  *update_wallet.Handler
-	GetLessons    *get_lessons.Handler
-	UpdateStudent *update_student.Handler
+	UpdateWallet           *update_wallet.Handler
+	GetLessons             *get_lessons.Handler
+	UpdateStudent          *update_student.Handler
+	GetTgAdminsUsernames   *get_tg_admins_usernames.Handler
+	GetTransactionHistory  *get_transaction_history.Handler
+	GetNotificationHistory *get_notification_history.Handler
+	PushNotification       *push_notification.Handler
 }
 
 func NewGroup(adminModule *admin.Module) *HandlerGroup {
@@ -42,8 +50,12 @@ func NewGroup(adminModule *admin.Module) *HandlerGroup {
 		GetStudentFinance: get_student_finance.NewHandler(adminModule),
 		MoveStudent:       move_student.NewHandler(adminModule),
 
-		UpdateWallet:  update_wallet.NewHandler(adminModule),
-		GetLessons:    get_lessons.NewHandler(adminModule),
-		UpdateStudent: update_student.NewHandler(adminModule),
+		UpdateWallet:           update_wallet.NewHandler(adminModule),
+		GetLessons:             get_lessons.NewHandler(adminModule),
+		UpdateStudent:          update_student.NewHandler(adminModule),
+		GetTgAdminsUsernames:   get_tg_admins_usernames.NewHandler(adminModule),
+		GetTransactionHistory:  get_transaction_history.NewHandler(adminModule),
+		GetNotificationHistory: get_notification_history.NewHandler(adminModule),
+		PushNotification:       push_notification.NewHandler(adminModule),
 	}
 }

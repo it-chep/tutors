@@ -42,7 +42,13 @@ func (h *Handler) Handle() http.HandlerFunc {
 			return
 		}
 
-		baseData, err := h.adminModule.Actions.GetTutorFinance.Do(ctx, tutorID, req.From, req.To)
+		from, to, err := req.ToTime()
+		if err != nil {
+			http.Error(w, "invalid time", http.StatusBadRequest)
+			return
+		}
+
+		baseData, err := h.adminModule.Actions.GetTutorFinance.Do(ctx, tutorID, from, to)
 		if err != nil {
 			http.Error(w, "failed to get finance data: "+err.Error(), http.StatusInternalServerError)
 			return
@@ -61,11 +67,9 @@ func (h *Handler) Handle() http.HandlerFunc {
 func (h *Handler) prepareResponse(financeInfo dto.TutorFinance) Response {
 	return Response{
 		Finance: Finance{
-			Conversion: int64(financeInfo.Conversion),
-			Count:      financeInfo.Count,
+			HoursCount: financeInfo.HoursCount,
+			Wages:      financeInfo.Wages.String(),
 			Amount:     financeInfo.Amount.String(),
-			BaseCount:  financeInfo.BaseCount,
-			TrialCount: financeInfo.TrialCount,
 		},
 	}
 }

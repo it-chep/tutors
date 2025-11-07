@@ -29,7 +29,8 @@ func (r *Repository) UpdateStudent(ctx context.Context, studentID int64, update 
 			cost_per_hour = $7, 
 			parent_full_name = $8, 
 			parent_phone = $9, 
-			parent_tg = $10
+			parent_tg = $10,
+			tg_admin_username = $11
 		where id = $1
 	`
 	args := []interface{}{
@@ -43,6 +44,7 @@ func (r *Repository) UpdateStudent(ctx context.Context, studentID int64, update 
 		update.ParentFullName,
 		update.ParentPhone,
 		update.ParentTg,
+		update.TgAdminUsername,
 	}
 
 	_, err := r.pool.Exec(ctx, sql, args...)

@@ -16,9 +16,10 @@ type Student struct {
 	TutorID     int64
 	TutorName   string
 
-	ParentFullName string
-	ParentPhone    string
-	ParentTg       string
+	ParentFullName  string
+	ParentPhone     string
+	ParentTg        string
+	TgAdminUsername string
 
 	Balance decimal.Decimal
 

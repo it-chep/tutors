@@ -100,7 +100,7 @@ func (a *Action) SetAmount(ctx context.Context, msg dto.Message) error {
 	return a.bot.SendMessages([]bot_dto.Message{
 		{
 			Chat: msg.ChatID,
-			Text: fmt.Sprintf("Спасибо за использование нашего сервиса!\n Ждем вашей оплаты: %s", url),
+			Text: fmt.Sprintf("Спасибо за использование нашего сервиса!\n Ждем вашей оплаты: %s \n\n⚠️ Рекомендуем оплачивать по СБП", url),
 		},
 	})
 }

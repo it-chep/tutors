@@ -78,5 +78,6 @@ func (h *Handler) prepareResponse(lessons []dto.Lesson) Response {
 				DurationMinutes: int64(l.Duration.Minutes()),
 			}
 		}),
+		LessonsCount: int64(len(lessons)),
 	}
 }

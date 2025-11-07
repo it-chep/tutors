@@ -1,11 +1,9 @@
 package get_tutor_finance
 
 type Finance struct {
-	Conversion int64  `json:"conversion"`
-	Count      int64  `json:"lessons_count"`
-	Amount     string `json:"amount"`
-	BaseCount  int64  `json:"base_lessons"`
-	TrialCount int64  `json:"trial_lessons"`
+	Amount     string  `json:"amount"`
+	Wages      string  `json:"wages"` // заработная плата репа
+	HoursCount float64 `json:"hours_count"`
 }
 type Response struct {
 	Finance Finance `json:"data"`

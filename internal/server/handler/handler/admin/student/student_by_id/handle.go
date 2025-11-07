@@ -68,6 +68,7 @@ func (h *Handler) prepareResponse(student dto.Student) Response {
 			IsBalanceNegative:   student.IsBalanceNegative,
 			IsNewbie:            student.IsNewbie,
 			ParentTgID:          student.ParentTgID,
+			TgAdminUsername:     student.TgAdminUsername,
 		},
 	}
 }

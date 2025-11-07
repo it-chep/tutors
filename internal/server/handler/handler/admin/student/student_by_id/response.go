@@ -13,9 +13,10 @@ type Student struct {
 	TutorID     int64  `json:"tutor_id"`
 	TutorName   string `json:"tutor_name"`
 
-	ParentFullName string `json:"parent_full_name"`
-	ParentPhone    string `json:"parent_phone"`
-	ParentTg       string `json:"parent_tg"`
+	ParentFullName  string `json:"parent_full_name"`
+	ParentPhone     string `json:"parent_phone"`
+	ParentTg        string `json:"parent_tg"`
+	TgAdminUsername string `json:"tg_admin_username"`
 
 	Balance             string `json:"balance"`
 	IsOnlyTrialFinished bool   `json:"is_only_trial_finished"`

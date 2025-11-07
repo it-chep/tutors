@@ -61,12 +61,8 @@ func (h *Handler) Handle() http.HandlerFunc {
 func (h *Handler) prepareResponse(finance dto.GetAllFinanceDto) Response {
 	return Response{
 		Finance: Finance{
-			Profit:            finance.Profit,
-			CashFlow:          finance.CashFlow,
-			Conversion:        finance.Conversion,
-			LessonsCount:      finance.CountLessons,
-			CountBaseLessons:  finance.CountBaseLessons,
-			CountTrialLessons: finance.CountTrialLessons,
+			Profit:   finance.Profit,
+			CashFlow: finance.CashFlow,
 		},
 	}
 }
