@@ -1,6 +1,7 @@
 package dal
 
 import (
+	"context"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -13,3 +14,5 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 		pool: pool,
 	}
 }
+
+func (r *Repository) FilterStudents(ctx context.Context)
