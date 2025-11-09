@@ -10,6 +10,7 @@ type Student struct {
 	IsOnlyTrialFinished bool   `json:"is_only_trial_finished"`
 	IsBalanceNegative   bool   `json:"is_balance_negative"`
 	IsNewbie            bool   `json:"is_newbie"`
+	Balance             string `json:"balance"`
 }
 
 type Response struct {

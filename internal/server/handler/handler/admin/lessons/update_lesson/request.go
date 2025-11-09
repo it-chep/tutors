@@ -11,13 +11,13 @@ type Request struct {
 }
 
 func (r Request) ToDto() (dto.UpdateLesson, error) {
-	date, err := time.Parse(time.DateOnly, r.Date)
+	createdDate, err := time.Parse(time.DateTime, r.Date)
 	if err != nil {
 		return dto.UpdateLesson{}, err
 	}
 
 	return dto.UpdateLesson{
-		Date:     date,
+		Date:     createdDate,
 		Duration: time.Duration(r.Duration) * time.Minute,
 	}, nil
 }

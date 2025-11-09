@@ -64,7 +64,7 @@ func (r *Repository) UpdateLesson(ctx context.Context, lessonID int64, upd dto.U
 	args := []interface{}{
 		lessonID,
 		upd.Duration.Minutes(),
-		upd.Date,
+		upd.Date.UTC(),
 	}
 
 	_, err := r.pool.Exec(ctx, sql, args...)

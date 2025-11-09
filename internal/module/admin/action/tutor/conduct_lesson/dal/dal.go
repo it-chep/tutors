@@ -2,6 +2,7 @@ package dal
 
 import (
 	"context"
+	"time"
 
 	"github.com/shopspring/decimal"
 
@@ -89,16 +90,17 @@ func (r *Repository) UpdateStudentWallet(ctx context.Context, studentID int64, r
 }
 
 // ConductLesson помечаем что урок проведен
-func (r *Repository) ConductLesson(ctx context.Context, tutorID, studentID, durationInMinutes int64) error {
+func (r *Repository) ConductLesson(ctx context.Context, tutorID, studentID, durationInMinutes int64, createdTime time.Time) error {
 	sql := `
-		insert into conducted_lessons(student_id, tutor_id, duration_in_minutes, is_trial)
-		values ($1, $2, $3, false)
+		insert into conducted_lessons(student_id, tutor_id, duration_in_minutes, is_trial, created_at)
+		values ($1, $2, $3, false, $4)
 	`
 
 	args := []interface{}{
 		studentID,
 		tutorID,
 		durationInMinutes,
+		createdTime.UTC(),
 	}
 
 	_, err := r.pool.Exec(ctx, sql, args...)

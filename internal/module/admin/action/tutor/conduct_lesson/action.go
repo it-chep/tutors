@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
@@ -27,7 +28,7 @@ func New(pool *pgxpool.Pool, bot *tg_bot.Bot) *Action {
 	}
 }
 
-func (a *Action) Do(ctx context.Context, tutorID, studentID int64, durationInMinutes int64) error {
+func (a *Action) Do(ctx context.Context, tutorID, studentID, durationInMinutes int64, createdTime time.Time) error {
 	// получаем студента
 	student, err := a.dal.GetStudent(ctx, studentID)
 	if err != nil {
@@ -56,7 +57,7 @@ func (a *Action) Do(ctx context.Context, tutorID, studentID int64, durationInMin
 	}
 
 	// Помечаем урок проведенным
-	err = a.dal.ConductLesson(ctx, tutorID, studentID, durationInMinutes)
+	err = a.dal.ConductLesson(ctx, tutorID, studentID, durationInMinutes, createdTime)
 	if err != nil {
 		return err
 	}

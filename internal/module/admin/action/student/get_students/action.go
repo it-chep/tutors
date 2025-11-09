@@ -109,11 +109,8 @@ func (a *Action) getStudentsByTutor(ctx context.Context, tutorID int64) ([]dto.S
 	return studentsForTutor, nil
 }
 
-func (a *Action) enrichStudents(ctx context.Context, students []dto.Student) {
-	studentIDs := make([]int64, 0, len(students))
-	for _, student := range students {
-		studentIDs = append(studentIDs, student.ID)
-	}
+func (a *Action) enrichStudents(ctx context.Context, students dto.Students) {
+	studentIDs := students.IDs()
 
 	info, err := a.dal.GetStudentsWalletInfo(ctx, studentIDs)
 	if err != nil {
@@ -127,6 +124,8 @@ func (a *Action) enrichStudents(ctx context.Context, students []dto.Student) {
 	for i, _ := range students {
 		// Задолженности
 		wallet, ok := info[students[i].ID]
+		students[i].Balance = wallet.Balance
+
 		if !ok {
 			students[i].IsBalanceNegative = false
 		}

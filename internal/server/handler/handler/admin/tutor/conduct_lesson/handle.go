@@ -3,6 +3,7 @@ package conduct_lesson
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	userCtx "github.com/it-chep/tutors.git/pkg/context"
@@ -37,7 +38,12 @@ func (h *Handler) Handle() http.HandlerFunc {
 			tutorID = userCtx.GetTutorID(ctx)
 		}
 
-		err := h.adminModule.Actions.ConductLesson.Do(ctx, tutorID, req.StudentID, req.Duration)
+		createdTime, err := time.Parse(time.DateTime, req.Date)
+		if err != nil {
+			http.Error(w, "failed to parse date: "+err.Error(), http.StatusBadRequest)
+		}
+
+		err = h.adminModule.Actions.ConductLesson.Do(ctx, tutorID, req.StudentID, req.Duration, createdTime)
 		if err != nil {
 			http.Error(w, "failed to conduct lesson: "+err.Error(), http.StatusInternalServerError)
 			return

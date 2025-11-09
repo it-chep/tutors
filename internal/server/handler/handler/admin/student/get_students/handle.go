@@ -65,6 +65,7 @@ func (h *Handler) prepareResponse(students []dto.Student) Response {
 				IsOnlyTrialFinished: item.IsOnlyTrialFinished,
 				IsBalanceNegative:   item.IsBalanceNegative,
 				IsNewbie:            item.IsNewbie,
+				Balance:             item.Balance.String(),
 			}
 		}),
 		StudentsCount: int64(len(students)),
