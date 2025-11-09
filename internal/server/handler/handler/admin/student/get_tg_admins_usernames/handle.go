@@ -5,6 +5,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	userCtx "github.com/it-chep/tutors.git/pkg/context"
+	"github.com/samber/lo"
 	"net/http"
 )
 
@@ -31,7 +32,7 @@ func (h *Handler) Handle() http.HandlerFunc {
 
 		usernames, err := h.adminModule.Actions.GetTgAdminsUsernames.Do(ctx, adminID)
 		response := Response{
-			Usernames: usernames,
+			Usernames: lo.Ternary(len(usernames) > 0, usernames, []string{}),
 		}
 
 		w.Header().Set("Content-Type", "application/json")

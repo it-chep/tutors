@@ -26,7 +26,7 @@ func (d *Dal) GetLessons(ctx context.Context, parentTgID int64) ([]dto.Lesson, e
 		from conducted_lessons cl 
 		    join students s
 		        on cl.student_id = s.id
-		where s.parent_tg_id = $1 and cl.created_at between $2 and $3
+		where cl.is_trial is not true and s.parent_tg_id = $1 and cl.created_at between $2 and $3
 		order by cl.created_at
 	`
 

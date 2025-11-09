@@ -14,4 +14,6 @@ type Request struct {
 	ParentFullName string `json:"parent_full_name"`
 	ParentPhone    string `json:"parent_phone"`
 	ParentTg       string `json:"parent_tg"`
+
+	TgAdminUsername *string `json:"tg_admin_username,omitempty"`
 }

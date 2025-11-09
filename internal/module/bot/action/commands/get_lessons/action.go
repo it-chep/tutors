@@ -36,15 +36,15 @@ func (a *Action) GetLessons(ctx context.Context, msg dto.Message) error {
 	}
 
 	builder := strings.Builder{}
-	builder.WriteString("Ваши занятия за последние 30 дней")
+	builder.WriteString("Ваши занятия за последние 30 дней\n\n")
 
 	for i, lesson := range lessons {
 		lessonCost := studentCost.Mul(decimal.NewFromFloat(lesson.Duration.Hours()))
 		builder.WriteString(
-			fmt.Sprintf("%d. %s - %f мин - %s₽",
+			fmt.Sprintf("%d. %s - %d мин - %s₽\n",
 				i+1,
-				lesson.Date.Format("11-05-2004"),
-				lesson.Duration.Minutes(),
+				fmt.Sprintf("%d.%d.%d", lesson.Date.Day(), lesson.Date.Month(), lesson.Date.Year()),
+				int64(lesson.Duration.Minutes()),
 				lessonCost.String(),
 			))
 	}

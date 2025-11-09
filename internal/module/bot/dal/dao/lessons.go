@@ -19,6 +19,7 @@ func (l *LessonDAO) ToDomain() dto.Lesson {
 		StudentID: l.StudentID,
 		Duration:  time.Duration(l.DurationInMinutes) * time.Minute,
 		IsTrial:   l.IsTrial.Bool,
+		Date:      l.CreatedAt.Time,
 	}
 }
 

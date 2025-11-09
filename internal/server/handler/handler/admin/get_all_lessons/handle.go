@@ -7,6 +7,7 @@ import (
 	userCtx "github.com/it-chep/tutors.git/pkg/context"
 	"github.com/samber/lo"
 	"net/http"
+	"time"
 )
 
 type Handler struct {
@@ -58,7 +59,7 @@ func (h *Handler) prepareResponse(lessons []dto.Lesson) Response {
 		Lessons: lo.Map(lessons, func(l dto.Lesson, _ int) Lesson {
 			return Lesson{
 				ID:                l.ID,
-				CreatedAt:         l.Date.String(),
+				CreatedAt:         l.Date.Format(time.DateTime),
 				StudentName:       l.StudentFullName,
 				StudentID:         l.StudentID,
 				TutorName:         l.TutorFullName,

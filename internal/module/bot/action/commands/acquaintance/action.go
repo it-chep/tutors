@@ -54,6 +54,7 @@ func (a *Action) MakeKnown(ctx context.Context, msg dto.Message) error {
 			Buttons: dto.StepButtons{
 				{Text: start.GetBalance},
 				{Text: start.TopUpBalance},
+				{Text: start.GetLessons},
 			}},
 	})
 }

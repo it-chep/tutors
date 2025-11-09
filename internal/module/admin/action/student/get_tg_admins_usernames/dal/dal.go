@@ -21,7 +21,7 @@ func (r *Repository) GetUsernames(ctx context.Context, adminID int64) ([]string,
 		select distinct s.tg_admin_username 
 		from students s 
 		    join tutors t on s.tutor_id = t.id 
-		where t.admin_id = $1
+		where t.admin_id = $1 and s.tg_admin_username is not null and s.tg_admin_username != ''
 	`
 
 	var usernames []string

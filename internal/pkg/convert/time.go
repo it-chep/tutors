@@ -7,33 +7,15 @@ import (
 )
 
 func StringsIntervalToTime(from, to string) (time.Time, time.Time, error) {
-	fromTime, err := time.Parse(time.DateOnly, from)
+	fromTime, err := time.Parse(time.DateTime, from)
 	if err != nil {
 		return time.Time{}, time.Time{}, errors.New("Неправильно указан формат даты 'ОТ'")
 	}
 
-	toTime, err := time.Parse(time.DateOnly, to)
+	toTime, err := time.Parse(time.DateTime, to)
 	if err != nil {
 		return time.Time{}, time.Time{}, errors.New("Неправильно указан формат даты 'ДО'")
 	}
-
-	// Устанавливаем время для fromTime: 00:00:00 в текущей локации
-	fromTime = time.Date(
-		fromTime.Year(),
-		fromTime.Month(),
-		fromTime.Day(),
-		0, 0, 0, 0,
-		time.UTC,
-	)
-
-	// Устанавливаем время для toTime: 23:59:59 в текущей локации
-	toTime = time.Date(
-		toTime.Year(),
-		toTime.Month(),
-		toTime.Day(),
-		23, 59, 59, 0,
-		time.UTC,
-	)
 
 	return fromTime, toTime, nil
 }

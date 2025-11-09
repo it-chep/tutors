@@ -8,6 +8,7 @@ import (
 	"github.com/samber/lo"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type Handler struct {
@@ -64,7 +65,7 @@ func (h *Handler) prepareResponse(notifications []dto.NotificationHistory) Respo
 		Notifications: lo.Map(notifications, func(n dto.NotificationHistory, _ int) Notification {
 			return Notification{
 				ID:        n.ID,
-				CreatedAt: n.CreatedAt.String(),
+				CreatedAt: n.CreatedAt.Format(time.DateTime),
 			}
 		}),
 		NotificationCount: int64(len(notifications)),

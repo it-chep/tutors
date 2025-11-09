@@ -69,7 +69,7 @@ func (h *Handler) prepareResponse(lessons []dto.Lesson) Response {
 				StudentId:       l.StudentID,
 				TutorId:         l.TutorID,
 				StudentFullName: l.StudentFullName,
-				Date:            l.Date.Format(time.DateOnly),
+				Date:            l.Date.Format(time.DateTime),
 				DurationMinutes: int64(l.Duration.Minutes()),
 			}
 		}),

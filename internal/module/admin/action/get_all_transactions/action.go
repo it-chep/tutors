@@ -35,9 +35,9 @@ func (a *Action) Do(ctx context.Context, adminID int64, from, to time.Time) ([]d
 		return item.ID, item
 	})
 
-	for _, transaction := range transactions {
+	for i, transaction := range transactions {
 		student := studentsMap[transaction.StudentID]
-		transaction.StudentName = fmt.Sprintf("%s %s %s", student.LastName, student.FirstName, student.MiddleName)
+		transactions[i].StudentName = fmt.Sprintf("%s %s %s", student.LastName, student.FirstName, student.MiddleName)
 	}
 
 	return transactions, nil

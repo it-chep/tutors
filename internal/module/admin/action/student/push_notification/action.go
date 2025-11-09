@@ -39,10 +39,14 @@ func (a *Action) Do(ctx context.Context, studentID int64) error {
 		return errors.New("У пользователя нет задолженности")
 	}
 
+	if student.ParentTgID <= 0 {
+		return errors.New("У пользователя нет TGID")
+	}
+
 	err = a.bot.SendMessages([]bot_dto.Message{
 		{
 			Chat: student.ParentTgID,
-			Text: fmt.Sprintf("Здравствуйте, у вас возникла задолженность по занятиям - %s.р, пополните пожалуйста баланс.", wallet.Balance.Abs().String()),
+			Text: fmt.Sprintf("Здравствуйте, у вас возникла задолженность по занятиям: %sр, пополните пожалуйста баланс.", wallet.Balance.Abs().String()),
 		},
 	})
 	if err != nil {
