@@ -1,6 +1,9 @@
 package dto
 
-import "github.com/shopspring/decimal"
+import (
+	"github.com/samber/lo"
+	"github.com/shopspring/decimal"
+)
 
 type Student struct {
 	ID         int64
@@ -29,6 +32,14 @@ type Student struct {
 	IsNewbie            bool
 
 	ParentTgID int64
+}
+
+type Students []Student
+
+func (s Students) IDs() []int64 {
+	return lo.Map(s, func(item Student, _ int) int64 {
+		return item.ID
+	})
 }
 
 type StudentFinance struct {

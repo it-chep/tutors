@@ -8,7 +8,6 @@ import (
 	"github.com/samber/lo"
 	"net/http"
 	"strconv"
-	"time"
 )
 
 type Handler struct {
@@ -63,10 +62,9 @@ func (h *Handler) Handle() http.HandlerFunc {
 func (h *Handler) prepareResponse(transactions []dto.TransactionHistory) Response {
 	return Response{
 		Transactions: lo.Map(transactions, func(t dto.TransactionHistory, _ int) Transaction {
-			loc, _ := time.LoadLocation("Europe/Moscow")
 			return Transaction{
 				ID:          t.ID.String(),
-				CreatedAt:   t.CreatedAt.In(loc).String(),
+				CreatedAt:   t.CreatedAt.String(),
 				Amount:      t.Amount.String(),
 				IsConfirmed: t.IsConfirmed,
 			}

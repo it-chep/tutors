@@ -8,8 +8,12 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/get_admins"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/auth"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_lessons"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_subjects"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_transactions"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/lessons/delete_lesson"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/lessons/update_lesson"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/student/filter_students"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_notification_history"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_tg_admins_usernames"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_transaction_history"
@@ -56,6 +60,7 @@ type Aggregator struct {
 	DeleteStudent          *delete_student.Action
 	GetStudentFinance      *get_student_finance.Action
 	GetStudents            *get_students.Action
+	FilterStudents         *filter_students.Action
 	SearchStudent          *search_student.Action
 	GetStudentByID         *student_by_id.Action
 	MoveStudents           *move_students.Action
@@ -73,6 +78,12 @@ type Aggregator struct {
 	// Предметы
 	GetAllSubjects *get_all_subjects.Action
 
+	// Транзакции
+	GetAllTransactions *get_all_transactions.Action
+
+	// Уроки
+	GetAllLessons *get_all_lessons.Action
+
 	// AUTH
 	Auth *auth.Aggregator
 
@@ -84,6 +95,7 @@ type Aggregator struct {
 
 	// Уроки
 	DeleteLesson *delete_lesson.Action
+	UpdateLesson *update_lesson.Action
 }
 
 func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtConfig, bot *tg_bot.Bot) *Aggregator {
@@ -104,6 +116,7 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 		DeleteStudent:          delete_student.New(pool),
 		GetStudentFinance:      get_student_finance.New(pool),
 		GetStudents:            get_students.New(pool),
+		FilterStudents:         filter_students.New(pool),
 		SearchStudent:          search_student.New(pool),
 		GetStudentByID:         student_by_id.New(pool),
 		MoveStudents:           move_students.New(pool),
@@ -121,6 +134,12 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 		// Предметы
 		GetAllSubjects: get_all_subjects.New(pool),
 
+		// Транзакции
+		GetAllTransactions: get_all_transactions.New(pool),
+
+		// Уроки
+		GetAllLessons: get_all_lessons.New(pool),
+
 		// AUTH
 		Auth: auth.NewAggregator(pool, smtp, config),
 
@@ -132,5 +151,6 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 
 		// Уроки
 		DeleteLesson: delete_lesson.New(pool),
+		UpdateLesson: update_lesson.New(pool, bot),
 	}
 }

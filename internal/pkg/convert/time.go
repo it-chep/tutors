@@ -16,8 +16,6 @@ func StringsIntervalToTime(from, to string) (time.Time, time.Time, error) {
 	if err != nil {
 		return time.Time{}, time.Time{}, errors.New("Неправильно указан формат даты 'ДО'")
 	}
-	// Используем текущую временную зону
-	loc := time.Now().Location()
 
 	// Устанавливаем время для fromTime: 00:00:00 в текущей локации
 	fromTime = time.Date(
@@ -25,8 +23,8 @@ func StringsIntervalToTime(from, to string) (time.Time, time.Time, error) {
 		fromTime.Month(),
 		fromTime.Day(),
 		0, 0, 0, 0,
-		loc,
-	).Add(24 * time.Hour)
+		time.UTC,
+	)
 
 	// Устанавливаем время для toTime: 23:59:59 в текущей локации
 	toTime = time.Date(
@@ -34,8 +32,8 @@ func StringsIntervalToTime(from, to string) (time.Time, time.Time, error) {
 		toTime.Month(),
 		toTime.Day(),
 		23, 59, 59, 0,
-		loc,
-	).Add(24 * time.Hour)
+		time.UTC,
+	)
 
 	return fromTime, toTime, nil
 }

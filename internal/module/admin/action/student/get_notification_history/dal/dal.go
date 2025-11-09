@@ -25,12 +25,18 @@ func (r *Repository) GetNotificationsByRange(ctx context.Context, studentID int6
 		from notification_history nh  
 		    join students s 
 		        on nh.parent_tg_id = s.parent_tg_id 
-		where s.id = $1
+		where s.id = $1 and nh.created_at between $2 and $3
 		order by nh.created_at desc
 	`
 
+	args := []interface{}{
+		studentID,
+		from,
+		to,
+	}
+
 	var history dao.NotificationsHistoryDAO
-	err := pgxscan.Select(ctx, r.pool, &history, sql, studentID)
+	err := pgxscan.Select(ctx, r.pool, &history, sql, args...)
 
 	return history.ToDomain(), err
 }
