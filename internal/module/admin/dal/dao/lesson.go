@@ -10,6 +10,24 @@ import (
 	"github.com/samber/lo"
 )
 
+type LessonDefaultDAO struct {
+	xo.ConductedLesson
+}
+
+func (l LessonDefaultDAO) ToDomain() dto.Lesson {
+	less := dto.Lesson{
+		ID:        l.ID,
+		TutorID:   l.TutorID,
+		StudentID: l.StudentID,
+		Duration:  time.Duration(l.DurationInMinutes) * time.Minute,
+		IsTrial:   l.IsTrial.Bool,
+	}
+	if l.CreatedAt.Valid {
+		less.Date = l.CreatedAt.Time
+	}
+	return less
+}
+
 type LessonDAO struct {
 	xo.ConductedLesson
 	FirstName  string  `db:"first_name" json:"first_name"`
