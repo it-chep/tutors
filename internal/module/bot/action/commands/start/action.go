@@ -13,6 +13,7 @@ import (
 const (
 	GetBalance   = "Мой баланс"
 	TopUpBalance = "Пополнить баланс"
+	GetLessons   = "Мои занятия"
 )
 
 type Action struct {
@@ -46,6 +47,7 @@ func (a *Action) Start(ctx context.Context, msg dto.Message) error {
 			Buttons: dto.StepButtons{
 				{Text: GetBalance},
 				{Text: TopUpBalance},
+				{Text: GetLessons},
 			},
 		},
 	})

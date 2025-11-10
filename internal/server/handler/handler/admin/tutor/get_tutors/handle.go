@@ -52,9 +52,9 @@ func (h *Handler) Handle() http.HandlerFunc {
 	}
 }
 
-func (h *Handler) prepareResponse(students []dto.Tutor) Response {
+func (h *Handler) prepareResponse(tutors []dto.Tutor) Response {
 	return Response{
-		Tutors: lo.Map(students, func(item dto.Tutor, index int) Tutor {
+		Tutors: lo.Map(tutors, func(item dto.Tutor, index int) Tutor {
 			return Tutor{
 				ID:                 item.ID,
 				FullName:           item.FullName,
@@ -64,5 +64,6 @@ func (h *Handler) prepareResponse(students []dto.Tutor) Response {
 				HasNewBie:          item.HasNewBie,
 			}
 		}),
+		TutorsCount: int64(len(tutors)),
 	}
 }

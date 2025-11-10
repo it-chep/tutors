@@ -14,4 +14,6 @@ type CreateRequest struct {
 	ParentFullName string
 	ParentPhone    string
 	ParentTg       string
+
+	TgAdminUsername string
 }

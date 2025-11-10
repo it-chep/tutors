@@ -109,25 +109,33 @@ func (h *Handler) setupRoutes(cfg Config) {
 
 		// Студенты
 		r.Route("/students", func(r chi.Router) {
-			r.Get("/", h.adminAgg.Students.GetStudents.Handle())                            // GET /admin/students
-			r.Get("/search", h.adminAgg.Students.SearchStudent.Handle())                    // GET /admin/students/search
-			r.Get("/{student_id}", h.adminAgg.Students.GetStudentByID.Handle())             // GET /admin/students/{id}
-			r.Post("/", h.adminAgg.Students.CreateStudent.Handle())                         // POST /admin/students
-			r.Delete("/{student_id}", h.adminAgg.Students.DeleteStudent.Handle())           // DELETE /admin/students/{id}
-			r.Post("/{student_id}/finance", h.adminAgg.Students.GetStudentFinance.Handle()) // POST /admin/students/{id}/finance
-			r.Post("/move", h.adminAgg.Students.MoveStudent.Handle())                       // POST /admin/students/move
-			r.Post("/{student_id}/wallet", h.adminAgg.Students.UpdateWallet.Handle())       // POST /admin/students/{id}/wallet
-			r.Post("/{student_id}/lessons", h.adminAgg.Students.GetLessons.Handle())        // POST /admin/students/{id}/lessons
-			r.Post("/{student_id}", h.adminAgg.Students.UpdateStudent.Handle())             // GET /admin/students/{id}
+			r.Get("/", h.adminAgg.Students.GetStudents.Handle())                                       // GET /admin/students
+			r.Get("/search", h.adminAgg.Students.SearchStudent.Handle())                               // GET /admin/students/search
+			r.Get("/tg_admins_usernames", h.adminAgg.Students.GetTgAdminsUsernames.Handle())           // GET /admin/students/tg_admins_usernames
+			r.Get("/{student_id}", h.adminAgg.Students.GetStudentByID.Handle())                        // GET /admin/students/{id}
+			r.Post("/", h.adminAgg.Students.CreateStudent.Handle())                                    // POST /admin/students
+			r.Post("/filter", h.adminAgg.Students.FilterStudents.Handle())                             // POST /admin/students/filter
+			r.Delete("/{student_id}", h.adminAgg.Students.DeleteStudent.Handle())                      // DELETE /admin/students/{id}
+			r.Post("/{student_id}/finance", h.adminAgg.Students.GetStudentFinance.Handle())            // POST /admin/students/{id}/finance
+			r.Post("/move", h.adminAgg.Students.MoveStudent.Handle())                                  // POST /admin/students/move
+			r.Post("/{student_id}/wallet", h.adminAgg.Students.UpdateWallet.Handle())                  // POST /admin/students/{id}/wallet
+			r.Post("/{student_id}/lessons", h.adminAgg.Students.GetLessons.Handle())                   // POST /admin/students/{id}/lessons
+			r.Post("/{student_id}/transactions", h.adminAgg.Students.GetTransactionHistory.Handle())   // POST /admin/students/{id}/transactions
+			r.Post("/{student_id}/notifications", h.adminAgg.Students.GetNotificationHistory.Handle()) // POST /admin/students/{id}/notifications
+			r.Post("/{student_id}/notifications/push", h.adminAgg.Students.PushNotification.Handle())  // POST /admin/students/{id}/notifications/push
+			r.Post("/{student_id}", h.adminAgg.Students.UpdateStudent.Handle())                        // GET /admin/students/{id}
 		})
 
 		// Уроки
 		r.Route("/lessons", func(r chi.Router) {
-			r.Delete("/{lesson_id}", h.adminAgg.Lessons.DeleteLesson.Handle()) // POST /admin/lessons/{id}
+			r.Delete("/{lesson_id}", h.adminAgg.Lessons.DeleteLesson.Handle()) // DELETE /admin/lessons/{id}
+			r.Post("/{lesson_id}", h.adminAgg.Lessons.UpdateLesson.Handle())   // POST /admin/lessons/{id}
+			r.Post("/", h.adminAgg.GetAllLessons.Handle())                     // POST /admin/lessons
 		})
 
-		r.Get("/subjects", h.adminAgg.GetAllSubjects.Handle()) // GET /admin/subjects
-		r.Post("/finance", h.adminAgg.GetAllFinance.Handle())  // POST /admin/finance
+		r.Get("/subjects", h.adminAgg.GetAllSubjects.Handle())          // GET /admin/subjects
+		r.Post("/finance", h.adminAgg.GetAllFinance.Handle())           // POST /admin/finance
+		r.Post("/transactions", h.adminAgg.GetAllTransactions.Handle()) // POST /admin/transactions
 	})
 
 	h.router.Post("/webhook/alpha", h.adminAgg.AlphaHook.Handle())      // POST /alpha/hook

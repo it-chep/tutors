@@ -28,6 +28,7 @@ func (s StudentDAO) ToDomain() dto.Student {
 		ParentTg:        TgLink(s.ParentTg),
 		IsFinishedTrial: s.IsFinishedTrial,
 		ParentTgID:      s.ParentTgID.Int64,
+		TgAdminUsername: s.TgAdminUsername.String,
 	}
 }
 

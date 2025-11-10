@@ -18,12 +18,9 @@ type Tutor struct {
 }
 
 type TutorFinance struct {
-	Conversion float64
-	Count      int64
-	BaseCount  int64
-	TrialCount int64
-
-	Amount decimal.Decimal
+	Wages      decimal.Decimal
+	Amount     decimal.Decimal
+	HoursCount float64
 }
 
 type TutorLessons struct {

@@ -2,6 +2,7 @@ package create_student
 
 import (
 	"encoding/json"
+	"github.com/samber/lo"
 	"net/http"
 
 	"github.com/it-chep/tutors.git/internal/module/admin"
@@ -39,9 +40,10 @@ func (h *Handler) Handle() http.HandlerFunc {
 			SubjectID:   req.SubjectID,
 			TutorID:     req.TutorID,
 
-			ParentFullName: req.ParentFullName,
-			ParentPhone:    req.ParentPhone,
-			ParentTg:       req.ParentTg,
+			ParentFullName:  req.ParentFullName,
+			ParentPhone:     req.ParentPhone,
+			ParentTg:        req.ParentTg,
+			TgAdminUsername: lo.FromPtr(req.TgAdminUsername),
 		})
 		if err != nil {
 			http.Error(w, "failed to create student data: "+err.Error(), http.StatusInternalServerError)

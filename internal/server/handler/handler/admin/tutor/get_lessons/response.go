@@ -10,5 +10,6 @@ type Lesson struct {
 }
 
 type Response struct {
-	Lessons []Lesson `json:"lessons"`
+	Lessons      []Lesson `json:"lessons"`
+	LessonsCount int64    `json:"lessons_count"`
 }

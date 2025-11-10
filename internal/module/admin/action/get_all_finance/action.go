@@ -6,7 +6,6 @@ import (
 
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance/dal"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance/dto"
-	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/convert"
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -30,11 +29,9 @@ func (a *Action) Do(ctx context.Context, from, to string, adminID int64) (dto.Ge
 	}
 
 	var (
-		cashFlow     decimal.Decimal
-		finance      decimal.Decimal
-		lessonsCount indto.TutorLessons
-		conversion   float64
-		wg           = sync.WaitGroup{}
+		cashFlow decimal.Decimal
+		finance  decimal.Decimal
+		wg       = sync.WaitGroup{}
 	)
 
 	// Получаем общий оборот
@@ -61,38 +58,10 @@ func (a *Action) Do(ctx context.Context, from, to string, adminID int64) (dto.Ge
 		finance = gfinance
 	}()
 
-	// Получаем оплаченные уроки
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		gLessonsCount, gErr := a.dal.GetLessons(ctx, fromTime, toTime, adminID)
-		if gErr != nil {
-			logger.Error(ctx, "Ошибка при получении оплаченных уроков", gErr)
-			return
-		}
-		lessonsCount = gLessonsCount
-	}()
-
-	// Получаем конверсию
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		gConversion, gErr := a.dal.GetTutorsConversion(ctx, fromTime, toTime, adminID)
-		if gErr != nil {
-			logger.Error(ctx, "Ошибка при получении конверсии", gErr)
-			return
-		}
-		conversion = gConversion
-	}()
-
 	wg.Wait()
 
 	return dto.GetAllFinanceDto{
-		Profit:            finance.String(),
-		CashFlow:          cashFlow.String(),
-		Conversion:        conversion,
-		CountLessons:      lessonsCount.LessonsCount,
-		CountBaseLessons:  lessonsCount.BaseCount,
-		CountTrialLessons: lessonsCount.TrialCount,
+		Profit:   finance.String(),
+		CashFlow: cashFlow.String(),
 	}, nil
 }

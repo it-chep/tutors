@@ -11,5 +11,6 @@ type Tutor struct {
 }
 
 type Response struct {
-	Tutors []Tutor `json:"tutors"`
+	Tutors      []Tutor `json:"tutors"`
+	TutorsCount int64   `json:"tutors_count"`
 }

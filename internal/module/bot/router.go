@@ -15,6 +15,8 @@ func (b *Bot) Route(ctx context.Context, msg dto.Message) error {
 		return b.Actions.GetBalance.GetBalance(ctx, msg)
 	case start.TopUpBalance:
 		return b.Actions.TopUpBalance.InitTransaction(ctx, msg)
+	case start.GetLessons:
+		return b.Actions.GetLessons.GetLessons(ctx, msg)
 	default:
 		if ok, err := b.Actions.Acquaintance.OnRegistration(ctx, msg); err == nil && ok {
 			return b.Actions.Acquaintance.MakeKnown(ctx, msg)

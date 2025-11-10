@@ -466,6 +466,131 @@
 
 </details>
 
+### Получение доступных юзернеймов админов тг
+
+`GET`  http://localhost:8080/admin/students/tg_admins_usernames
+
+<details>
+<summary><b>Пример ответа</b></summary>
+
+```json
+{
+  "tg_admins": [
+    "maxim_jordan",
+    "@danzelVash",
+    "@kalashnikoff069"
+  ]
+}
+```
+
+</details>
+
+### Получение доступных юзернеймов админов тг
+
+`POST`  http://localhost:8080/admin/students/filter
+
+<details>
+<summary><b>Пример запроса</b></summary>
+
+```json
+{
+  "tg_admins_usernames": [
+    "maxim_jordan",
+    "@danzelVash"
+  ]
+}
+```
+
+</details>
+
+<details>
+<summary><b>Пример ответа</b></summary>
+
+```json
+{
+  "students": [
+    {
+      "id": 1,
+      "first_name": "Максим",
+      "last_name": "Нечепорук",
+      "middle_name": "Алексеевич",
+      "tg": "https://t.me/maxim_jordan",
+      "is_only_trial_finished": true,
+      "is_balance_negative": false,
+      "is_newbie": false
+    }
+  ]
+}
+```
+
+</details>
+
+### Получение транзакций пользователя
+
+`POST`  http://localhost:8080/admin/students/1/transactions
+
+<details>
+<summary><b>Пример запроса</b></summary>
+
+```json
+{
+  "from": "2023-01-01",
+  "to": "2023-01-02"
+}
+```
+
+</details>
+
+<details>
+<summary><b>Пример ответа</b></summary>
+
+```json
+{
+  "transactions": [
+    {
+      "id": "0f81a1a4-6ab1-4cff-97c0-c3d483d2a96f",
+      "created_at": "2023-01-02 11.02.3333",
+      "is_confirmed": true,
+      "amount": "12345"
+    }
+  ]
+}
+```
+
+</details>
+
+### Получение уведомлений пользователя
+
+`POST`  http://localhost:8080/admin/students/1/notifications
+
+<details>
+<summary><b>Пример запроса</b></summary>
+
+```json
+{
+  "from": "2023-01-01",
+  "to": "2023-01-02"
+}
+```
+
+</details>
+
+<details>
+<summary><b>Пример ответа</b></summary>
+
+```json
+{
+  "notifications": [
+    {
+      "id": 1,
+      "created_at": "2023-01-02 11.02.3333"
+    }
+  ]
+}
+```
+
+</details>
+
 # Админы
 
 # AUTH

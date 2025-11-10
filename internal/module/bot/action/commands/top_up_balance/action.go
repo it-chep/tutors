@@ -77,7 +77,10 @@ func (a *Action) SetAmount(ctx context.Context, msg dto.Message) error {
 	if err != nil {
 		logger.Error(ctx, "ошибка при получении админа от тутора родителя", err)
 		return a.bot.SendMessages([]bot_dto.Message{
-			{Chat: msg.ChatID, Text: "Извините, но мы не нашли вашего репетитора. Обратитесь за помощью в поддержку"},
+			{
+				Chat: msg.ChatID,
+				Text: "Извините, но мы не нашли вашего репетитора. Обратитесь за помощью в поддержку",
+			},
 		})
 	}
 

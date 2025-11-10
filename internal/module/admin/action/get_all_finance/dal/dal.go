@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/dal/dao"
-	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/convert"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/shopspring/decimal"
@@ -50,50 +49,6 @@ func (r *Repository) GetExpenses(ctx context.Context, from, to time.Time, adminI
 	return convert.NumericToDecimal(amount), nil
 }
 
-// GetTutorsConversion считаем конверсию оплат после триалок у репетиторов
-func (r *Repository) GetTutorsConversion(ctx context.Context, from, to time.Time, adminID int64) (float64, error) {
-	sql := `
-		WITH trial_lessons AS (SELECT cl.student_id,
-									  cl.created_at as trial_date,
-									  cl.tutor_id
-							   FROM conducted_lessons cl
-										join tutors t on cl.tutor_id = t.id
-							   WHERE t.admin_id = $3 and cl.is_trial = true
-								 AND cl.created_at BETWEEN $1 AND $2),
-			 paid_students AS (SELECT DISTINCT th.student_id
-							   FROM transactions_history th
-									join students s on th.student_id = s.id
-									join tutors t on s.tutor_id = t.id
-							   WHERE t.admin_id = $3 and th.confirmed_at BETWEEN $1 AND $2
-								 AND th.amount > 0),
-			 conversion_data AS (SELECT COUNT(DISTINCT tl.student_id) as total_trial_students,
-										COUNT(DISTINCT ps.student_id) as converted_students,
-										CASE
-											WHEN COUNT(DISTINCT tl.student_id) > 0 THEN
-												(COUNT(DISTINCT ps.student_id)::decimal / COUNT(DISTINCT tl.student_id)) * 100
-											ELSE 0
-											END                       as conversion_rate
-								 FROM trial_lessons tl
-										  LEFT JOIN paid_students ps ON tl.student_id = ps.student_id)
-		SELECT ROUND(conversion_rate, 2) as conversion_rate_percent
-		FROM conversion_data
-	`
-
-	args := []interface{}{
-		from,
-		to,
-		adminID,
-	}
-
-	var conversion float64
-	err := pgxscan.Get(ctx, r.pool, &conversion, sql, args...)
-	if err != nil {
-		return conversion, err
-	}
-
-	return conversion, nil
-}
-
 // GetCashFlow получение оборота
 func (r *Repository) GetCashFlow(ctx context.Context, from, to time.Time, adminID int64) (decimal.Decimal, error) {
 	sql := `
@@ -117,38 +72,6 @@ func (r *Repository) GetCashFlow(ctx context.Context, from, to time.Time, adminI
 	}
 
 	return convert.NumericToDecimal(amount), nil
-}
-
-// GetLessons количество проведенных занятий
-func (r *Repository) GetLessons(ctx context.Context, from, to time.Time, adminID int64) (dto.TutorLessons, error) {
-	sql := `
-		select cl.* from conducted_lessons cl
-		join tutors t on cl.tutor_id = t.id
-		where t.admin_id = $3 and created_at between $1 and $2
-	`
-
-	args := []interface{}{
-		from,
-		to,
-		adminID,
-	}
-
-	var lessons []dao.ConductedLessonDAO
-	err := pgxscan.Select(ctx, r.pool, &lessons, sql, args...)
-	if err != nil {
-		return dto.TutorLessons{}, err
-	}
-
-	counters := dao.TutorLessonsCountDao{
-		LessonsCount: int64(len(lessons)),
-		TrialCount: int64(len(lo.Filter(lessons, func(item dao.ConductedLessonDAO, index int) bool {
-			return item.IsTrial.Bool
-		}))),
-		BaseCount: int64(len(lo.Filter(lessons, func(item dao.ConductedLessonDAO, index int) bool {
-			return !item.IsTrial.Bool
-		}))),
-	}
-	return counters.ToDomain(), nil
 }
 
 // GetFinanceInfo получаем прибыль по репетитору
