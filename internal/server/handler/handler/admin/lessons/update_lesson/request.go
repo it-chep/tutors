@@ -2,13 +2,12 @@ package update_lesson
 
 import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/lessons/update_lesson/dto"
-	"strconv"
 	"time"
 )
 
 type Request struct {
 	Date     string `json:"date"`
-	Duration string `json:"duration"`
+	Duration int64  `json:"duration"`
 }
 
 func (r Request) ToDto() (dto.UpdateLesson, error) {
@@ -17,9 +16,8 @@ func (r Request) ToDto() (dto.UpdateLesson, error) {
 		return dto.UpdateLesson{}, err
 	}
 
-	dura, _ := strconv.Atoi(r.Duration)
 	return dto.UpdateLesson{
 		Date:     createdDate,
-		Duration: time.Duration(dura) * time.Minute,
+		Duration: time.Duration(r.Duration) * time.Minute,
 	}, nil
 }
