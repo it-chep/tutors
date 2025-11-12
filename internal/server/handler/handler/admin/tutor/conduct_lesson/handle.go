@@ -41,6 +41,7 @@ func (h *Handler) Handle() http.HandlerFunc {
 		createdTime, err := time.Parse(time.DateTime, req.Date)
 		if err != nil {
 			http.Error(w, "failed to parse date: "+err.Error(), http.StatusBadRequest)
+			return
 		}
 
 		err = h.adminModule.Actions.ConductLesson.Do(ctx, tutorID, req.StudentID, req.Duration, createdTime)
