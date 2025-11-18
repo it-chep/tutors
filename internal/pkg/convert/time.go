@@ -17,5 +17,7 @@ func StringsIntervalToTime(from, to string) (time.Time, time.Time, error) {
 		return time.Time{}, time.Time{}, errors.New("Неправильно указан формат даты 'ДО'")
 	}
 
+	toTime.Add(24 * time.Hour)
+
 	return fromTime, toTime, nil
 }
