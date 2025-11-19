@@ -11,11 +11,11 @@ func (b *Bot) Route(ctx context.Context, msg dto.Message) error {
 	switch msg.Text {
 	case "/start":
 		return b.Actions.Start.Start(ctx, msg)
-	case start.GetBalance, start.GetBalanceCommand:
+	case start.GetBalance, "/balance":
 		return b.Actions.GetBalance.GetBalance(ctx, msg)
-	case start.TopUpBalance, start.TopUpBalanceCommand:
+	case start.TopUpBalance, "/add_balance":
 		return b.Actions.TopUpBalance.InitTransaction(ctx, msg)
-	case start.GetLessons, start.GetLessonsCommand:
+	case start.GetLessons, "/lessons":
 		return b.Actions.GetLessons.GetLessons(ctx, msg)
 	default:
 		if ok, err := b.Actions.Acquaintance.OnRegistration(ctx, msg); err == nil && ok {
