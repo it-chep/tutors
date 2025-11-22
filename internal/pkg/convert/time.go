@@ -19,5 +19,5 @@ func StringsIntervalToTime(from, to string) (time.Time, time.Time, error) {
 
 	newToTime := toTime.Add(24 * time.Hour)
 
-	return fromTime, newToTime, nil
+	return fromTime.UTC(), newToTime.UTC(), nil
 }
