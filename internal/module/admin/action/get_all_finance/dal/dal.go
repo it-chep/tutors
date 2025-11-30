@@ -51,27 +51,38 @@ func (r *Repository) GetExpenses(ctx context.Context, from, to time.Time, adminI
 
 // GetCashFlow получение оборота
 func (r *Repository) GetCashFlow(ctx context.Context, from, to time.Time, adminID int64) (decimal.Decimal, error) {
-	sql := `
-		select sum(th.amount) 
-		from transactions_history th 
-			join students s on th.student_id = s.id
-			join tutors t on s.tutor_id = t.id
-		where t.admin_id = $3 and th.confirmed_at between $1 and $2
-	`
-
-	args := []interface{}{
-		from,
-		to,
-		adminID,
-	}
-
-	var amount pgtype.Numeric
-	err := pgxscan.Get(ctx, r.pool, &amount, sql, args...)
+	lessons, err := r.conductedNotTrialLessons(ctx, adminID, from, to)
 	if err != nil {
-		return decimal.Decimal{}, err
+		return decimal.Zero, err
 	}
 
-	return convert.NumericToDecimal(amount), nil
+	sixty := decimal.NewFromInt(60)
+	allMoney := decimal.NewFromFloat(0.0)
+
+	studentsMap := lo.GroupBy(lessons, func(item dao.ConductedLessonDAO) int64 {
+		return item.StudentID
+	})
+
+	for _, studentInfo := range r.perStudentHours(ctx, adminID) {
+		studentLessons, ok := studentsMap[lo.FromPtr(studentInfo.StudentID)]
+		if !ok {
+			continue
+		}
+		// сколько отзанимался типочек
+		var minutesCount int64
+		for _, studentLesson := range studentLessons {
+			minutesCount += studentLesson.DurationInMinutes
+		}
+
+		// считаем сколько он занес
+		studentCostPerHour := convert.NumericToDecimal(lo.FromPtr(studentInfo.Student))
+		minutesDecimal := decimal.NewFromInt(int64(minutesCount))
+		userMoney := studentCostPerHour.Mul(minutesDecimal).Div(sixty)
+
+		allMoney = allMoney.Add(userMoney)
+	}
+
+	return allMoney, nil
 }
 
 // GetFinanceInfo получаем прибыль по репетитору
