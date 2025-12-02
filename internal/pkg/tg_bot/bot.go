@@ -1,6 +1,8 @@
 package tg_bot
 
 import (
+	"context"
+	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	"net/http"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -24,6 +26,7 @@ type Bot struct {
 func NewTgBot(cfg Config) (*Bot, error) {
 	bot, err := tgbotapi.NewBotAPI(cfg.Token())
 	if err != nil {
+		logger.Error(context.Background(), "[ERROR] NewBotAPI", err)
 		return nil, err
 	}
 
@@ -32,11 +35,13 @@ func NewTgBot(cfg Config) (*Bot, error) {
 		hook, _ := tgbotapi.NewWebhook(cfg.WebhookURL() + cfg.Token() + "/")
 		_, err = bot.Request(hook)
 		if err != nil {
+			logger.Error(context.Background(), "[ERROR] Request", err)
 			return nil, err
 		}
 
 		_, err = bot.GetWebhookInfo()
 		if err != nil {
+			logger.Error(context.Background(), "[ERROR] GetWebhookInfo", err)
 			return nil, err
 		}
 
@@ -61,7 +66,12 @@ func NewTgBot(cfg Config) (*Bot, error) {
 }
 
 func (b *Bot) HandleUpdate(r *http.Request) (*tgbotapi.Update, error) {
-	return b.bot.HandleUpdate(r)
+	update, err := b.bot.HandleUpdate(r)
+	if err != nil {
+		logger.Error(r.Context(), "[ERROR] HandleUpdate", err)
+		return nil, err
+	}
+	return update, nil
 }
 
 func (b *Bot) GetUpdates() tgbotapi.UpdatesChannel {
@@ -76,6 +86,7 @@ func (b *Bot) GetUser(message dto.Message) (bot_dto.User, error) {
 		},
 	})
 	if err != nil {
+		logger.Error(context.Background(), "[ERROR] GetChatMember", err)
 		return bot_dto.User{}, err
 	}
 
