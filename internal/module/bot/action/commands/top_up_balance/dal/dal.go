@@ -3,6 +3,8 @@ package top_up_balance_dal
 import (
 	"context"
 	"fmt"
+	"github.com/jackc/pgx/v5"
+	"github.com/pkg/errors"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/google/uuid"
@@ -25,15 +27,22 @@ func (d *Dal) TransactionByParent(ctx context.Context, parentTG int64) (*busines
 	var (
 		transaction = &dao.TransactionDAO{}
 		sql         = `
-			select * from transactions_history 
-				where student_id = (select id from students where parent_tg_id = $1) and
-				      confirmed_at is null and 
-				      amount is null
-		`
+            SELECT th.* FROM transactions_history th
+            JOIN students s ON th.student_id = s.id
+            WHERE s.parent_tg_id = $1 
+              AND th.confirmed_at IS NULL 
+              AND th.amount IS NULL
+            ORDER BY th.created_at DESC
+            LIMIT 1
+        `
 	)
 
-	if err := pgxscan.Get(ctx, d.pool, transaction, sql, parentTG); err != nil {
-		return nil, err
+	err := pgxscan.Get(ctx, d.pool, transaction, sql, parentTG)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to get pending transaction: %w", err)
 	}
 
 	return transaction.ToDomain(), nil
