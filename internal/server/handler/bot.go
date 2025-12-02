@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/it-chep/tutors.git/internal/module/bot/dto"
+	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	"net/http"
 )
 
@@ -9,6 +10,7 @@ func (h *Handler) bot() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		event, err := h.botParser.HandleUpdate(r)
 		if err != nil {
+			logger.Error(r.Context(), "[ERROR] Ошибка при хендлинге ивента", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -32,6 +34,7 @@ func (h *Handler) bot() http.HandlerFunc {
 		}
 
 		if err = h.botModule.Route(r.Context(), msg); err != nil {
+			logger.Error(r.Context(), "[ERROR] Ошибка при обработке ивента", err)
 			w.WriteHeader(http.StatusBadGateway)
 			return
 		}
