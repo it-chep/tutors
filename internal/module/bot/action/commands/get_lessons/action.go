@@ -35,6 +35,15 @@ func (a *Action) GetLessons(ctx context.Context, msg dto.Message) error {
 		return err
 	}
 
+	if studentCost.IsZero() {
+		return a.bot.SendMessages([]bot_dto.Message{
+			{
+				Chat: msg.ChatID,
+				Text: "У вас пока нет занятий",
+			},
+		})
+	}
+
 	builder := strings.Builder{}
 	builder.WriteString("Ваши занятия за последние 30 дней\n\n")
 

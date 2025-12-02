@@ -5,7 +5,9 @@ import (
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/it-chep/tutors.git/internal/module/bot/dal/dao"
 	"github.com/it-chep/tutors.git/internal/module/bot/dto"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 	"time"
 )
@@ -52,6 +54,9 @@ func (d *Dal) GetStudentCostByParentTgID(ctx context.Context, parentTgID int64) 
 
 	err := pgxscan.Get(ctx, d.pool, &costPerHour, sql, parentTgID)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return decimal.Zero, nil
+		}
 		return decimal.Decimal{}, err
 	}
 
