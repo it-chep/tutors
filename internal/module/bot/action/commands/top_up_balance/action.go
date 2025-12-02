@@ -38,8 +38,8 @@ func NewAction(pool *pgxpool.Pool, alfa *alfa.Client, tbank *tbank.Client, bankB
 }
 
 func (a *Action) TransactionExists(ctx context.Context, msg dto.Message) bool {
-	_, err := a.dal.TransactionByParent(ctx, msg.User)
-	return err == nil
+	trans, err := a.dal.TransactionByParent(ctx, msg.User)
+	return err == nil && trans != nil
 }
 
 func (a *Action) InitTransaction(ctx context.Context, msg dto.Message) error {
@@ -66,6 +66,11 @@ func (a *Action) SetAmount(ctx context.Context, msg dto.Message) error {
 	transaction, err := a.dal.TransactionByParent(ctx, msg.User)
 	if err != nil {
 		return err
+	}
+	if transaction == nil {
+		return a.bot.SendMessages([]bot_dto.Message{
+			{Chat: msg.ChatID, Text: "Пожалуйста, укажите сумму на которую хотите пополнить баланс"},
+		})
 	}
 
 	if err = a.dal.SetTransactionAmount(ctx, transaction.ID, int64(amount)); err != nil {
