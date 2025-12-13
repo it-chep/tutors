@@ -27,13 +27,10 @@ func (d *Dal) TransactionByParent(ctx context.Context, parentTG int64) (*busines
 	var (
 		transaction = &dao.TransactionDAO{}
 		sql         = `
-            SELECT th.* FROM transactions_history th
-            JOIN students s ON th.student_id = s.id
-            WHERE s.parent_tg_id = $1 
-              AND th.confirmed_at IS NULL 
-              AND th.amount IS NULL
-            ORDER BY th.created_at DESC
-            LIMIT 1
+			select * from transactions_history 
+			where student_id = (select id from students where parent_tg_id = $1) and
+				  confirmed_at is null and 
+				  amount is null
         `
 	)
 
