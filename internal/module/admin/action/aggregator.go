@@ -15,6 +15,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/lessons/delete_lesson"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/lessons/update_lesson"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/archivate_student"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/student/archive_filter"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/filter_students"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_archive"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_notification_history"
@@ -82,6 +83,7 @@ type Aggregator struct {
 	GetArchive        *get_archive.Action
 	ArchiveStudent    *archivate_student.Action
 	UnArhivateStudent *unarchivate_student.Action
+	ArchiveFilter     *archive_filter.Action
 
 	// Финансы
 	GetAllFinance      *get_all_finance.Action
@@ -145,6 +147,7 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 		GetArchive:        get_archive.New(pool),
 		ArchiveStudent:    archivate_student.New(pool),
 		UnArhivateStudent: unarchivate_student.New(pool),
+		ArchiveFilter:     archive_filter.New(pool),
 
 		// Финансы
 		GetAllFinance:      get_all_finance.New(pool),
