@@ -1,4 +1,4 @@
-package get_all_finance
+package get_all_finance_by_tgs
 
 type Finance struct {
 	Profit   string `json:"profit"`

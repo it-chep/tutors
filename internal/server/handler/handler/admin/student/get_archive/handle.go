@@ -1,15 +1,12 @@
-package get_students
+package get_archive
 
 import (
 	"encoding/json"
-	"net/http"
-	"strconv"
-
-	userCtx "github.com/it-chep/tutors.git/pkg/context"
-
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/samber/lo"
+	"net/http"
+	"strconv"
 )
 
 type Handler struct {
@@ -33,10 +30,11 @@ func (h *Handler) Handle() http.HandlerFunc {
 		}
 
 		if dto.IsTutorRole(ctx) {
-			tutorID = userCtx.GetTutorID(ctx)
+			http.Error(w, "forbidden", http.StatusForbidden)
+			return
 		}
 
-		baseData, err := h.adminModule.Actions.GetStudents.Do(ctx, tutorID)
+		baseData, err := h.adminModule.Actions.GetArchive.Do(ctx, tutorID)
 		if err != nil {
 			http.Error(w, "failed to get user data: "+err.Error(), http.StatusInternalServerError)
 			return
