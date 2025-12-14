@@ -1,4 +1,4 @@
-package get_admins
+package get_assistants
 
 import (
 	"encoding/json"
@@ -24,9 +24,9 @@ func (h *Handler) Handle() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		baseData, err := h.adminModule.Actions.GetAdmins.Do(ctx, dto.AdminRole)
+		baseData, err := h.adminModule.Actions.GetAdmins.Do(ctx, dto.AssistantRole)
 		if err != nil {
-			http.Error(w, "failed to get tutors data: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, "failed to get assistants data: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -40,10 +40,10 @@ func (h *Handler) Handle() http.HandlerFunc {
 	}
 }
 
-func (h *Handler) prepareResponse(admins []dto.User) Response {
+func (h *Handler) prepareResponse(assistants []dto.User) Response {
 	return Response{
-		Admins: lo.Map(admins, func(item dto.User, index int) Admin {
-			return Admin{
+		Assistants: lo.Map(assistants, func(item dto.User, index int) Assistant {
+			return Assistant{
 				ID:       item.ID,
 				FullName: item.FullName,
 				Tg:       item.Tg,

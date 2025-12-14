@@ -2,12 +2,13 @@ package get_all_transactions
 
 import (
 	"encoding/json"
+	"net/http"
+	"time"
+
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	userCtx "github.com/it-chep/tutors.git/pkg/context"
 	"github.com/samber/lo"
-	"net/http"
-	"time"
 )
 
 type Handler struct {
@@ -27,6 +28,11 @@ func (h *Handler) Handle() http.HandlerFunc {
 		var req Request
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, "failed to decode request: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if dto.IsAssistantRole(ctx) {
+			http.Error(w, "authorization required", http.StatusUnauthorized)
 			return
 		}
 

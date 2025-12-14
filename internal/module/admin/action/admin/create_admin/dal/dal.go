@@ -3,8 +3,6 @@ package dal
 import (
 	"context"
 
-	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
-
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/create_admin/dto"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -26,7 +24,7 @@ func (r *Repository) CreateAdmin(ctx context.Context, createDTO dto.CreateReques
 	args := []interface{}{
 		createDTO.Email,
 		createDTO.FullName,
-		indto.AdminRole,
+		createDTO.Role,
 		createDTO.Phone,
 		createDTO.Tg,
 	}

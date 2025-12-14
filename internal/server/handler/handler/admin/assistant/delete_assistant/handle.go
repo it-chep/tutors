@@ -1,11 +1,11 @@
-package delete_admin
+package delete_assistant
 
 import (
-	"github.com/go-chi/chi/v5"
-	"github.com/it-chep/tutors.git/internal/module/admin/dto"
-
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 
 	"github.com/it-chep/tutors.git/internal/module/admin"
 )
@@ -24,14 +24,14 @@ func (h *Handler) Handle() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		adminIDStr := chi.URLParam(r, "admin_id")
-		adminID, err := strconv.ParseInt(adminIDStr, 10, 64)
+		assistantIDStr := chi.URLParam(r, "assistant_id")
+		assistantID, err := strconv.ParseInt(assistantIDStr, 10, 64)
 		if err != nil {
-			http.Error(w, "invalid admin ID", http.StatusBadRequest)
+			http.Error(w, "invalid assistant ID", http.StatusBadRequest)
 			return
 		}
 
-		err = h.adminModule.Actions.DeleteAdmin.Do(ctx, adminID, dto.AdminRole)
+		err = h.adminModule.Actions.DeleteAdmin.Do(ctx, assistantID, dto.AssistantRole)
 		if err != nil {
 			http.Error(w, "failed to create student data: "+err.Error(), http.StatusInternalServerError)
 			return

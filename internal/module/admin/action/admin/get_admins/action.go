@@ -19,6 +19,6 @@ func New(pool *pgxpool.Pool) *Action {
 	}
 }
 
-func (a *Action) Do(ctx context.Context) ([]dto.User, error) {
-	return a.dal.GetAdmins(ctx)
+func (a *Action) Do(ctx context.Context, role dto.Role) ([]dto.User, error) {
+	return a.dal.GetAdmins(ctx, role)
 }
