@@ -41,6 +41,9 @@ func (d *Dal) GetLessons(ctx context.Context, parentTgID int64) ([]dto.Lesson, e
 	var lessons dao.LessonsDAO
 	err := pgxscan.Select(ctx, d.pool, &lessons, sql, args...)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return []dto.Lesson{}, nil
+		}
 		return nil, err
 	}
 

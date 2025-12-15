@@ -3,6 +3,7 @@ package top_up_balance_dal
 import (
 	"context"
 	"fmt"
+	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
 
@@ -37,8 +38,10 @@ func (d *Dal) TransactionByParent(ctx context.Context, parentTG int64) (*busines
 	err := pgxscan.Get(ctx, d.pool, transaction, sql, parentTG)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
+			logger.Message(ctx, fmt.Sprintf("NIL transaction by parent (parent_tg_id = %d)", parentTG))
 			return nil, nil
 		}
+		logger.Message(ctx, fmt.Sprintf("ERROR TRANSACTIONS (parent_tg_id = %d)", parentTG))
 		return nil, fmt.Errorf("failed to get pending transaction: %w", err)
 	}
 
@@ -60,6 +63,7 @@ func (d *Dal) InitTransaction(ctx context.Context, parentTG int64) (string, erro
 	`
 
 	if _, err = d.pool.Exec(ctx, sql, parentTG, order.String()); err != nil {
+		logger.Error(ctx, fmt.Sprintf("InitTransaction ERROR (parent_tg_id = %d)", parentTG), err)
 		return "", err
 	}
 

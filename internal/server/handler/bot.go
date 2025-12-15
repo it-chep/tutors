@@ -35,7 +35,15 @@ func (h *Handler) bot() http.HandlerFunc {
 		}
 
 		if err = h.botModule.Route(r.Context(), msg); err != nil {
-			logger.Error(r.Context(), fmt.Sprintf("[ERROR] Ошибка при обработке ивента, TGID: %d", event.SentFrom().ID), err)
+			logger.Error(
+				r.Context(),
+				fmt.Sprintf(
+					"[ERROR] Ошибка при обработке ивента, TGID: %d, username: %s, lastname: %s, firstname: %s",
+					event.SentFrom().ID,
+					event.SentFrom().UserName,
+					event.SentFrom().LastName,
+					event.SentFrom().FirstName,
+				), err)
 			w.WriteHeader(http.StatusBadGateway)
 			return
 		}

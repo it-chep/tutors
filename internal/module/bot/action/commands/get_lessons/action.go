@@ -35,7 +35,7 @@ func (a *Action) GetLessons(ctx context.Context, msg dto.Message) error {
 		return err
 	}
 
-	if studentCost.IsZero() {
+	if studentCost.IsZero() || len(lessons) == 0 {
 		return a.bot.SendMessages([]bot_dto.Message{
 			{
 				Chat: msg.ChatID,
