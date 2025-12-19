@@ -30,7 +30,7 @@ func (a *Action) Do(ctx context.Context) error {
 		return err
 	}
 
-	wallets, err := a.dal.GetStudentsWallet(ctx)
+	wallets, err := a.dal.GetStudentsWallet(ctx, students.IDs())
 	if err != nil {
 		return err
 	}

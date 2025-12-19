@@ -112,7 +112,7 @@ func (h *Handler) setupRoutes(cfg Config) {
 			r.Get("/", h.adminAgg.Students.GetStudents.Handle())                                       // GET /admin/students
 			r.Get("/search", h.adminAgg.Students.SearchStudent.Handle())                               // GET /admin/students/search
 			r.Get("/archive", h.adminAgg.Students.GetArchive.Handle())                                 // GET /admin/students/archive
-			r.Get("/push_all_students", h.adminAgg.Students.PushAllDebitors.Handle())                  // GET /admin/students/push_all_students
+			r.Post("/push_all_students", h.adminAgg.Students.PushAllDebitors.Handle())                 // POST /admin/students/push_all_students
 			r.Get("/tg_admins_usernames", h.adminAgg.Students.GetTgAdminsUsernames.Handle())           // GET /admin/students/tg_admins_usernames
 			r.Get("/{student_id}", h.adminAgg.Students.GetStudentByID.Handle())                        // GET /admin/students/{id}
 			r.Post("/", h.adminAgg.Students.CreateStudent.Handle())                                    // POST /admin/students

@@ -25,7 +25,7 @@ func (r *Repository) GetAllStudentsForAdmin(ctx context.Context, adminID int64) 
 		    join tutors t on s.tutor_id = t.id 
 		where t.admin_id = $1 
 		  and s.is_archive is true 
-		order by id
+		order by s.id
 	`
 	var students dao.StudentsDAO
 	err := pgxscan.Select(ctx, r.pool, &students, sql, adminID)

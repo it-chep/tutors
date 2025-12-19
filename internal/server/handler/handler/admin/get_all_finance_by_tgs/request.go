@@ -5,5 +5,5 @@ type Request struct {
 	To      string `json:"to"`
 	AdminID int64  `json:"admin_id"`
 
-	TgUsernames []string `json:"tg_admin_usernames"`
+	TgUsernames []string `json:"tg_admins_usernames"`
 }

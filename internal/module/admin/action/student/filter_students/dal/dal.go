@@ -41,7 +41,6 @@ func stmtBuilder(adminID int64, filter dto.FilterRequest) (_ string, phValues []
 		    join tutors t on s.tutor_id = t.id 
 			join wallet w on s.id = w.student_id
 		where t.admin_id = $1 and s.is_archive is not true
-		order by id
 	`
 
 	phValues = append(phValues, adminID)
