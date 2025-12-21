@@ -55,12 +55,12 @@ func (a *Action) LoginHandler() http.HandlerFunc {
 		}
 
 		code := smtp.GenerateCode()
-		fmt.Println("code: ", code)
+		//fmt.Println("code: ", code)
 		a.codes.Put(req.Email, code)
-		//err = a.smtp.SendEmail(smtp.EmailParams{
-		//	Body: fmt.Sprintf("Ваш код %s", code), Destination: req.Email,
-		//	Subject: "Авторизация в системе 100rep.ru",
-		//})
+		err = a.smtp.SendEmail(smtp.EmailParams{
+			Body: fmt.Sprintf("Ваш код %s", code), Destination: req.Email,
+			Subject: "Авторизация в системе 100rep.ru",
+		})
 		if err != nil {
 			http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusInternalServerError)
 			logger.Error(r.Context(), "Ошибка при отправке кода", err)
