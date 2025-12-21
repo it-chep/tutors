@@ -2,9 +2,10 @@ package get_all_finance
 
 import (
 	"encoding/json"
+	"net/http"
+
 	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
 	userCtx "github.com/it-chep/tutors.git/pkg/context"
-	"net/http"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance/dto"
 
@@ -32,6 +33,11 @@ func (h *Handler) Handle() http.HandlerFunc {
 		}
 
 		if indto.IsTutorRole(ctx) {
+			http.Error(w, "authorization required", http.StatusUnauthorized)
+			return
+		}
+
+		if indto.IsAssistantRole(ctx) {
 			http.Error(w, "authorization required", http.StatusUnauthorized)
 			return
 		}

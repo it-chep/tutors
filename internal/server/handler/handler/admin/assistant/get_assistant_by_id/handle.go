@@ -1,11 +1,12 @@
-package get_admins
+package get_assistant_by_id
 
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
-	"github.com/samber/lo"
 
 	"github.com/it-chep/tutors.git/internal/module/admin"
 )
@@ -24,9 +25,16 @@ func (h *Handler) Handle() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		baseData, err := h.adminModule.Actions.GetAdmins.Do(ctx, dto.AdminRole)
+		assistantIDStr := chi.URLParam(r, "assistant_id")
+		assistantID, err := strconv.ParseInt(assistantIDStr, 10, 64)
 		if err != nil {
-			http.Error(w, "failed to get tutors data: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, "invalid assistant ID", http.StatusBadRequest)
+			return
+		}
+
+		baseData, err := h.adminModule.Actions.GetAdminByID.Do(ctx, assistantID)
+		if err != nil {
+			http.Error(w, "failed to get assistant data: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -40,14 +48,12 @@ func (h *Handler) Handle() http.HandlerFunc {
 	}
 }
 
-func (h *Handler) prepareResponse(admins []dto.User) Response {
+func (h *Handler) prepareResponse(admin dto.User) Response {
 	return Response{
-		Admins: lo.Map(admins, func(item dto.User, index int) Admin {
-			return Admin{
-				ID:       item.ID,
-				FullName: item.FullName,
-				Tg:       item.Tg,
-			}
-		}),
+		Assistant: Assistant{
+			ID:       admin.ID,
+			FullName: admin.FullName,
+			Tg:       admin.Tg,
+		},
 	}
 }

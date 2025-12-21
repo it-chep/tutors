@@ -94,6 +94,14 @@ func (h *Handler) setupRoutes(cfg Config) {
 			r.Delete("/{admin_id}", h.adminAgg.Admins.DeleteAdmin.Handle()) // DELETE /admin/admins/{id}
 		})
 
+		// Ассистенты
+		r.Route("/assistant", func(r chi.Router) {
+			r.Get("/", h.adminAgg.Assistant.GetAssistants.Handle())                    // GET /admin/assistant
+			r.Post("/", h.adminAgg.Assistant.CreateAssistant.Handle())                 // POST /admin/assistant
+			r.Get("/{assistant_id}", h.adminAgg.Assistant.GetAssistantByID.Handle())   // GET /admin/assistant/{id}
+			r.Delete("/{assistant_id}", h.adminAgg.Assistant.DeleteAssistant.Handle()) // DELETE /admin/assistant/{id}
+		})
+
 		// Репетиторы
 		r.Route("/tutors", func(r chi.Router) {
 			r.Get("/", h.adminAgg.Tutors.GetTutors.Handle())                          // GET /admin/tutors

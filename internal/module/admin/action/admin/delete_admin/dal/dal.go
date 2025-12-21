@@ -16,8 +16,8 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 	}
 }
 
-// DeleteAdmin удаление админа
-func (r *Repository) DeleteAdmin(ctx context.Context, adminID int64) error {
+// DeleteUser удаление админа
+func (r *Repository) DeleteUser(ctx context.Context, adminID int64) error {
 	sql := `
 		delete from users where id = $1
 	`

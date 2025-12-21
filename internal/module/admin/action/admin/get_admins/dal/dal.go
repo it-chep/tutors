@@ -21,13 +21,13 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 }
 
 // GetAdmins получение админов для суперадминки
-func (r *Repository) GetAdmins(ctx context.Context) ([]dto.User, error) {
+func (r *Repository) GetAdmins(ctx context.Context, role dto.Role) ([]dto.User, error) {
 	sql := `
 		select u.* from users u join roles r on u.role_id = r.id where r.id = $1
 	`
 
 	var admins dao.Users
-	err := pgxscan.Select(ctx, r.pool, &admins, sql, dto.AdminRole)
+	err := pgxscan.Select(ctx, r.pool, &admins, sql, role)
 	if err != nil {
 		return nil, err
 	}
