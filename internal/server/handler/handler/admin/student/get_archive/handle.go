@@ -1,4 +1,4 @@
-package filter_students
+package get_archive
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/samber/lo"
 	"net/http"
+	"strconv"
 )
 
 type Handler struct {
@@ -22,41 +23,24 @@ func (h *Handler) Handle() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		// todo надо ли такое делать в репетиторе ?
-		//tutorIDStr := r.URL.Query().Get("tutor_id")
-		//tutorID, err := strconv.ParseInt(tutorIDStr, 10, 64)
-		//if err != nil {
-		//	tutorID = 0
-		//}
-		//if dto.IsTutorRole(ctx) {
-		//	tutorID = userCtx.GetTutorID(ctx)
-		//}
+		tutorIDStr := r.URL.Query().Get("tutor_id")
+		tutorID, err := strconv.ParseInt(tutorIDStr, 10, 64)
+		if err != nil {
+			tutorID = 0
+		}
 
-		var (
-			req      Request
-			students dto.Students
-			err      error
-		)
-		if err = json.NewDecoder(r.Body).Decode(&req); err != nil {
-			http.Error(w, "failed to decode request: "+err.Error(), http.StatusInternalServerError)
+		if dto.IsTutorRole(ctx) {
+			http.Error(w, "forbidden", http.StatusForbidden)
 			return
 		}
 
-		if req.IsArchived {
-			students, err = h.adminModule.Actions.ArchiveFilter.Do(ctx, req.ToArchiveFilterRequest())
-			if err != nil {
-				http.Error(w, "failed to get user data: "+err.Error(), http.StatusInternalServerError)
-				return
-			}
-		} else {
-			students, err = h.adminModule.Actions.FilterStudents.Do(ctx, req.ToFilterRequest())
-			if err != nil {
-				http.Error(w, "failed to get user data: "+err.Error(), http.StatusInternalServerError)
-				return
-			}
+		baseData, err := h.adminModule.Actions.GetArchive.Do(ctx, tutorID)
+		if err != nil {
+			http.Error(w, "failed to get user data: "+err.Error(), http.StatusInternalServerError)
+			return
 		}
 
-		response := h.prepareResponse(students)
+		response := h.prepareResponse(baseData)
 
 		w.Header().Set("Content-Type", "application/json")
 		if err = json.NewEncoder(w).Encode(response); err != nil {
@@ -80,6 +64,7 @@ func (h *Handler) prepareResponse(students []dto.Student) Response {
 				IsBalanceNegative:   item.IsBalanceNegative,
 				IsNewbie:            item.IsNewbie,
 				Balance:             item.Balance.String(),
+				IsArchived:          item.IsArchived,
 			}
 		}),
 		StudentsCount: int64(len(students)),

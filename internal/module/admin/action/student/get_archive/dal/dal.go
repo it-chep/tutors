@@ -2,7 +2,6 @@ package dal
 
 import (
 	"context"
-
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/it-chep/tutors.git/internal/module/admin/dal/dao"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
@@ -25,7 +24,7 @@ func (r *Repository) GetAllStudentsForAdmin(ctx context.Context, adminID int64) 
 		from students s 
 		    join tutors t on s.tutor_id = t.id 
 		where t.admin_id = $1 
-		  and s.is_archive is not true 
+		  and s.is_archive is true 
 		order by s.id
 	`
 	var students dao.StudentsDAO
@@ -55,7 +54,7 @@ func (r *Repository) GetTutorStudentsForAdmin(ctx context.Context, adminID, tuto
 		select s.* 
 		from students s 
 		    join tutors t on s.tutor_id = t.id 
-		where t.admin_id = $1 and s.tutor_id = $2 and s.is_archive is not true
+		where t.admin_id = $1 and s.tutor_id = $2 and s.is_archive is true
 	`
 	var students dao.StudentsDAO
 	err := pgxscan.Select(ctx, r.pool, &students, sql, adminID, tutorID)
@@ -68,7 +67,7 @@ func (r *Repository) GetTutorStudentsForAdmin(ctx context.Context, adminID, tuto
 
 func (r *Repository) GetTutorStudents(ctx context.Context, tutorID int64) ([]dto.Student, error) {
 	sql := `
-		select * from students where tutor_id = $1 and is_archive is not true 
+		select * from students where tutor_id = $1 and is_archive is true 
 		
 	`
 	var students dao.StudentsDAO

@@ -29,6 +29,7 @@ func (s StudentDAO) ToDomain() dto.Student {
 		IsFinishedTrial: s.IsFinishedTrial,
 		ParentTgID:      s.ParentTgID.Int64,
 		TgAdminUsername: s.TgAdminUsername.String,
+		IsArchived:      s.IsArchive.Bool,
 	}
 }
 
@@ -71,12 +72,20 @@ type Wallet struct {
 	xo.Wallet
 }
 
+type Wallets []Wallet
+
 func (w Wallet) ToDomain() dto.Wallet {
 	return dto.Wallet{
 		ID:        w.ID,
 		StudentID: w.StudentID,
 		Balance:   convert.NumericToDecimal(w.Balance),
 	}
+}
+
+func (w Wallets) ToDomain() []dto.Wallet {
+	return lo.Map(w, func(item Wallet, _ int) dto.Wallet {
+		return item.ToDomain()
+	})
 }
 
 type StudentWithTransactions struct {

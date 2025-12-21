@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/georgysavva/scany/v2/pgxscan"
-	"github.com/it-chep/tutors.git/internal/module/admin/action/student/filter_students/dto"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/student/archive_filter/dto"
 	"github.com/it-chep/tutors.git/internal/module/admin/dal/dao"
 	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -40,7 +40,7 @@ func stmtBuilder(adminID int64, filter dto.FilterRequest) (_ string, phValues []
 		from students s 
 		    join tutors t on s.tutor_id = t.id 
 			join wallet w on s.id = w.student_id
-		where t.admin_id = $1 and s.is_archive is not true
+		where t.admin_id = $1 and s.is_archive is true
 	`
 
 	phValues = append(phValues, adminID)

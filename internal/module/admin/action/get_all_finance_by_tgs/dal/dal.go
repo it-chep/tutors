@@ -2,7 +2,7 @@ package dal
 
 import (
 	"context"
-	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance/dto"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance_by_tgs/dto"
 	"github.com/samber/lo"
 	"time"
 
@@ -51,12 +51,7 @@ func (r *Repository) GetExpenses(ctx context.Context, from, to time.Time, adminI
 }
 
 // GetCashFlow получение оборота
-func (r *Repository) GetCashFlow(ctx context.Context, from, to time.Time, adminID int64) (decimal.Decimal, error) {
-	lessons, err := r.conductedNotTrialLessons(ctx, adminID, from, to)
-	if err != nil {
-		return decimal.Zero, err
-	}
-
+func (r *Repository) GetCashFlow(ctx context.Context, req dto.Request, lessons dao.ConductedLessonDAOs) (decimal.Decimal, error) {
 	sixty := decimal.NewFromInt(60)
 	allMoney := decimal.NewFromFloat(0.0)
 
@@ -64,7 +59,7 @@ func (r *Repository) GetCashFlow(ctx context.Context, from, to time.Time, adminI
 		return item.StudentID
 	})
 
-	for _, studentInfo := range r.perStudentHours(ctx, adminID) {
+	for _, studentInfo := range r.perStudentHours(ctx, req.AdminID) {
 		studentLessons, ok := studentsMap[lo.FromPtr(studentInfo.StudentID)]
 		if !ok {
 			continue
@@ -87,12 +82,7 @@ func (r *Repository) GetCashFlow(ctx context.Context, from, to time.Time, adminI
 }
 
 // GetFinanceInfo получаем прибыль по репетитору
-func (r *Repository) GetFinanceInfo(ctx context.Context, from, to time.Time, adminID int64) (decimal.Decimal, error) {
-	lessons, err := r.conductedNotTrialLessons(ctx, adminID, from, to)
-	if err != nil {
-		return decimal.NewFromFloat(0.0), err
-	}
-
+func (r *Repository) GetFinanceInfo(ctx context.Context, req dto.Request, lessons dao.ConductedLessonDAOs) (decimal.Decimal, error) {
 	sixty := decimal.NewFromInt(60)
 	allMoney := decimal.NewFromFloat(0.0)
 	salary := decimal.NewFromFloat(0.0)
@@ -105,7 +95,7 @@ func (r *Repository) GetFinanceInfo(ctx context.Context, from, to time.Time, adm
 		return item.TutorID
 	})
 
-	for _, studentInfo := range r.perStudentHours(ctx, adminID) {
+	for _, studentInfo := range r.perStudentHours(ctx, req.AdminID) {
 		studentLessons, ok := studentsMap[lo.FromPtr(studentInfo.StudentID)]
 		if !ok {
 			continue
@@ -124,7 +114,7 @@ func (r *Repository) GetFinanceInfo(ctx context.Context, from, to time.Time, adm
 		allMoney = allMoney.Add(userMoney)
 	}
 
-	for _, tutorInfo := range r.perTutorHours(ctx, adminID) {
+	for _, tutorInfo := range r.perTutorHours(ctx, req.AdminID) {
 		tutorsLessons, ok := tutorsMap[lo.FromPtr(tutorInfo.TutorID)]
 		if !ok {
 			continue
@@ -183,19 +173,22 @@ func (r *Repository) perTutorHours(ctx context.Context, adminID int64) (moneys [
 	return
 }
 
-func (r *Repository) conductedNotTrialLessons(ctx context.Context, adminID int64, from, to time.Time) (dao.ConductedLessonDAOs, error) {
+func (r *Repository) GetLessonsInfo(ctx context.Context, req dto.Request) (dao.ConductedLessonDAOs, error) {
 	sql := `
 		select cl.* from conducted_lessons cl
-		         join tutors t on cl.tutor_id = t.id
+		    	join students s on cl.student_id = s.id
+		        join tutors t on cl.tutor_id = t.id
 		where t.admin_id = $1
 		 	and cl.created_at between $2 and $3
 			and cl.is_trial = false
+			and s.tg_admin_username = any($4)
 	`
 
 	args := []interface{}{
-		adminID,
-		from,
-		to,
+		req.AdminID,
+		req.From,
+		req.To,
+		req.TgUsernames,
 	}
 
 	var lessons dao.ConductedLessonDAOs
@@ -208,16 +201,23 @@ func (r *Repository) conductedNotTrialLessons(ctx context.Context, adminID int64
 }
 
 // GetDebt получение текущей дебиторской задолженности
-func (r *Repository) GetDebt(ctx context.Context, adminID int64) (decimal.Decimal, error) {
+func (r *Repository) GetDebt(ctx context.Context, req dto.Request) (decimal.Decimal, error) {
 	sql := `
 		select sum(w.balance) from wallet w 
     		join students s on w.student_id = s.id 
 			join tutors t on s.tutor_id = t.id
-		where t.admin_id = $1 and balance < 0
+		where t.admin_id = $1 
+		  and balance < 0 
+		  and s.tg_admin_username = any($2)
 	`
 
+	args := []interface{}{
+		req.AdminID,
+		req.TgUsernames,
+	}
+
 	var debt pgtype.Numeric
-	err := pgxscan.Get(ctx, r.pool, &debt, sql, adminID)
+	err := pgxscan.Get(ctx, r.pool, &debt, sql, args...)
 	if err != nil {
 		return decimal.Decimal{}, err
 	}
@@ -226,12 +226,7 @@ func (r *Repository) GetDebt(ctx context.Context, adminID int64) (decimal.Decima
 }
 
 // GetTutorsInfo получаем информацию по репетиторам
-func (r *Repository) GetTutorsInfo(ctx context.Context, from, to time.Time, adminID int64) (dto.TutorsInfo, error) {
-	lessons, err := r.conductedNotTrialLessons(ctx, adminID, from, to)
-	if err != nil {
-		return dto.TutorsInfo{}, err
-	}
-
+func (r *Repository) GetTutorsInfo(ctx context.Context, req dto.Request, lessons dao.ConductedLessonDAOs) (dto.TutorsInfo, error) {
 	sixty := decimal.NewFromInt(60)
 	salary := decimal.NewFromFloat(0.0)
 	hours := decimal.NewFromFloat(0.0)
@@ -240,7 +235,7 @@ func (r *Repository) GetTutorsInfo(ctx context.Context, from, to time.Time, admi
 		return item.TutorID
 	})
 
-	for _, tutorInfo := range r.perTutorHours(ctx, adminID) {
+	for _, tutorInfo := range r.perTutorHours(ctx, req.AdminID) {
 		tutorsLessons, ok := tutorsMap[lo.FromPtr(tutorInfo.TutorID)]
 		if !ok {
 			continue

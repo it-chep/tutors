@@ -1,4 +1,4 @@
-package get_students
+package get_archive
 
 type Student struct {
 	ID                  int64  `json:"id"`

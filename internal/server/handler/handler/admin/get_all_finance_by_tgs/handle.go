@@ -1,13 +1,13 @@
-package get_all_finance
+package get_all_finance_by_tgs
 
 import (
 	"encoding/json"
+	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
+	"github.com/it-chep/tutors.git/internal/pkg/convert"
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
 	"net/http"
 
-	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
-	userCtx "github.com/it-chep/tutors.git/pkg/context"
-
-	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance/dto"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance_by_tgs/dto"
 
 	"github.com/it-chep/tutors.git/internal/module/admin"
 )
@@ -37,18 +37,23 @@ func (h *Handler) Handle() http.HandlerFunc {
 			return
 		}
 
-		if indto.IsAssistantRole(ctx) {
-			http.Error(w, "authorization required", http.StatusUnauthorized)
+		from, to, err := convert.StringsIntervalToTime(req.From, req.To)
+		if err != nil {
+			http.Error(w, "failed to convert from time: "+err.Error(), http.StatusBadRequest)
 			return
 		}
-
 		// суперадмин отправит ID админа в теле
 		adminID := req.AdminID
 		if indto.IsAdminRole(ctx) {
 			adminID = userCtx.UserIDFromContext(ctx)
 		}
 
-		finance, err := h.adminModule.Actions.GetAllFinance.Do(ctx, req.From, req.To, adminID)
+		finance, err := h.adminModule.Actions.GetAllFinanceByTGs.Do(ctx, dto.Request{
+			AdminID:     adminID,
+			TgUsernames: req.TgUsernames,
+			From:        from,
+			To:          to,
+		})
 		if err != nil {
 			http.Error(w, "failed to get user data: "+err.Error(), http.StatusInternalServerError)
 			return
