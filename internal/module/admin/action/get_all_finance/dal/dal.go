@@ -3,6 +3,8 @@ package dal
 import (
 	"context"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance/dto"
+	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
 	"github.com/samber/lo"
 	"time"
 
@@ -191,11 +193,40 @@ func (r *Repository) conductedNotTrialLessons(ctx context.Context, adminID int64
 		 	and cl.created_at between $2 and $3
 			and cl.is_trial = false
 	`
-
 	args := []interface{}{
 		adminID,
 		from,
 		to,
+	}
+
+	if indto.IsAssistantRole(ctx) {
+		sql = `
+			select cl.* from conducted_lessons cl
+					join tutors t on cl.tutor_id = t.id
+			        join students s on s.id = cl.student_id
+			where t.admin_id = $1
+				and cl.created_at between $2 and $3
+				and cl.is_trial = false
+				and (
+			-- Условие A: Если у ассистента есть TG, используем их
+		      s.tg_admin_username = any(
+				  SELECT available_tgs
+				  FROM assistant_tgs 
+				  WHERE user_id = $4
+					AND available_tgs IS NOT NULL 
+					AND array_length(available_tgs, 1) > 0
+			  )
+			  -- Условие B: Если у ассистента нет TG (пустой массив или нет записи), показываем всех
+			  OR NOT EXISTS (
+				  SELECT 1
+				  FROM assistant_tgs 
+				  WHERE user_id = $4
+					AND available_tgs IS NOT NULL 
+					AND array_length(available_tgs, 1) > 0
+			  )
+			)
+		`
+		args = append(args, userCtx.UserIDFromContext(ctx))
 	}
 
 	var lessons dao.ConductedLessonDAOs

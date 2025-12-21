@@ -1,13 +1,11 @@
-package create_assistant
+package delete_available_tg
 
 import (
 	"encoding/json"
-	"net/http"
-
-	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/create_admin/dto"
-	dto2 "github.com/it-chep/tutors.git/internal/module/admin/dto"
-
+	"github.com/go-chi/chi/v5"
 	"github.com/it-chep/tutors.git/internal/module/admin"
+	"net/http"
+	"strconv"
 )
 
 type Handler struct {
@@ -24,22 +22,22 @@ func (h *Handler) Handle() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
+		assistantIDStr := chi.URLParam(r, "assistant_id")
+		assistantID, err := strconv.ParseInt(assistantIDStr, 10, 64)
+		if err != nil {
+			http.Error(w, "invalid assistant ID", http.StatusBadRequest)
+			return
+		}
+
 		var req Request
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, "failed to decode request: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		err := h.adminModule.Actions.CreateAdmin.Do(ctx, dto.CreateRequest{
-			FullName:     req.FullName,
-			Tg:           req.Tg,
-			Phone:        req.Phone,
-			Email:        req.Email,
-			Role:         dto2.AssistantRole,
-			AvailableTGs: req.AvailableTgs,
-		})
+		err = h.adminModule.Actions.DeleteAvailableTg.Do(ctx, assistantID, req.AvailableTg)
 		if err != nil {
-			http.Error(w, "failed to create assistant data: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, "failed to get assistant data: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}

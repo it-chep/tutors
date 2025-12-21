@@ -6,6 +6,8 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/delete_admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/get_admin_by_id"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/get_admins"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/assistant/add_available_tg"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/assistant/delete_available_tg"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/auth"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance_by_tgs"
@@ -110,6 +112,10 @@ type Aggregator struct {
 	// Уроки
 	DeleteLesson *delete_lesson.Action
 	UpdateLesson *update_lesson.Action
+
+	// Ассистенты
+	AddAvailableTg    *add_available_tg.Action
+	DeleteAvailableTg *delete_available_tg.Action
 }
 
 func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtConfig, bot *tg_bot.Bot) *Aggregator {
@@ -174,5 +180,9 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 		// Уроки
 		DeleteLesson: delete_lesson.New(pool),
 		UpdateLesson: update_lesson.New(pool, bot),
+
+		// Ассистенты
+		AddAvailableTg:    add_available_tg.New(pool),
+		DeleteAvailableTg: delete_available_tg.New(pool),
 	}
 }

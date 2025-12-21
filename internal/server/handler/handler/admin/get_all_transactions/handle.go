@@ -32,7 +32,7 @@ func (h *Handler) Handle() http.HandlerFunc {
 		}
 
 		if dto.IsAssistantRole(ctx) {
-			http.Error(w, "authorization required", http.StatusUnauthorized)
+			http.Error(w, "у ассистента нет на это прав", http.StatusUnauthorized)
 			return
 		}
 

@@ -3,6 +3,7 @@ package get_tutors
 import (
 	"cmp"
 	"context"
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
 	"slices"
 
 	"github.com/samber/lo"
@@ -25,6 +26,9 @@ func New(pool *pgxpool.Pool) *Action {
 func (a *Action) Do(ctx context.Context, adminID int64) (tutors []dto.Tutor, err error) {
 	if dto.IsSuperAdminRole(ctx) && adminID == 0 {
 		tutors, err = a.dal.GetTutors(ctx)
+	}
+	if dto.IsAssistantRole(ctx) {
+		tutors, err = a.dal.GetTutorsAvailableToAssistance(ctx, userCtx.UserIDFromContext(ctx))
 	}
 	if adminID != 0 {
 		tutors, err = a.dal.GetTutorsByAdmin(ctx, adminID)

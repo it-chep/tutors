@@ -29,10 +29,11 @@ func (a *Action) Do(ctx context.Context, from, to string, adminID int64) (dto.Ge
 	}
 
 	var (
-		cashFlow decimal.Decimal
-		finance  decimal.Decimal
-		debt     decimal.Decimal
-		wg       = sync.WaitGroup{}
+		cashFlow   decimal.Decimal
+		finance    decimal.Decimal
+		debt       decimal.Decimal
+		tutorsInfo dto.TutorsInfo
+		wg         = sync.WaitGroup{}
 	)
 
 	// Получаем общий оборот
@@ -71,11 +72,24 @@ func (a *Action) Do(ctx context.Context, from, to string, adminID int64) (dto.Ge
 		debt = gdebt
 	}()
 
+	// Получаем дебиторскую задолженность
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		gtutorsInfo, gErr := a.dal.GetTutorsInfo(ctx, fromTime, toTime, adminID)
+		if gErr != nil {
+			logger.Error(ctx, "Ошибка при получении дебиторской задолженности", gErr)
+			return
+		}
+		tutorsInfo = gtutorsInfo
+	}()
+
 	wg.Wait()
 
 	return dto.GetAllFinanceDto{
-		Profit:   finance.String(),
-		CashFlow: cashFlow.String(),
-		Debt:     debt.String(),
+		Profit:     finance.String(),
+		CashFlow:   cashFlow.String(),
+		Debt:       debt.String(),
+		TutorsInfo: tutorsInfo,
 	}, nil
 }

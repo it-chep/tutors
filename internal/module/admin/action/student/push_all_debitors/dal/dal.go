@@ -19,16 +19,17 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 }
 
 // GetDebitors .
-func (r *Repository) GetDebitors(ctx context.Context) (dto.Students, error) {
+func (r *Repository) GetDebitors(ctx context.Context, adminID int64) (dto.Students, error) {
 	sql := `
 		select s.* 
 		from students s 
 			join wallet w on s.id = w.student_id
-		where w.balance < 0 and s.parent_tg_id is not null
+			join tutors t on s.tutor_id = t.id
+		where w.balance < 0 and s.parent_tg_id is not null and t.admin_id = $1
 	`
 
 	var students dao.StudentsDAO
-	err := pgxscan.Select(ctx, r.pool, &students, sql)
+	err := pgxscan.Select(ctx, r.pool, &students, sql, adminID)
 	if err != nil {
 		return nil, err
 	}

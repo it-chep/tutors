@@ -1,6 +1,7 @@
 package get_all_finance_by_tgs
 
 import (
+	"context"
 	"encoding/json"
 	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/convert"
@@ -33,7 +34,7 @@ func (h *Handler) Handle() http.HandlerFunc {
 		}
 
 		if indto.IsTutorRole(ctx) {
-			http.Error(w, "authorization required", http.StatusUnauthorized)
+			http.Error(w, "у репетитора нет на это прав ", http.StatusUnauthorized)
 			return
 		}
 
@@ -45,7 +46,7 @@ func (h *Handler) Handle() http.HandlerFunc {
 		// суперадмин отправит ID админа в теле
 		adminID := req.AdminID
 		if indto.IsAdminRole(ctx) {
-			adminID = userCtx.UserIDFromContext(ctx)
+			adminID = userCtx.AdminIDFromContext(ctx)
 		}
 
 		finance, err := h.adminModule.Actions.GetAllFinanceByTGs.Do(ctx, dto.Request{
@@ -59,7 +60,7 @@ func (h *Handler) Handle() http.HandlerFunc {
 			return
 		}
 
-		response := h.prepareResponse(finance)
+		response := h.prepareResponse(ctx, finance)
 
 		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(response); err != nil {
@@ -69,7 +70,16 @@ func (h *Handler) Handle() http.HandlerFunc {
 	}
 }
 
-func (h *Handler) prepareResponse(finance dto.GetAllFinanceDto) Response {
+func (h *Handler) prepareResponse(ctx context.Context, finance dto.GetAllFinanceDto) Response {
+	if indto.IsAssistantRole(ctx) {
+		return Response{
+			Finance: Finance{
+				Salary: finance.TutorsInfo.Salary,
+				Hours:  finance.TutorsInfo.Hours,
+			},
+		}
+	}
+
 	return Response{
 		Finance: Finance{
 			Profit:   finance.Profit,

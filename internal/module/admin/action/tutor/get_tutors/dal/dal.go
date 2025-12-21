@@ -91,3 +91,43 @@ func (r *Repository) GetTutorsStudents(ctx context.Context, tutorIDs []int64) ([
 
 	return students.ToDomain(), nil
 }
+
+func (r *Repository) GetTutorsAvailableToAssistance(ctx context.Context, assistantID int64) ([]dto.Tutor, error) {
+	sql := `
+		select 
+            t.cost_per_hour,
+            t.subject_id,
+            t.admin_id,
+            u.full_name as full_name,
+            u.tutor_id as id,
+            u.tg,
+            u.phone
+		from tutors t 
+		    join users u on t.id = u.tutor_id 
+			join students s on t.id = s.tutor_id
+		where       
+			  -- Условие A: Если у ассистента есть TG, используем их
+		      s.tg_admin_username = any(
+				  SELECT available_tgs
+				  FROM assistant_tgs 
+				  WHERE user_id = $1 
+					AND available_tgs IS NOT NULL 
+					AND array_length(available_tgs, 1) > 0
+			  )
+			  -- Условие B: Если у ассистента нет TG (пустой массив или нет записи), показываем всех
+			  OR NOT EXISTS (
+				  SELECT 1
+				  FROM assistant_tgs 
+				  WHERE user_id = $1 
+					AND available_tgs IS NOT NULL 
+					AND array_length(available_tgs, 1) > 0
+			  )
+		order by t.id
+	`
+	var tutors dao.TutorsDao
+	if err := pgxscan.Select(ctx, r.pool, &tutors, sql, assistantID); err != nil {
+		return nil, err
+	}
+
+	return tutors.ToDomain(), nil
+}

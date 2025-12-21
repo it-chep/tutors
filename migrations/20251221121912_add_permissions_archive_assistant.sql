@@ -9,7 +9,9 @@ values (35, 'Финансы по тгшкам', '/admin/finance_by_tgs', '-'),
        (38, 'Уведомить всех должников', '/admin/students/push_all_students', '-'),
        (39, 'Получить всех архивных студентов', '/admin/students/archive', '-'),
        (40, 'Получить всех/создать ассистента', '/admin/assistant', '-'),
-       (41, 'Получить 1 ассистента или удалить его', '/admin/assistant/{id}', '-');
+       (41, 'Получить 1 ассистента или удалить его', '/admin/assistant/{id}', '-'),
+       (42, 'Добавить доступ ассистента к тгшке', '/admin/assistant/{id}/add_available_tg', '-'),
+       (43, 'Забрать доступ ассистента к тгшке', '/admin/assistant/{id}/delete_available_tg', '-');
 
 insert into roles_permissions (id, role_id, permission_id)
 values (72, 2, 35),
@@ -63,6 +65,12 @@ values (79, 4, 1),
        (117, 4, 39),
        (118, 4, 40),
        (119, 4, 41);
+
+
+-- Добавление/удаление доступной тгшки
+insert into roles_permissions (id, role_id, permission_id)
+values (120, 2, 42),
+       (121, 2, 43);
 
 insert into roles (id, name, description)
 values (4, 'assistant', 'Ассистент');

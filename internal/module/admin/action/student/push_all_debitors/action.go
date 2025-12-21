@@ -24,8 +24,8 @@ func New(pool *pgxpool.Pool, bot *tg_bot.Bot) *Action {
 	}
 }
 
-func (a *Action) Do(ctx context.Context) error {
-	students, err := a.dal.GetDebitors(ctx)
+func (a *Action) Do(ctx context.Context, adminID int64) error {
+	students, err := a.dal.GetDebitors(ctx, adminID)
 	if err != nil {
 		return err
 	}

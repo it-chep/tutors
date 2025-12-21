@@ -31,7 +31,7 @@ func (h *Handler) Handle() http.HandlerFunc {
 			return
 		}
 
-		if dto.IsTutorRole(ctx) {
+		if dto.IsTutorRole(ctx) || dto.IsAssistantRole(ctx) {
 			http.Error(w, "authorization required", http.StatusUnauthorized)
 			return
 		}

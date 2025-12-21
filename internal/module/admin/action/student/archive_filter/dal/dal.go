@@ -7,6 +7,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/archive_filter/dto"
 	"github.com/it-chep/tutors.git/internal/module/admin/dal/dao"
 	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/samber/lo"
 	"strings"
@@ -23,7 +24,7 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 }
 
 func (r *Repository) FilterStudents(ctx context.Context, adminID int64, filter dto.FilterRequest) (indto.Students, error) {
-	sql, phValues := stmtBuilder(adminID, filter)
+	sql, phValues := stmtBuilder(ctx, adminID, filter)
 
 	var students dao.StudentsDAO
 	err := pgxscan.Select(ctx, r.pool, &students, sql, phValues...)
@@ -34,7 +35,7 @@ func (r *Repository) FilterStudents(ctx context.Context, adminID int64, filter d
 	return students.ToDomain(), nil
 }
 
-func stmtBuilder(adminID int64, filter dto.FilterRequest) (_ string, phValues []any) {
+func stmtBuilder(ctx context.Context, adminID int64, filter dto.FilterRequest) (_ string, phValues []any) {
 	defaultSql := `
 		select s.*
 		from students s 
@@ -62,6 +63,40 @@ func stmtBuilder(adminID int64, filter dto.FilterRequest) (_ string, phValues []
 		whereStmtBuilder.WriteString(
 			`and w.balance < 0`,
 		)
+	}
+
+	if indto.IsAssistantRole(ctx) {
+		whereStmtBuilder.WriteString(
+			fmt.Sprintf(`
+							 and (
+                -- Если у ассистента есть конкретные TG, фильтруем по ним
+                (
+                    exists (
+                        select 1 
+                        from assistant_tgs 
+                        where user_id = $%d 
+                          and available_tgs is not null 
+                          and array_length(available_tgs, 1) > 0
+                    )
+                    and s.tg_admin_username = any(
+                        select available_tgs
+                        from assistant_tgs 
+                        where user_id = $%d
+                    )
+                )
+                -- ИЛИ если нет конкретных TG, не фильтруем (показываем все)
+                or not exists (
+                    select 1 
+                    from assistant_tgs 
+                    where user_id = $%d 
+                      and available_tgs is not null 
+                      and array_length(available_tgs, 1) > 0
+                )
+            )
+			`, phCounter, phCounter, phCounter),
+		)
+		phValues = append(phValues, userCtx.UserIDFromContext(ctx))
+		phCounter++
 	}
 
 	return fmt.Sprintf(`

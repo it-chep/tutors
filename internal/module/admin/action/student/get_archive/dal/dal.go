@@ -130,3 +130,42 @@ func (r *Repository) HasStudentsPayments(ctx context.Context, studentIDs []int64
 	}
 	return resultMap, nil
 }
+
+func (r *Repository) GetStudentsAvailableToAssistant(ctx context.Context, assistantID int64) ([]dto.Student, error) {
+	sql := `
+		select * 
+		from students 
+		where is_archive is true and (
+                -- Если у ассистента есть конкретные TG, фильтруем по ним
+                (
+                    exists (
+                        select 1 
+                        from assistant_tgs 
+                        where user_id = $1
+                          and available_tgs is not null 
+                          and array_length(available_tgs, 1) > 0
+                    )
+                    and tg_admin_username = any(
+                        select available_tgs
+                        from assistant_tgs 
+                        where user_id = $1
+                    )
+                )
+                -- ИЛИ если нет конкретных TG, не фильтруем (показываем все)
+                or not exists (
+                    select 1 
+                    from assistant_tgs 
+                    where user_id = $1
+                      and available_tgs is not null 
+                      and array_length(available_tgs, 1) > 0
+                )
+            )
+	`
+	var students dao.StudentsDAO
+	err := pgxscan.Select(ctx, r.pool, &students, sql, assistantID)
+	if err != nil {
+		return nil, err
+	}
+
+	return students.ToDomain(), nil
+}

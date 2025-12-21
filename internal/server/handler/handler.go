@@ -96,10 +96,12 @@ func (h *Handler) setupRoutes(cfg Config) {
 
 		// Ассистенты
 		r.Route("/assistant", func(r chi.Router) {
-			r.Get("/", h.adminAgg.Assistant.GetAssistants.Handle())                    // GET /admin/assistant
-			r.Post("/", h.adminAgg.Assistant.CreateAssistant.Handle())                 // POST /admin/assistant
-			r.Get("/{assistant_id}", h.adminAgg.Assistant.GetAssistantByID.Handle())   // GET /admin/assistant/{id}
-			r.Delete("/{assistant_id}", h.adminAgg.Assistant.DeleteAssistant.Handle()) // DELETE /admin/assistant/{id}
+			r.Get("/", h.adminAgg.Assistant.GetAssistants.Handle())                                        // GET /admin/assistant
+			r.Post("/", h.adminAgg.Assistant.CreateAssistant.Handle())                                     // POST /admin/assistant
+			r.Get("/{assistant_id}", h.adminAgg.Assistant.GetAssistantByID.Handle())                       // GET /admin/assistant/{id}
+			r.Delete("/{assistant_id}", h.adminAgg.Assistant.DeleteAssistant.Handle())                     // DELETE /admin/assistant/{id}
+			r.Post("/{assistant_id}/add_available_tg", h.adminAgg.Assistant.AddAvailableTG.Handle())       // POST /admin/assistant/{id}/add_available_tg
+			r.Post("/{assistant_id}/delete_available_tg", h.adminAgg.Assistant.DeleteAvailableTG.Handle()) // POST /admin/assistant/{id}/delete_available_tg
 		})
 
 		// Репетиторы

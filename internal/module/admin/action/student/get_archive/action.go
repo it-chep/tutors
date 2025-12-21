@@ -43,6 +43,10 @@ func (a *Action) Do(ctx context.Context, tutorID int64) (_ []dto.Student, err er
 		return a.getStudentsByTutor(ctx, tutorID)
 	}
 
+	if dto.IsAssistantRole(ctx) {
+		return a.getStudentsByAssistant(ctx)
+	}
+
 	return nil, nil
 }
 
@@ -59,6 +63,17 @@ func (a *Action) getAllStudentsForSuperAdmin(ctx context.Context) ([]dto.Student
 
 func (a *Action) getStudentsByTutorForSuperAdmin(ctx context.Context, tutorID int64) ([]dto.Student, error) {
 	students, err := a.dal.GetTutorStudents(ctx, tutorID)
+	if err != nil {
+		return nil, err
+	}
+
+	a.enrichStudents(ctx, students)
+
+	return students, nil
+}
+
+func (a *Action) getStudentsByAssistant(ctx context.Context) ([]dto.Student, error) {
+	students, err := a.dal.GetStudentsAvailableToAssistant(ctx, userCtx.UserIDFromContext(ctx))
 	if err != nil {
 		return nil, err
 	}

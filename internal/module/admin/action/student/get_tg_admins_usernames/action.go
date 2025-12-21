@@ -3,6 +3,8 @@ package get_tg_admins_usernames
 import (
 	"context"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_tg_admins_usernames/dal"
+	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -17,5 +19,15 @@ func New(pool *pgxpool.Pool) *Action {
 }
 
 func (a *Action) Do(ctx context.Context, adminID int64) ([]string, error) {
+	if indto.IsAssistantRole(ctx) {
+		usernames, err := a.dal.GetAssistantUsernames(ctx, userCtx.UserIDFromContext(ctx))
+		if err != nil {
+			return nil, err
+		}
+		if len(usernames) != 0 {
+			return usernames, nil
+		}
+	}
+
 	return a.dal.GetUsernames(ctx, adminID)
 }

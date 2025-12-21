@@ -19,7 +19,7 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r *Repository) CreateAdmin(ctx context.Context, createDTO dto.CreateRequest) error {
+func (r *Repository) CreateAdmin(ctx context.Context, createDTO dto.CreateRequest) (int64, error) {
 	sql := `
 		insert into users (email, full_name, role_id, phone, tg) values ($1, $2, $3, $4, $5) returning id
 	`
@@ -34,14 +34,29 @@ func (r *Repository) CreateAdmin(ctx context.Context, createDTO dto.CreateReques
 	var id int64
 	err := r.pool.QueryRow(ctx, sql, args...).Scan(&id)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	if createDTO.Role == dto2.AssistantRole {
-		_, err = r.pool.Exec(ctx, "update users set admin_id = $1 where id = $1", userCtx.UserIDFromContext(ctx))
+		_, err = r.pool.Exec(ctx, "update users set admin_id = $1 where id = $1", userCtx.AdminIDFromContext(ctx))
 	} else if createDTO.Role == dto2.AdminRole {
 		_, err = r.pool.Exec(ctx, "update users set admin_id = $1 where id = $1", id)
 	}
+
+	return id, err
+}
+
+// AddAvailableTGs добавления тг доступных ассистенту
+func (r *Repository) AddAvailableTGs(ctx context.Context, assistantID int64, createDTO dto.CreateRequest) error {
+	sql := `
+		insert into assistant_tgs (user_id, available_tgs) values ($1, $2) returning id
+	`
+	args := []interface{}{
+		assistantID,
+		createDTO.AvailableTGs,
+	}
+
+	_, err := r.pool.Exec(ctx, sql, args...)
 
 	return err
 }
