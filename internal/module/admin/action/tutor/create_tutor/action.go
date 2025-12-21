@@ -24,5 +24,5 @@ func (a *Action) Do(ctx context.Context, createDTO dto.Request, adminID int64) e
 		return err
 	}
 
-	return a.dal.CreateUser(ctx, createDTO, tutorID)
+	return a.dal.CreateUser(ctx, createDTO, tutorID, adminID)
 }
