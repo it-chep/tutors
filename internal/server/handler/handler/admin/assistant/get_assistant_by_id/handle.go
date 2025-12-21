@@ -54,6 +54,7 @@ func (h *Handler) prepareResponse(admin dto.User) Response {
 			ID:       admin.ID,
 			FullName: admin.FullName,
 			Tg:       admin.Tg,
+			Phone:    admin.Phone,
 		},
 	}
 }
