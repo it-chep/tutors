@@ -37,8 +37,12 @@ func (h *Handler) Handle() http.HandlerFunc {
 			http.Error(w, "failed to get assistant data: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-
-		response := h.prepareResponse(baseData)
+		tgs, err := h.adminModule.Actions.GetAssistantAvailableTGs.Do(ctx, assistantID)
+		if err != nil {
+			http.Error(w, "failed to get assistant data: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		response := h.prepareResponse(baseData, tgs)
 
 		w.Header().Set("Content-Type", "application/json")
 		if err = json.NewEncoder(w).Encode(response); err != nil {
@@ -48,13 +52,14 @@ func (h *Handler) Handle() http.HandlerFunc {
 	}
 }
 
-func (h *Handler) prepareResponse(admin dto.User) Response {
+func (h *Handler) prepareResponse(admin dto.User, tgs []string) Response {
 	return Response{
 		Assistant: Assistant{
-			ID:       admin.ID,
-			FullName: admin.FullName,
-			Tg:       admin.Tg,
-			Phone:    admin.Phone,
+			ID:           admin.ID,
+			FullName:     admin.FullName,
+			Tg:           admin.Tg,
+			Phone:        admin.Phone,
+			AvailableTgs: tgs,
 		},
 	}
 }

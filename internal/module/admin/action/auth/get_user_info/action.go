@@ -42,7 +42,7 @@ func (a *Action) Handle() http.HandlerFunc {
 
 		paid, err := a.dal.GetPaidFunctions(ctx, user.AdminID)
 		if err != nil {
-			http.Error(w, "Что-то пошло не так с id админа, попробуйте позже", http.StatusInternalServerError)
+			http.Error(w, "Ошибка из GetPaidFunctions", http.StatusInternalServerError)
 			return
 		}
 

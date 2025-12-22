@@ -3,6 +3,8 @@ package get_user_info_dal
 import (
 	"context"
 	"encoding/json"
+	"github.com/jackc/pgx/v5"
+	"github.com/pkg/errors"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/it-chep/tutors.git/internal/module/admin/dal/dao"
@@ -35,6 +37,9 @@ func (r *Repository) GetPaidFunctions(ctx context.Context, adminID int64) (*dto.
 	sql := "select * from paid_functions where admin_id = $1"
 	p := &xo.PaidFunction{}
 	if err := pgxscan.Get(ctx, r.pool, p, sql, adminID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, err
 	}
 

@@ -21,8 +21,10 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 // GetAssistantUsernames возвращает доступные тгшки ассистенту
 func (r *Repository) GetAssistantUsernames(ctx context.Context, assistantID int64) ([]string, error) {
 	sql := `
-		select available_tgs from assistant_tgs where user_id = $1
-	`
+        SELECT available_tgs 
+        FROM assistant_tgs 
+        WHERE user_id = $1
+    `
 
 	var availableTgs []string
 	err := pgxscan.Get(ctx, r.pool, &availableTgs, sql, assistantID)
@@ -34,21 +36,4 @@ func (r *Repository) GetAssistantUsernames(ctx context.Context, assistantID int6
 	}
 
 	return availableTgs, nil
-}
-
-func (r *Repository) GetUsernames(ctx context.Context, adminID int64) ([]string, error) {
-	sql := `
-		select distinct s.tg_admin_username 
-		from students s 
-		    join tutors t on s.tutor_id = t.id 
-		where t.admin_id = $1 and s.tg_admin_username is not null and s.tg_admin_username != ''
-	`
-
-	var usernames []string
-	err := pgxscan.Select(ctx, r.pool, &usernames, sql, adminID)
-	if err != nil {
-		return nil, err
-	}
-
-	return usernames, nil
 }
