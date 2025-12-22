@@ -45,6 +45,10 @@ func (a *Action) Do(ctx context.Context, tutorID int64) (_ []dto.Student, err er
 	}
 
 	if dto.IsAssistantRole(ctx) {
+		if tutorID == 0 {
+			return a.getStudentsByAssistant(ctx)
+		}
+		// todo if tutorID != 0
 		return a.getStudentsByAssistant(ctx)
 	}
 

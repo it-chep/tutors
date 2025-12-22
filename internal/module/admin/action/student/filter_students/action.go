@@ -23,7 +23,7 @@ func New(pool *pgxpool.Pool) *Action {
 
 func (a *Action) Do(ctx context.Context, filter dto.FilterRequest) ([]indto.Student, error) {
 
-	adminID := userCtx.UserIDFromContext(ctx)
+	adminID := userCtx.AdminIDFromContext(ctx)
 
 	students, err := a.dal.FilterStudents(ctx, adminID, filter)
 	if err != nil {

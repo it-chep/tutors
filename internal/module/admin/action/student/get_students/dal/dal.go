@@ -134,33 +134,33 @@ func (r *Repository) HasStudentsPayments(ctx context.Context, studentIDs []int64
 
 func (r *Repository) GetStudentsAvailableToAssistant(ctx context.Context, assistantID int64) ([]dto.Student, error) {
 	sql := `
-		select * 
-		from students 
-		where is_archive is not true and (
-                -- Если у ассистента есть конкретные TG, фильтруем по ним
-                (
-                    exists (
-                        select 1 
-                        from assistant_tgs 
-                        where user_id = $1
-                          and available_tgs is not null 
-                          and array_length(available_tgs, 1) > 0
-                    )
-                    and tg_admin_username = any(
-                        select available_tgs
-                        from assistant_tgs 
-                        where user_id = $1
-                    )
-                )
-                -- ИЛИ если нет конкретных TG, не фильтруем (показываем все)
-                or not exists (
-                    select 1 
-                    from assistant_tgs 
-                    where user_id = $1
-                      and available_tgs is not null 
-                      and array_length(available_tgs, 1) > 0
-                )
-            )
+		 with assistant_data as (
+            select 
+                available_tgs,
+                case 
+                    when available_tgs is not null and array_length(available_tgs, 1) > 0 
+                    then true 
+                    else false 
+                end as has_tgs
+            from assistant_tgs 
+            where user_id = $1
+        )
+        select s.* 
+        from students s
+        cross join (
+            select 
+                coalesce(available_tgs, '{}'::text[]) as available_tgs,
+                coalesce(has_tgs, false) as has_tgs
+            from assistant_data
+            union all
+            select '{}'::text[], false
+            where not exists (select 1 from assistant_data)
+        ) ad
+        where s.is_archive is not true 
+          and (
+                (ad.has_tgs and s.tg_admin_username = any(ad.available_tgs))
+                or not ad.has_tgs
+              )
 	`
 	var students dao.StudentsDAO
 	err := pgxscan.Select(ctx, r.pool, &students, sql, assistantID)

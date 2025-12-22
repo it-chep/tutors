@@ -52,7 +52,7 @@ func stmtBuilder(ctx context.Context, adminID int64, filter dto.FilterRequest) (
 	if len(filter.TgUsernames) != 0 {
 		whereStmtBuilder.WriteString(
 			fmt.Sprintf(`
-				and tg_admin_username = any($%d)
+				and s.tg_admin_username = any($%d)
 			`, phCounter),
 		)
 		phValues = append(phValues, filter.TgUsernames)
@@ -66,36 +66,29 @@ func stmtBuilder(ctx context.Context, adminID int64, filter dto.FilterRequest) (
 	}
 
 	if indto.IsAssistantRole(ctx) {
+		assistantID := userCtx.UserIDFromContext(ctx)
+
 		whereStmtBuilder.WriteString(
 			fmt.Sprintf(`
-							 and (
-                -- Если у ассистента есть конкретные TG, фильтруем по ним
-                (
-                    exists (
+                and (
+                    not exists (
                         select 1 
-                        from assistant_tgs 
-                        where user_id = $%d 
-                          and available_tgs is not null 
-                          and array_length(available_tgs, 1) > 0
+                        from assistant_tgs at
+                        where at.user_id = $%d
+                          and at.available_tgs is not null
+                          and array_length(at.available_tgs, 1) > 0
                     )
-                    and s.tg_admin_username = any(
-                        select available_tgs
-                        from assistant_tgs 
-                        where user_id = $%d
+                    or s.tg_admin_username in (
+                        select unnest(at.available_tgs)
+                        from assistant_tgs at
+                        where at.user_id = $%d
+                          and at.available_tgs is not null
                     )
                 )
-                -- ИЛИ если нет конкретных TG, не фильтруем (показываем все)
-                or not exists (
-                    select 1 
-                    from assistant_tgs 
-                    where user_id = $%d 
-                      and available_tgs is not null 
-                      and array_length(available_tgs, 1) > 0
-                )
-            )
-			`, phCounter, phCounter, phCounter),
+            `, phCounter, phCounter),
 		)
-		phValues = append(phValues, userCtx.UserIDFromContext(ctx))
+
+		phValues = append(phValues, assistantID)
 		phCounter++
 	}
 
