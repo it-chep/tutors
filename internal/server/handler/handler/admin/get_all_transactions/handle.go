@@ -36,7 +36,7 @@ func (h *Handler) Handle() http.HandlerFunc {
 			return
 		}
 
-		adminID := userCtx.UserIDFromContext(ctx)
+		adminID := userCtx.AdminIDFromContext(ctx)
 
 		from, to, err := req.ToTime()
 		if err != nil {
