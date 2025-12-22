@@ -2,6 +2,8 @@ package create_student
 
 import (
 	"context"
+	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/create_student/dal"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/create_student/dto"
@@ -23,5 +25,14 @@ func (a *Action) Do(ctx context.Context, createDTO dto.CreateRequest) error {
 	if err != nil {
 		return err
 	}
-	return a.dal.CreateWallet(ctx, studentID)
+	err = a.dal.CreateWallet(ctx, studentID)
+	if err != nil {
+		return err
+	}
+
+	if indto.IsAssistantRole(ctx) && len(createDTO.TgAdminUsername) != 0 {
+		return a.dal.AddTgToAssistant(ctx, userCtx.UserIDFromContext(ctx), createDTO.TgAdminUsername)
+	}
+
+	return nil
 }

@@ -27,11 +27,11 @@ func (a *Action) Do(ctx context.Context, adminID int64) (tutors []dto.Tutor, err
 	if dto.IsSuperAdminRole(ctx) && adminID == 0 {
 		tutors, err = a.dal.GetTutors(ctx)
 	}
-	if dto.IsAssistantRole(ctx) {
-		tutors, err = a.dal.GetTutorsAvailableToAssistance(ctx, userCtx.UserIDFromContext(ctx))
-	}
 	if adminID != 0 {
 		tutors, err = a.dal.GetTutorsByAdmin(ctx, adminID)
+	}
+	if dto.IsAssistantRole(ctx) {
+		tutors, err = a.dal.GetTutorsAvailableToAssistance(ctx, userCtx.UserIDFromContext(ctx))
 	}
 
 	tutorsIDs := make([]int64, 0, len(tutors))

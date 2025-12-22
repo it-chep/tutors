@@ -32,7 +32,7 @@ func (h *Handler) Handle() http.HandlerFunc {
 			adminID = 0
 		}
 
-		if adminID == 0 && dto.IsAdminRole(ctx) {
+		if adminID == 0 && (dto.IsAdminRole(ctx) || dto.IsAssistantRole(ctx)) {
 			adminID = userCtx.AdminIDFromContext(ctx)
 		}
 

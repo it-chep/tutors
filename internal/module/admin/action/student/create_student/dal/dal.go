@@ -59,3 +59,24 @@ func (r *Repository) CreateWallet(ctx context.Context, studentID int64) error {
 	_, err := r.pool.Exec(ctx, sql, args...)
 	return err
 }
+
+// AddTgToAssistant добавление тг ассистенту
+func (r *Repository) AddTgToAssistant(ctx context.Context, assistantID int64, tgAdminUsername string) error {
+	sql := `
+		update assistant_tgs
+		set available_tgs = array(
+			select distinct unnest(array_append(available_tgs, $2))
+		)
+		where user_id = $1
+	`
+	args := []interface{}{
+		assistantID,
+		tgAdminUsername,
+	}
+
+	_, err := r.pool.Exec(ctx, sql, args...)
+	if err != nil {
+		return err
+	}
+	return nil
+}

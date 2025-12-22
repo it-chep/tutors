@@ -94,32 +94,32 @@ func (r *Repository) GetTutorsStudents(ctx context.Context, tutorIDs []int64) ([
 
 func (r *Repository) GetTutorsAvailableToAssistance(ctx context.Context, assistantID int64) ([]dto.Tutor, error) {
 	sql := `
-		select 
-            t.cost_per_hour,
-            t.subject_id,
-            t.admin_id,
-            u.full_name as full_name,
-            u.tutor_id as id,
-            u.tg,
-            u.phone
-		from tutors t 
-		    join users u on t.id = u.tutor_id 
-			join students s on t.id = s.tutor_id
-		where       
-                    not exists (
-                        select 1 
-                        from assistant_tgs at
-                        where at.user_id = $1
-                          and at.available_tgs is not null
-                          and array_length(at.available_tgs, 1) > 0
-                    )
-                    or s.tg_admin_username in (
-                        select unnest(at.available_tgs)
-                        from assistant_tgs at
-                        where at.user_id = $1
-                          and at.available_tgs is not null
-                    )
-		order by t.id
+		WITH assistant_available_tgs AS (SELECT available_tgs
+								 FROM assistant_tgs
+								 WHERE user_id = $1
+								   AND available_tgs IS NOT NULL
+								   AND array_length(available_tgs, 1) > 0)
+		SELECT DISTINCT t.cost_per_hour,
+						t.subject_id,
+						t.admin_id,
+						u.full_name as full_name,
+						u.tutor_id  as id,
+						u.tg,
+						u.phone
+		FROM tutors t
+				 JOIN users u ON t.id = u.tutor_id
+				 LEFT JOIN students s ON t.id = s.tutor_id
+				 cross JOIN assistant_available_tgs aat
+		WHERE
+		   -- Если у ассистента нет ограничений по TG
+			NOT EXISTS (SELECT 1 FROM assistant_available_tgs)
+		   -- Или у студента есть TG в разрешенных
+		   OR s.tg_admin_username = ANY (aat.available_tgs)
+		   -- Или у репетитора вообще нет студентов
+		   OR NOT EXISTS (SELECT 1
+						  FROM students s2
+						  WHERE s2.tutor_id = t.id)
+		ORDER BY id
 	`
 	var tutors dao.TutorsDao
 	if err := pgxscan.Select(ctx, r.pool, &tutors, sql, assistantID); err != nil {

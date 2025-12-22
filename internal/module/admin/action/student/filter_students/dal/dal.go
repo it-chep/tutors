@@ -92,8 +92,6 @@ func stmtBuilder(ctx context.Context, adminID int64, filter dto.FilterRequest) (
 		phCounter++
 	}
 
-	fmt.Println(whereStmtBuilder.String())
-
 	return fmt.Sprintf(`
 		%s
 		%s
