@@ -2,10 +2,10 @@ package dal
 
 import (
 	"context"
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/create_admin/dto"
 	dto2 "github.com/it-chep/tutors.git/internal/module/admin/dto"
-	userCtx "github.com/it-chep/tutors.git/pkg/context"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -38,7 +38,7 @@ func (r *Repository) CreateAdmin(ctx context.Context, createDTO dto.CreateReques
 	}
 
 	if createDTO.Role == dto2.AssistantRole {
-		_, err = r.pool.Exec(ctx, "update users set admin_id = $1 where id = $1", userCtx.AdminIDFromContext(ctx))
+		_, err = r.pool.Exec(ctx, "update users set admin_id = $1 where id = $2", userCtx.AdminIDFromContext(ctx), id)
 	} else if createDTO.Role == dto2.AdminRole {
 		_, err = r.pool.Exec(ctx, "update users set admin_id = $1 where id = $1", id)
 	}

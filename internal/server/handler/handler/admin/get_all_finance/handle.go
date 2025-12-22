@@ -39,7 +39,7 @@ func (h *Handler) Handle() http.HandlerFunc {
 
 		// суперадмин отправит ID админа в теле
 		adminID := req.AdminID
-		if indto.IsAdminRole(ctx) {
+		if indto.IsAdminRole(ctx) || indto.IsAssistantRole(ctx) {
 			adminID = userCtx.AdminIDFromContext(ctx)
 		}
 

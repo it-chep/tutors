@@ -38,23 +38,20 @@ func (r *Repository) GetStudentLessons(ctx context.Context, studentID int64, fro
 			        join students s on s.id = cl.student_id
 			where cl.student_id=$1 and cl.created_at between $2 and $3
 				and (
-			-- Условие A: Если у ассистента есть TG, используем их
-		      s.tg_admin_username = any(
-				  SELECT available_tgs
-				  FROM assistant_tgs 
-				  WHERE user_id = $4
-					AND available_tgs IS NOT NULL 
-					AND array_length(available_tgs, 1) > 0
-			  )
-			  -- Условие B: Если у ассистента нет TG (пустой массив или нет записи), показываем всех
-			  OR NOT EXISTS (
-				  SELECT 1
-				  FROM assistant_tgs 
-				  WHERE user_id = $4
-					AND available_tgs IS NOT NULL 
-					AND array_length(available_tgs, 1) > 0
-			  )
-			)
+                    not exists (
+                        select 1 
+                        from assistant_tgs at
+                        where at.user_id = $4
+                          and at.available_tgs is not null
+                          and array_length(at.available_tgs, 1) > 0
+                    )
+                    or s.tg_admin_username in (
+                        select unnest(at.available_tgs)
+                        from assistant_tgs at
+                        where at.user_id = $4
+                          and at.available_tgs is not null
+                    )
+                )
 		`
 		args = append(args, userCtx.UserIDFromContext(ctx))
 	}
