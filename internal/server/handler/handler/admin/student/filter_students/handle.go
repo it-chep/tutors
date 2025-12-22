@@ -32,16 +32,28 @@ func (h *Handler) Handle() http.HandlerFunc {
 		//	tutorID = userCtx.GetTutorID(ctx)
 		//}
 
-		var req Request
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		var (
+			req      Request
+			students dto.Students
+			err      error
+		)
+		if err = json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, "failed to decode request: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		students, err := h.adminModule.Actions.FilterStudents.Do(ctx, req.ToFilterRequest())
-		if err != nil {
-			http.Error(w, "failed to get user data: "+err.Error(), http.StatusInternalServerError)
-			return
+		if req.IsArchived {
+			students, err = h.adminModule.Actions.ArchiveFilter.Do(ctx, req.ToArchiveFilterRequest())
+			if err != nil {
+				http.Error(w, "failed to get user data: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else {
+			students, err = h.adminModule.Actions.FilterStudents.Do(ctx, req.ToFilterRequest())
+			if err != nil {
+				http.Error(w, "failed to get user data: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
 		}
 
 		response := h.prepareResponse(students)

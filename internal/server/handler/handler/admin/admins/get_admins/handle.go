@@ -24,7 +24,7 @@ func (h *Handler) Handle() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		baseData, err := h.adminModule.Actions.GetAdmins.Do(ctx)
+		baseData, err := h.adminModule.Actions.GetAdmins.Do(ctx, dto.AdminRole)
 		if err != nil {
 			http.Error(w, "failed to get tutors data: "+err.Error(), http.StatusInternalServerError)
 			return

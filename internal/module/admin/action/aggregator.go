@@ -6,18 +6,27 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/delete_admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/get_admin_by_id"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/get_admins"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/assistant/add_available_tg"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/assistant/delete_available_tg"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/assistant/get_available_tg"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/auth"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance_by_tgs"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_lessons"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_subjects"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_transactions"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/lessons/delete_lesson"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/lessons/update_lesson"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/student/archivate_student"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/student/archive_filter"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/filter_students"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_archive"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_notification_history"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_tg_admins_usernames"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_transaction_history"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/student/push_all_debitors"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/push_notification"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/student/unarchivate_student"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/create_student"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/delete_student"
@@ -70,10 +79,18 @@ type Aggregator struct {
 	GetTgAdminsUsernames   *get_tg_admins_usernames.Action
 	GetTransactionHistory  *get_transaction_history.Action
 	GetNotificationHistory *get_notification_history.Action
-	PushNotification       *push_notification.Action
+	// пуши
+	PushNotification *push_notification.Action
+	PushAllDebitors  *push_all_debitors.Action
+	// архив
+	GetArchive        *get_archive.Action
+	ArchiveStudent    *archivate_student.Action
+	UnArhivateStudent *unarchivate_student.Action
+	ArchiveFilter     *archive_filter.Action
 
 	// Финансы
-	GetAllFinance *get_all_finance.Action
+	GetAllFinance      *get_all_finance.Action
+	GetAllFinanceByTGs *get_all_finance_by_tgs.Action
 
 	// Предметы
 	GetAllSubjects *get_all_subjects.Action
@@ -96,6 +113,11 @@ type Aggregator struct {
 	// Уроки
 	DeleteLesson *delete_lesson.Action
 	UpdateLesson *update_lesson.Action
+
+	// Ассистенты
+	AddAvailableTg           *add_available_tg.Action
+	DeleteAvailableTg        *delete_available_tg.Action
+	GetAssistantAvailableTGs *get_available_tg.Action
 }
 
 func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtConfig, bot *tg_bot.Bot) *Aggregator {
@@ -126,10 +148,18 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 		GetTgAdminsUsernames:   get_tg_admins_usernames.New(pool),
 		GetTransactionHistory:  get_transaction_history.New(pool),
 		GetNotificationHistory: get_notification_history.New(pool),
-		PushNotification:       push_notification.New(pool, bot),
+		// пуши
+		PushNotification: push_notification.New(pool, bot),
+		PushAllDebitors:  push_all_debitors.New(pool, bot),
+		// архив
+		GetArchive:        get_archive.New(pool),
+		ArchiveStudent:    archivate_student.New(pool),
+		UnArhivateStudent: unarchivate_student.New(pool),
+		ArchiveFilter:     archive_filter.New(pool),
 
 		// Финансы
-		GetAllFinance: get_all_finance.New(pool),
+		GetAllFinance:      get_all_finance.New(pool),
+		GetAllFinanceByTGs: get_all_finance_by_tgs.New(pool),
 
 		// Предметы
 		GetAllSubjects: get_all_subjects.New(pool),
@@ -152,5 +182,10 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 		// Уроки
 		DeleteLesson: delete_lesson.New(pool),
 		UpdateLesson: update_lesson.New(pool, bot),
+
+		// Ассистенты
+		AddAvailableTg:           add_available_tg.New(pool),
+		DeleteAvailableTg:        delete_available_tg.New(pool),
+		GetAssistantAvailableTGs: get_available_tg.New(pool),
 	}
 }

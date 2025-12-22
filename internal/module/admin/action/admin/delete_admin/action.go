@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/delete_admin/dal"
+	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -17,11 +18,14 @@ func New(pool *pgxpool.Pool) *Action {
 	}
 }
 
-func (a *Action) Do(ctx context.Context, adminID int64) error {
-	_ = a.dal.DeleteWallets(ctx, adminID)
-	_ = a.dal.DeleteStudents(ctx, adminID)
-	_ = a.dal.DeleteTutors(ctx, adminID)
-	err := a.dal.DeleteAdmin(ctx, adminID)
+func (a *Action) Do(ctx context.Context, userID int64, role dto.Role) error {
+	if role == dto.AdminRole {
+		_ = a.dal.DeleteWallets(ctx, userID)
+		_ = a.dal.DeleteStudents(ctx, userID)
+		_ = a.dal.DeleteTutors(ctx, userID)
+	}
+
+	err := a.dal.DeleteUser(ctx, userID)
 	if err != nil {
 		return err
 	}

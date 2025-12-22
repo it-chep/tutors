@@ -19,6 +19,7 @@ func (u *User) UserDto() dto.User {
 		FullName: u.FullName.String,
 		IsActive: u.IsActive.Bool,
 		Role:     dto.Role(u.RoleID.Int64),
+		AdminID:  u.AdminID.Int64,
 	}
 }
 
@@ -27,6 +28,7 @@ func (u *User) UserInfo() *dto.UserInfo {
 		ID:      u.ID,
 		TutorID: u.TutorID.Int64,
 		Role:    dto.Role(u.RoleID.Int64),
+		AdminID: u.AdminID.Int64,
 	}
 }
 

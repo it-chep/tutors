@@ -16,7 +16,8 @@ type User struct {
 }
 
 type Response struct {
-	User User `json:"user"`
+	User          User            `json:"user"`
+	PaidFunctions map[string]bool `json:"paid_functions"`
 }
 
 type Action struct {
@@ -39,12 +40,19 @@ func (a *Action) Handle() http.HandlerFunc {
 			return
 		}
 
+		paid, err := a.dal.GetPaidFunctions(ctx, user.AdminID)
+		if err != nil {
+			http.Error(w, "Ошибка из GetPaidFunctions", http.StatusInternalServerError)
+			return
+		}
+
 		resp := Response{
 			User: User{
 				ID:      user.ID,
 				Role:    user.Role.FrontString(),
 				TutorID: user.TutorID,
 			},
+			PaidFunctions: paid.PaidFunctions,
 		}
 		w.Header().Set("Content-Type", "application/json")
 		if err = json.NewEncoder(w).Encode(resp); err != nil {

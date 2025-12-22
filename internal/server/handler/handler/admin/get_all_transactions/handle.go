@@ -2,12 +2,13 @@ package get_all_transactions
 
 import (
 	"encoding/json"
+	"net/http"
+	"time"
+
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	userCtx "github.com/it-chep/tutors.git/pkg/context"
 	"github.com/samber/lo"
-	"net/http"
-	"time"
 )
 
 type Handler struct {
@@ -30,7 +31,12 @@ func (h *Handler) Handle() http.HandlerFunc {
 			return
 		}
 
-		adminID := userCtx.UserIDFromContext(ctx)
+		if dto.IsAssistantRole(ctx) {
+			http.Error(w, "у ассистента нет на это прав", http.StatusUnauthorized)
+			return
+		}
+
+		adminID := userCtx.AdminIDFromContext(ctx)
 
 		from, to, err := req.ToTime()
 		if err != nil {

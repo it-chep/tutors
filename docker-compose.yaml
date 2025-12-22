@@ -32,16 +32,16 @@ services:
       - network
     depends_on:
       - postgres
-
-  pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
-      PGADMIN_LISTEN_PORT: 5050
-    ports:
-      - "5050:5050"
+#
+#  pgadmin:
+#    container_name: pgadmin
+#    image: dpage/pgadmin4
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+#      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+#      PGADMIN_LISTEN_PORT: 5050
+#    ports:
+#      - "5050:5050"
 
 networks:
   network:

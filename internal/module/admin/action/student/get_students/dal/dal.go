@@ -21,7 +21,12 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 
 func (r *Repository) GetAllStudentsForAdmin(ctx context.Context, adminID int64) ([]dto.Student, error) {
 	sql := `
-		select s.* from students s join tutors t on s.tutor_id = t.id where t.admin_id = $1
+		select s.* 
+		from students s 
+		    join tutors t on s.tutor_id = t.id 
+		where t.admin_id = $1 
+		  and s.is_archive is not true 
+		order by s.id
 	`
 	var students dao.StudentsDAO
 	err := pgxscan.Select(ctx, r.pool, &students, sql, adminID)
@@ -47,7 +52,10 @@ func (r *Repository) GetAllStudentsForSuperAdmin(ctx context.Context) ([]dto.Stu
 
 func (r *Repository) GetTutorStudentsForAdmin(ctx context.Context, adminID, tutorID int64) ([]dto.Student, error) {
 	sql := `
-		select s.* from students s join tutors t on s.tutor_id = t.id where t.admin_id = $1 and s.tutor_id = $2
+		select s.* 
+		from students s 
+		    join tutors t on s.tutor_id = t.id 
+		where t.admin_id = $1 and s.tutor_id = $2 and s.is_archive is not true
 	`
 	var students dao.StudentsDAO
 	err := pgxscan.Select(ctx, r.pool, &students, sql, adminID, tutorID)
@@ -60,7 +68,8 @@ func (r *Repository) GetTutorStudentsForAdmin(ctx context.Context, adminID, tuto
 
 func (r *Repository) GetTutorStudents(ctx context.Context, tutorID int64) ([]dto.Student, error) {
 	sql := `
-		select * from students where tutor_id = $1
+		select * from students where tutor_id = $1 and is_archive is not true 
+		
 	`
 	var students dao.StudentsDAO
 	err := pgxscan.Select(ctx, r.pool, &students, sql, tutorID)
@@ -121,4 +130,82 @@ func (r *Repository) HasStudentsPayments(ctx context.Context, studentIDs []int64
 		}
 	}
 	return resultMap, nil
+}
+
+func (r *Repository) GetStudentsAvailableToAssistant(ctx context.Context, assistantID int64) ([]dto.Student, error) {
+	sql := `
+		 with assistant_data as (
+            select 
+                available_tgs,
+                case 
+                    when available_tgs is not null and array_length(available_tgs, 1) > 0 
+                    then true 
+                    else false 
+                end as has_tgs
+            from assistant_tgs 
+            where user_id = $1
+        )
+        select s.* 
+        from students s
+        cross join (
+            select 
+                coalesce(available_tgs, '{}'::text[]) as available_tgs,
+                coalesce(has_tgs, false) as has_tgs
+            from assistant_data
+            union all
+            select '{}'::text[], false
+            where not exists (select 1 from assistant_data)
+        ) ad
+        where s.is_archive is not true 
+          and (
+                (ad.has_tgs and s.tg_admin_username = any(ad.available_tgs))
+                or not ad.has_tgs
+              )
+	`
+	var students dao.StudentsDAO
+	err := pgxscan.Select(ctx, r.pool, &students, sql, assistantID)
+	if err != nil {
+		return nil, err
+	}
+
+	return students.ToDomain(), nil
+}
+
+func (r *Repository) GetStudentsAvailableToAssistantWithTutor(ctx context.Context, assistantID, tutorID int64) ([]dto.Student, error) {
+	sql := `
+		 with assistant_data as (
+            select 
+                available_tgs,
+                case 
+                    when available_tgs is not null and array_length(available_tgs, 1) > 0 
+                    then true 
+                    else false 
+                end as has_tgs
+            from assistant_tgs 
+            where user_id = $1
+        )
+        select s.* 
+        from students s
+        cross join (
+            select 
+                coalesce(available_tgs, '{}'::text[]) as available_tgs,
+                coalesce(has_tgs, false) as has_tgs
+            from assistant_data
+            union all
+            select '{}'::text[], false
+            where not exists (select 1 from assistant_data)
+        ) ad
+        where s.is_archive is not true and s.tutor_id = $2
+          and (
+                (ad.has_tgs and s.tg_admin_username = any(ad.available_tgs))
+                or not ad.has_tgs
+              )
+	`
+	var students dao.StudentsDAO
+	err := pgxscan.Select(ctx, r.pool, &students, sql, assistantID, tutorID)
+	if err != nil {
+		return nil, err
+	}
+
+	return students.ToDomain(), nil
 }

@@ -69,6 +69,7 @@ func (h *Handler) prepareResponse(student dto.Student) Response {
 			IsNewbie:            student.IsNewbie,
 			ParentTgID:          student.ParentTgID,
 			TgAdminUsername:     student.TgAdminUsername,
+			IsArchived:          student.IsArchived,
 		},
 	}
 }

@@ -25,6 +25,7 @@ type User struct {
 	Tg         string         `db:"tg" json:"tg"`                   // tg text
 	Phone      string         `db:"phone" json:"phone"`             // phone text
 	SMTPCode   sql.NullString `db:"smtp_code" json:"smtp_code"`     // smtp_code character varying(10)
+	AdminID    sql.NullInt64  `db:"admin_id" json:"admin_id"`       // admin_id bigint
 }
 
 // zeroUser zero value of dto
@@ -47,6 +48,7 @@ const (
 	Field_User_Tg         = "tg"
 	Field_User_Phone      = "phone"
 	Field_User_SMTPCode   = "smtp_code"
+	Field_User_AdminID    = "admin_id"
 )
 
 func (t User) SelectColumnsWithCoalesce() []string {
@@ -63,6 +65,7 @@ func (t User) SelectColumnsWithCoalesce() []string {
 		fmt.Sprintf("COALESCE(u.tg, '%v') as tg", zeroUser.Tg),
 		fmt.Sprintf("COALESCE(u.phone, '%v') as phone", zeroUser.Phone),
 		"u.smtp_code",
+		"u.admin_id",
 	}
 }
 
@@ -80,11 +83,12 @@ func (t User) SelectColumns() []string {
 		"u.tg",
 		"u.phone",
 		"u.smtp_code",
+		"u.admin_id",
 	}
 }
 
 func (t User) Columns(without ...string) []string {
-	var str = "id, email, password, full_name, is_active, activate_at, created_at, role_id, tutor_id, tg, phone, smtp_code"
+	var str = "id, email, password, full_name, is_active, activate_at, created_at, role_id, tutor_id, tg, phone, smtp_code, admin_id"
 	for _, exc := range without {
 		str = strings.Replace(str+", ", exc+", ", "", 1)
 	}
@@ -117,6 +121,7 @@ func (t *User) ToMap() map[string]interface{} {
 		"tg":          t.Tg,
 		"phone":       t.Phone,
 		"smtp_code":   t.SMTPCode,
+		"admin_id":    t.AdminID,
 	}
 }
 

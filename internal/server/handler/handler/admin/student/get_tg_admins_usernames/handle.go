@@ -23,12 +23,12 @@ func (h *Handler) Handle() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		if !dto.IsAdminRole(ctx) {
-			http.Error(w, "Доступно только админам", http.StatusForbidden) // todo добавить и админа
+		if dto.IsTutorRole(ctx) {
+			http.Error(w, "Нет прав на это", http.StatusForbidden)
 			return
 		}
 
-		adminID := userCtx.UserIDFromContext(ctx)
+		adminID := userCtx.AdminIDFromContext(ctx)
 
 		usernames, err := h.adminModule.Actions.GetTgAdminsUsernames.Do(ctx, adminID)
 		response := Response{

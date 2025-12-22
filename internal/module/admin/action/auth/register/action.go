@@ -65,7 +65,7 @@ func (a *Action) RegisterHandler() http.HandlerFunc {
 		}
 
 		code := smtp.GenerateCode()
-
+		//fmt.Println("code: ", code)
 		a.codes.Put(req.Email, register_dto.CodeRegister{Password: string(passHash), Code: code})
 		err = a.smtp.SendEmail(smtp.EmailParams{
 			Body: fmt.Sprintf("Ваш код %s", code), Destination: req.Email,

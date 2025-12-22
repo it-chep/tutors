@@ -2,6 +2,9 @@ package dal
 
 import (
 	"context"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance/dto"
+	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
 	"github.com/samber/lo"
 	"time"
 
@@ -190,11 +193,37 @@ func (r *Repository) conductedNotTrialLessons(ctx context.Context, adminID int64
 		 	and cl.created_at between $2 and $3
 			and cl.is_trial = false
 	`
-
 	args := []interface{}{
 		adminID,
 		from,
 		to,
+	}
+
+	if indto.IsAssistantRole(ctx) {
+		sql = `
+			select cl.* from conducted_lessons cl
+					join tutors t on cl.tutor_id = t.id
+			        join students s on s.id = cl.student_id
+			where t.admin_id = $1
+				and cl.created_at between $2 and $3
+				and cl.is_trial = false
+				and (
+                    not exists (
+                        select 1 
+                        from assistant_tgs at
+                        where at.user_id = $4
+                          and at.available_tgs is not null
+                          and array_length(at.available_tgs, 1) > 0
+                    )
+                    or s.tg_admin_username in (
+                        select unnest(at.available_tgs)
+                        from assistant_tgs at
+                        where at.user_id = $4
+                          and at.available_tgs is not null
+                    )
+                )
+		`
+		args = append(args, userCtx.UserIDFromContext(ctx))
 	}
 
 	var lessons dao.ConductedLessonDAOs
@@ -204,4 +233,66 @@ func (r *Repository) conductedNotTrialLessons(ctx context.Context, adminID int64
 	}
 
 	return lessons, nil
+}
+
+// GetDebt получение текущей дебиторской задолженности
+func (r *Repository) GetDebt(ctx context.Context, adminID int64) (decimal.Decimal, error) {
+	sql := `
+		select sum(w.balance) from wallet w 
+    		join students s on w.student_id = s.id 
+			join tutors t on s.tutor_id = t.id
+		where t.admin_id = $1 and balance < 0
+	`
+
+	var debt pgtype.Numeric
+	err := pgxscan.Get(ctx, r.pool, &debt, sql, adminID)
+	if err != nil {
+		return decimal.Decimal{}, err
+	}
+
+	return convert.NumericToDecimal(debt), nil
+}
+
+// GetTutorsInfo получаем информацию по репетиторам
+func (r *Repository) GetTutorsInfo(ctx context.Context, from, to time.Time, adminID int64) (dto.TutorsInfo, error) {
+	lessons, err := r.conductedNotTrialLessons(ctx, adminID, from, to)
+	if err != nil {
+		return dto.TutorsInfo{}, err
+	}
+
+	sixty := decimal.NewFromInt(60)
+	salary := decimal.NewFromFloat(0.0)
+	hours := decimal.NewFromFloat(0.0)
+
+	tutorsMap := lo.GroupBy(lessons, func(item dao.ConductedLessonDAO) int64 {
+		return item.TutorID
+	})
+
+	for _, tutorInfo := range r.perTutorHours(ctx, adminID) {
+		tutorsLessons, ok := tutorsMap[lo.FromPtr(tutorInfo.TutorID)]
+		if !ok {
+			continue
+		}
+
+		// сколько отвел занятий типочек
+		var minutesCount int64
+		for _, tutorLesson := range tutorsLessons {
+			minutesCount += tutorLesson.DurationInMinutes
+		}
+
+		// считаем сколько на него надо потратить
+		tutorCostPerHour := convert.NumericToDecimal(lo.FromPtr(tutorInfo.Tutor))
+		minutesDecimal := decimal.NewFromInt(int64(minutesCount))
+		tutorMoney := tutorCostPerHour.Mul(minutesDecimal).Div(sixty)
+
+		salary = salary.Add(tutorMoney)
+
+		partOfHour := minutesDecimal.Div(sixty)
+		hours = hours.Add(partOfHour)
+	}
+
+	return dto.TutorsInfo{
+		Hours:  hours.String(),
+		Salary: salary.String(),
+	}, nil
 }

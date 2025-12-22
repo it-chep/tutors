@@ -39,10 +39,10 @@ func (r *Repository) CreateTutor(ctx context.Context, createDTO dto.Request, adm
 }
 
 // CreateUser создание пользователя
-func (r *Repository) CreateUser(ctx context.Context, createDTO dto.Request, tutorID int64) error {
+func (r *Repository) CreateUser(ctx context.Context, createDTO dto.Request, tutorID, adminID int64) error {
 	sql := `
-		insert into users (phone, tg, email, full_name, is_active, role_id, tutor_id)
-		values ($1, $2, $3, $4, false, $5, $6)
+		insert into users (phone, tg, email, full_name, is_active, role_id, tutor_id, admin_id)
+		values ($1, $2, $3, $4, false, $5, $6, $7)
 	`
 	args := []interface{}{
 		createDTO.Phone,
@@ -51,6 +51,7 @@ func (r *Repository) CreateUser(ctx context.Context, createDTO dto.Request, tuto
 		createDTO.FullName,
 		indto.TutorRole,
 		tutorID,
+		adminID,
 	}
 	_, err := r.pool.Exec(ctx, sql, args...)
 	return err

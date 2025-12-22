@@ -2,7 +2,10 @@ package create_admin
 
 import (
 	"encoding/json"
+
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/create_admin/dto"
+	dto2 "github.com/it-chep/tutors.git/internal/module/admin/dto"
+
 	"net/http"
 
 	"github.com/it-chep/tutors.git/internal/module/admin"
@@ -33,6 +36,7 @@ func (h *Handler) Handle() http.HandlerFunc {
 			Tg:       req.Tg,
 			Phone:    req.Phone,
 			Email:    req.Email,
+			Role:     dto2.AdminRole,
 		})
 		if err != nil {
 			http.Error(w, "failed to create student data: "+err.Error(), http.StatusInternalServerError)

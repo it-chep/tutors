@@ -94,6 +94,16 @@ func (h *Handler) setupRoutes(cfg Config) {
 			r.Delete("/{admin_id}", h.adminAgg.Admins.DeleteAdmin.Handle()) // DELETE /admin/admins/{id}
 		})
 
+		// Ассистенты
+		r.Route("/assistant", func(r chi.Router) {
+			r.Get("/", h.adminAgg.Assistant.GetAssistants.Handle())                                        // GET /admin/assistant
+			r.Post("/", h.adminAgg.Assistant.CreateAssistant.Handle())                                     // POST /admin/assistant
+			r.Get("/{assistant_id}", h.adminAgg.Assistant.GetAssistantByID.Handle())                       // GET /admin/assistant/{id}
+			r.Delete("/{assistant_id}", h.adminAgg.Assistant.DeleteAssistant.Handle())                     // DELETE /admin/assistant/{id}
+			r.Post("/{assistant_id}/add_available_tg", h.adminAgg.Assistant.AddAvailableTG.Handle())       // POST /admin/assistant/{id}/add_available_tg
+			r.Post("/{assistant_id}/delete_available_tg", h.adminAgg.Assistant.DeleteAvailableTG.Handle()) // POST /admin/assistant/{id}/delete_available_tg
+		})
+
 		// Репетиторы
 		r.Route("/tutors", func(r chi.Router) {
 			r.Get("/", h.adminAgg.Tutors.GetTutors.Handle())                          // GET /admin/tutors
@@ -111,6 +121,8 @@ func (h *Handler) setupRoutes(cfg Config) {
 		r.Route("/students", func(r chi.Router) {
 			r.Get("/", h.adminAgg.Students.GetStudents.Handle())                                       // GET /admin/students
 			r.Get("/search", h.adminAgg.Students.SearchStudent.Handle())                               // GET /admin/students/search
+			r.Get("/archive", h.adminAgg.Students.GetArchive.Handle())                                 // GET /admin/students/archive
+			r.Post("/push_all_students", h.adminAgg.Students.PushAllDebitors.Handle())                 // POST /admin/students/push_all_students
 			r.Get("/tg_admins_usernames", h.adminAgg.Students.GetTgAdminsUsernames.Handle())           // GET /admin/students/tg_admins_usernames
 			r.Get("/{student_id}", h.adminAgg.Students.GetStudentByID.Handle())                        // GET /admin/students/{id}
 			r.Post("/", h.adminAgg.Students.CreateStudent.Handle())                                    // POST /admin/students
@@ -123,6 +135,8 @@ func (h *Handler) setupRoutes(cfg Config) {
 			r.Post("/{student_id}/transactions", h.adminAgg.Students.GetTransactionHistory.Handle())   // POST /admin/students/{id}/transactions
 			r.Post("/{student_id}/notifications", h.adminAgg.Students.GetNotificationHistory.Handle()) // POST /admin/students/{id}/notifications
 			r.Post("/{student_id}/notifications/push", h.adminAgg.Students.PushNotification.Handle())  // POST /admin/students/{id}/notifications/push
+			r.Post("/{student_id}/archive", h.adminAgg.Students.ArchiveStudent.Handle())               // POST /admin/students/{id}/archive
+			r.Post("/{student_id}/unarchive", h.adminAgg.Students.UnArchivateStudent.Handle())         // POST /admin/students/{id}/unarchive
 			r.Post("/{student_id}", h.adminAgg.Students.UpdateStudent.Handle())                        // GET /admin/students/{id}
 		})
 
@@ -133,9 +147,10 @@ func (h *Handler) setupRoutes(cfg Config) {
 			r.Post("/", h.adminAgg.GetAllLessons.Handle())                     // POST /admin/lessons
 		})
 
-		r.Get("/subjects", h.adminAgg.GetAllSubjects.Handle())          // GET /admin/subjects
-		r.Post("/finance", h.adminAgg.GetAllFinance.Handle())           // POST /admin/finance
-		r.Post("/transactions", h.adminAgg.GetAllTransactions.Handle()) // POST /admin/transactions
+		r.Get("/subjects", h.adminAgg.GetAllSubjects.Handle())            // GET /admin/subjects
+		r.Post("/finance", h.adminAgg.GetAllFinance.Handle())             // POST /admin/finance
+		r.Post("/finance_by_tgs", h.adminAgg.GetAllFinanceByTGs.Handle()) // POST /admin/finance_by_tgs
+		r.Post("/transactions", h.adminAgg.GetAllTransactions.Handle())   // POST /admin/transactions
 	})
 
 	h.router.Post("/webhook/alpha", h.adminAgg.AlphaHook.Handle())      // POST /alpha/hook

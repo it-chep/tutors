@@ -2,6 +2,8 @@ package delete_admin
 
 import (
 	"github.com/go-chi/chi/v5"
+	"github.com/it-chep/tutors.git/internal/module/admin/dto"
+
 	"net/http"
 	"strconv"
 
@@ -29,7 +31,7 @@ func (h *Handler) Handle() http.HandlerFunc {
 			return
 		}
 
-		err = h.adminModule.Actions.DeleteAdmin.Do(ctx, adminID)
+		err = h.adminModule.Actions.DeleteAdmin.Do(ctx, adminID, dto.AdminRole)
 		if err != nil {
 			http.Error(w, "failed to create student data: "+err.Error(), http.StatusInternalServerError)
 			return

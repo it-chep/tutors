@@ -17,6 +17,8 @@ const (
 	AdminRole
 	// TutorRole - роль репетитора
 	TutorRole
+	// AssistantRole - ассистент
+	AssistantRole
 )
 
 func (r Role) String() string {
@@ -27,6 +29,8 @@ func (r Role) String() string {
 		return "Админ"
 	case TutorRole:
 		return "Репетитор"
+	case AssistantRole:
+		return "Ассистент"
 	default:
 		return "Неизвестно"
 	}
@@ -40,6 +44,8 @@ func (r Role) FrontString() string {
 		return "admin"
 	case TutorRole:
 		return "tutor"
+	case AssistantRole:
+		return "assistant"
 	default:
 		return "unknown"
 	}
@@ -64,6 +70,14 @@ func IsAdminRole(ctx context.Context) bool {
 func IsSuperAdminRole(ctx context.Context) bool {
 	roleID, _ := pkgContext.GetUserRole(ctx)
 	if roleID == int8(SuperAdminRole) {
+		return true
+	}
+	return false
+}
+
+func IsAssistantRole(ctx context.Context) bool {
+	roleID, _ := pkgContext.GetUserRole(ctx)
+	if roleID == int8(AssistantRole) {
 		return true
 	}
 	return false

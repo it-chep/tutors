@@ -32,8 +32,8 @@ func (h *Handler) Handle() http.HandlerFunc {
 			adminID = 0
 		}
 
-		if adminID == 0 && dto.IsAdminRole(ctx) {
-			adminID = userCtx.UserIDFromContext(ctx)
+		if adminID == 0 && (dto.IsAdminRole(ctx) || dto.IsAssistantRole(ctx)) {
+			adminID = userCtx.AdminIDFromContext(ctx)
 		}
 
 		baseData, err := h.adminModule.Actions.GetTutors.Do(ctx, adminID)

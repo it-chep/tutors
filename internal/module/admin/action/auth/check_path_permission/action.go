@@ -54,6 +54,8 @@ func (a *Action) AuthMiddleware() func(http.Handler) http.Handler {
 			if user.Role == dto.TutorRole {
 				ctx = userCtx.WithTutorID(ctx, user.TutorID)
 			}
+			ctx = userCtx.WithAdminID(ctx, user.AdminID)
+
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

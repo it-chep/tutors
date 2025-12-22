@@ -7,6 +7,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/filter_students/dto"
 	"github.com/it-chep/tutors.git/internal/module/admin/dal/dao"
 	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/samber/lo"
 	"strings"
@@ -23,7 +24,7 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 }
 
 func (r *Repository) FilterStudents(ctx context.Context, adminID int64, filter dto.FilterRequest) (indto.Students, error) {
-	sql, phValues := stmtBuilder(adminID, filter)
+	sql, phValues := stmtBuilder(ctx, adminID, filter)
 
 	var students dao.StudentsDAO
 	err := pgxscan.Select(ctx, r.pool, &students, sql, phValues...)
@@ -34,13 +35,13 @@ func (r *Repository) FilterStudents(ctx context.Context, adminID int64, filter d
 	return students.ToDomain(), nil
 }
 
-func stmtBuilder(adminID int64, filter dto.FilterRequest) (_ string, phValues []any) {
+func stmtBuilder(ctx context.Context, adminID int64, filter dto.FilterRequest) (_ string, phValues []any) {
 	defaultSql := `
 		select s.*
 		from students s 
 		    join tutors t on s.tutor_id = t.id 
 			join wallet w on s.id = w.student_id
-		where t.admin_id = $1
+		where t.admin_id = $1 and s.is_archive is not true
 	`
 
 	phValues = append(phValues, adminID)
@@ -51,7 +52,7 @@ func stmtBuilder(adminID int64, filter dto.FilterRequest) (_ string, phValues []
 	if len(filter.TgUsernames) != 0 {
 		whereStmtBuilder.WriteString(
 			fmt.Sprintf(`
-				and tg_admin_username = any($%d)
+				and s.tg_admin_username = any($%d)
 			`, phCounter),
 		)
 		phValues = append(phValues, filter.TgUsernames)
@@ -62,6 +63,33 @@ func stmtBuilder(adminID int64, filter dto.FilterRequest) (_ string, phValues []
 		whereStmtBuilder.WriteString(
 			`and w.balance < 0`,
 		)
+	}
+
+	if indto.IsAssistantRole(ctx) {
+		assistantID := userCtx.UserIDFromContext(ctx)
+
+		whereStmtBuilder.WriteString(
+			fmt.Sprintf(`
+                and (
+                    not exists (
+                        select 1 
+                        from assistant_tgs at
+                        where at.user_id = $%d
+                          and at.available_tgs is not null
+                          and array_length(at.available_tgs, 1) > 0
+                    )
+                    or s.tg_admin_username in (
+                        select unnest(at.available_tgs)
+                        from assistant_tgs at
+                        where at.user_id = $%d
+                          and at.available_tgs is not null
+                    )
+                )
+            `, phCounter, phCounter),
+		)
+
+		phValues = append(phValues, assistantID)
+		phCounter++
 	}
 
 	return fmt.Sprintf(`
