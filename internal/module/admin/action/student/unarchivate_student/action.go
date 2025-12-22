@@ -20,23 +20,24 @@ func New(pool *pgxpool.Pool) *Action {
 }
 
 func (a *Action) Do(ctx context.Context, studentID int64) error {
-	if dto.IsAdminRole(ctx) {
+	if dto.IsAdminRole(ctx) || dto.IsAssistantRole(ctx) {
 		return a.adminUnArchivate(ctx, studentID)
 	}
 
-	// todo сделать для ассистента
 	return nil
 }
 
 func (a *Action) adminUnArchivate(ctx context.Context, studentID int64) error {
-	userID := userCtx.UserIDFromContext(ctx)
+	requestAdminID := userCtx.AdminIDFromContext(ctx)
 	adminID, err := a.dal.GetStudentAdminID(ctx, studentID)
 	if err != nil {
 		return err
 	}
-	if adminID != userID {
+
+	if adminID != requestAdminID {
 		return errors.New("invalid admin")
 	}
+
 	student, err := a.dal.GetStudent(ctx, studentID)
 	if err != nil {
 		return err
