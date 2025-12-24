@@ -8,6 +8,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/get_admins"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/assistant/add_available_tg"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/assistant/delete_available_tg"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/assistant/get_assistance"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/assistant/get_available_tg"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/auth"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance"
@@ -118,6 +119,7 @@ type Aggregator struct {
 	AddAvailableTg           *add_available_tg.Action
 	DeleteAvailableTg        *delete_available_tg.Action
 	GetAssistantAvailableTGs *get_available_tg.Action
+	GetAssistance            *get_assistance.Action
 }
 
 func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtConfig, bot *tg_bot.Bot) *Aggregator {
@@ -187,5 +189,6 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 		AddAvailableTg:           add_available_tg.New(pool),
 		DeleteAvailableTg:        delete_available_tg.New(pool),
 		GetAssistantAvailableTGs: get_available_tg.New(pool),
+		GetAssistance:            get_assistance.New(pool),
 	}
 }

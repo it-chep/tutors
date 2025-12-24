@@ -2,6 +2,7 @@ package get_assistants
 
 import (
 	"encoding/json"
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
 	"net/http"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
@@ -24,7 +25,9 @@ func (h *Handler) Handle() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		baseData, err := h.adminModule.Actions.GetAdmins.Do(ctx, dto.AssistantRole)
+		adminID := userCtx.AdminIDFromContext(ctx)
+
+		baseData, err := h.adminModule.Actions.GetAssistance.Do(ctx, adminID)
 		if err != nil {
 			http.Error(w, "failed to get assistants data: "+err.Error(), http.StatusInternalServerError)
 			return
