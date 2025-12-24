@@ -5,6 +5,7 @@ import (
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/it-chep/tutors.git/internal/module/admin/dal/dao"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -146,6 +147,7 @@ func (r *Repository) GetStudentsAvailableToAssistant(ctx context.Context, assist
         )
         select s.* 
         from students s
+			join tutors t on s.tutor_id = t.id
         cross join (
             select 
                 coalesce(available_tgs, '{}'::text[]) as available_tgs,
@@ -155,14 +157,14 @@ func (r *Repository) GetStudentsAvailableToAssistant(ctx context.Context, assist
             select '{}'::text[], false
             where not exists (select 1 from assistant_data)
         ) ad
-        where s.is_archive is true 
+        where s.is_archive is true and t.admin_id = $2
           and (
                 (ad.has_tgs and s.tg_admin_username = any(ad.available_tgs))
                 or not ad.has_tgs
               )
 	`
 	var students dao.StudentsDAO
-	err := pgxscan.Select(ctx, r.pool, &students, sql, assistantID)
+	err := pgxscan.Select(ctx, r.pool, &students, sql, assistantID, userCtx.AdminIDFromContext(ctx))
 	if err != nil {
 		return nil, err
 	}

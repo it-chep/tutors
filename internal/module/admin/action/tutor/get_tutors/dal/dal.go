@@ -2,6 +2,7 @@ package dal
 
 import (
 	"context"
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/it-chep/tutors.git/internal/module/admin/dal/dao"
@@ -95,10 +96,8 @@ func (r *Repository) GetTutorsStudents(ctx context.Context, tutorIDs []int64) ([
 func (r *Repository) GetTutorsAvailableToAssistance(ctx context.Context, assistantID int64) ([]dto.Tutor, error) {
 	sql := `
 		WITH assistant_available_tgs AS (SELECT available_tgs
-								 FROM assistant_tgs
-								 WHERE user_id = $1
-								   AND available_tgs IS NOT NULL
-								   AND array_length(available_tgs, 1) > 0)
+										 FROM assistant_tgs where user_id = $1
+										 )
 		SELECT DISTINCT t.cost_per_hour,
 						t.subject_id,
 						t.admin_id,
@@ -111,18 +110,28 @@ func (r *Repository) GetTutorsAvailableToAssistance(ctx context.Context, assista
 				 LEFT JOIN students s ON t.id = s.tutor_id
 				 cross JOIN assistant_available_tgs aat
 		WHERE
-		   -- Если у ассистента нет ограничений по TG
-			NOT EXISTS (SELECT 1 FROM assistant_available_tgs)
-		   -- Или у студента есть TG в разрешенных
-		   OR s.tg_admin_username = ANY (aat.available_tgs)
-		   -- Или у репетитора вообще нет студентов
-		   OR NOT EXISTS (SELECT 1
-						  FROM students s2
-						  WHERE s2.tutor_id = t.id)
+			t.admin_id = $2   AND (
+			-- Случай 1: У ассистента нет ограничений по TG (пустой массив)
+			array_length(aat.available_tgs, 1) IS NULL
+				OR array_length(aat.available_tgs, 1) = 0
+		
+				-- Случай 2: У репетитора нет студентов вообще
+				OR NOT EXISTS (
+				SELECT 1 FROM students s2
+				WHERE s2.tutor_id = t.id
+			)
+		
+				-- Случай 3: У репетитора есть студент с разрешенным TG
+				OR EXISTS (
+				SELECT 1 FROM students s3
+				WHERE s3.tutor_id = t.id
+				  AND s3.tg_admin_username = ANY (aat.available_tgs)
+			))
+		
 		ORDER BY id
 	`
 	var tutors dao.TutorsDao
-	if err := pgxscan.Select(ctx, r.pool, &tutors, sql, assistantID); err != nil {
+	if err := pgxscan.Select(ctx, r.pool, &tutors, sql, assistantID, userCtx.AdminIDFromContext(ctx)); err != nil {
 		return nil, err
 	}
 

@@ -31,11 +31,6 @@ func (h *Handler) Handle() http.HandlerFunc {
 			return
 		}
 
-		if dto.IsAssistantRole(ctx) {
-			http.Error(w, "у ассистента нет прав на это", http.StatusForbidden)
-			return
-		}
-
 		studentIDStr := chi.URLParam(r, "student_id")
 		studentID, err := strconv.ParseInt(studentIDStr, 10, 64)
 		if err != nil {
