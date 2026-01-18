@@ -36,7 +36,7 @@ func (a *Action) Start(ctx context.Context, msg dto.Message) error {
 
 	if !known {
 		return a.bot.SendMessages([]bot_dto.Message{
-			{Chat: msg.ChatID, Text: "Привет, кажется мы с вами пока что не знакомы, давайте это исправим! Как вас зовут? Напишите свои Фамилию Имя Отчество"},
+			{Chat: msg.ChatID, Text: "Привет, кажется мы с вами пока что не знакомы, давайте это исправим! Как вас зовут? Напишите свои Фамилию Имя"},
 		})
 	}
 
