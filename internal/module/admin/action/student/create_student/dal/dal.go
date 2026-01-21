@@ -2,6 +2,7 @@ package dal
 
 import (
 	"context"
+	"strings"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/create_student/dto"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -25,18 +26,18 @@ func (r *Repository) CreateStudent(ctx context.Context, createDTO dto.CreateRequ
 		returning id
 	`
 	args := []interface{}{
-		createDTO.FirstName,
-		createDTO.LastName,
-		createDTO.MiddleName,
+		strings.TrimSpace(createDTO.FirstName),
+		strings.TrimSpace(createDTO.LastName),
+		strings.TrimSpace(createDTO.MiddleName),
 		createDTO.Phone,
 		createDTO.Tg,
 		createDTO.CostPerHour,
 		createDTO.SubjectID,
 		createDTO.TutorID,
-		createDTO.ParentFullName,
+		strings.TrimSpace(createDTO.ParentFullName),
 		createDTO.ParentPhone,
 		createDTO.ParentTg,
-		createDTO.TgAdminUsername,
+		strings.TrimSpace(createDTO.TgAdminUsername),
 	}
 
 	var id int64

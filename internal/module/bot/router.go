@@ -11,6 +11,8 @@ func (b *Bot) Route(ctx context.Context, msg dto.Message) error {
 	switch msg.Text {
 	case "/start":
 		return b.Actions.Start.Start(ctx, msg)
+	case "/info":
+		return b.Actions.Info.Do(ctx, msg)
 	case start.GetBalance, "/balance":
 		return b.Actions.GetBalance.GetBalance(ctx, msg)
 	case start.TopUpBalance, "/add_balance":

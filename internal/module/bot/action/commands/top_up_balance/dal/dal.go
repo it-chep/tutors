@@ -63,7 +63,7 @@ func (d *Dal) InitTransaction(ctx context.Context, parentTG int64) (string, erro
 	`
 
 	if _, err = d.pool.Exec(ctx, sql, parentTG, order.String()); err != nil {
-		logger.Error(ctx, fmt.Sprintf("InitTransaction ERROR (parent_tg_id = %d)", parentTG), err)
+		logger.Error(ctx, fmt.Sprintf("InitTransaction ERROR (parent_tg_id = %d, order = %s)", parentTG, order.String()), err)
 		return "", err
 	}
 

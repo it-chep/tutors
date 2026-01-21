@@ -2,9 +2,9 @@ package dal
 
 import (
 	"context"
-
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/update_student/dto"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"strings"
 )
 
 type Repository struct {
@@ -35,16 +35,16 @@ func (r *Repository) UpdateStudent(ctx context.Context, studentID int64, update 
 	`
 	args := []interface{}{
 		studentID,
-		update.FirstName,
-		update.LastName,
-		update.MiddleName,
+		strings.TrimSpace(update.FirstName),
+		strings.TrimSpace(update.LastName),
+		strings.TrimSpace(update.MiddleName),
 		update.Phone,
 		update.Tg,
 		update.CostPerHour,
-		update.ParentFullName,
+		strings.TrimSpace(update.ParentFullName),
 		update.ParentPhone,
 		update.ParentTg,
-		update.TgAdminUsername,
+		strings.TrimSpace(update.TgAdminUsername),
 	}
 
 	_, err := r.pool.Exec(ctx, sql, args...)
