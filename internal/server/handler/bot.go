@@ -5,6 +5,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/bot/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	"net/http"
+	"strings"
 )
 
 func (h *Handler) bot() http.HandlerFunc {
@@ -24,6 +25,9 @@ func (h *Handler) bot() http.HandlerFunc {
 		txt := ""
 		if event.Message != nil {
 			txt = event.Message.Text
+			if strings.Contains(txt, "/start ") {
+				txt = txt[len("/start "):]
+			}
 		} else if event.CallbackQuery != nil {
 			txt = event.CallbackQuery.Data
 		}

@@ -3,6 +3,7 @@ package action
 import (
 	"github.com/it-chep/tutors.git/internal/config"
 	"github.com/it-chep/tutors.git/internal/module/bot/action/commands/acquaintance"
+	"github.com/it-chep/tutors.git/internal/module/bot/action/commands/auth_user"
 	"github.com/it-chep/tutors.git/internal/module/bot/action/commands/get_balance"
 	"github.com/it-chep/tutors.git/internal/module/bot/action/commands/get_lessons"
 	"github.com/it-chep/tutors.git/internal/module/bot/action/commands/info"
@@ -21,6 +22,7 @@ type Agg struct {
 	TopUpBalance *top_up_balance.Action
 	GetLessons   *get_lessons.Action
 	Info         *info.Action
+	AuthUser     *auth_user.Action
 }
 
 func NewAgg(pool *pgxpool.Pool, bot *tg_bot.Bot, config *config.Config, alfa *alfa.Client, tbank *tbank.Client) *Agg {
@@ -31,5 +33,6 @@ func NewAgg(pool *pgxpool.Pool, bot *tg_bot.Bot, config *config.Config, alfa *al
 		TopUpBalance: top_up_balance.NewAction(pool, alfa, tbank, config.PaymentConfig.BankByAdmin, bot),
 		GetLessons:   get_lessons.NewAction(pool, bot),
 		Info:         info.New(bot),
+		AuthUser:     auth_user.NewAction(pool, bot),
 	}
 }

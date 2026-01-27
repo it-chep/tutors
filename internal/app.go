@@ -3,8 +3,6 @@ package internal
 import (
 	"context"
 	"fmt"
-	"log"
-
 	"github.com/it-chep/tutors.git/internal/config"
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/bot"
@@ -17,6 +15,8 @@ import (
 	"github.com/it-chep/tutors.git/internal/server"
 	"github.com/it-chep/tutors.git/pkg/smtp"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"log"
+	"strings"
 )
 
 type Workers []worker.Worker
@@ -86,6 +86,9 @@ func (a *App) Run(ctx context.Context) {
 				txt := ""
 				if update.Message != nil {
 					txt = update.Message.Text
+					if strings.Contains(txt, "/start ") {
+						txt = txt[len("/start "):]
+					}
 				} else if update.CallbackQuery != nil {
 					txt = update.CallbackQuery.Data
 				}
