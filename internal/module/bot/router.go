@@ -3,11 +3,12 @@ package bot
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/it-chep/tutors.git/internal/module/bot/action/commands/start"
 	"github.com/it-chep/tutors.git/internal/module/bot/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
-	"strconv"
-	"strings"
 )
 
 func (b *Bot) Route(ctx context.Context, msg dto.Message) error {
@@ -32,10 +33,6 @@ func (b *Bot) Route(ctx context.Context, msg dto.Message) error {
 	case start.GetLessons, "/lessons":
 		return b.Actions.GetLessons.GetLessons(ctx, msg)
 	default:
-		if ok, err := b.Actions.Acquaintance.OnRegistration(ctx, msg); err == nil && ok {
-			return b.Actions.Acquaintance.MakeKnown(ctx, msg)
-		}
-
 		if b.Actions.TopUpBalance.TransactionExists(ctx, msg) {
 			return b.Actions.TopUpBalance.SetAmount(ctx, msg)
 		}
