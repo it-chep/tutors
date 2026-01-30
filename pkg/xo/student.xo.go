@@ -31,6 +31,7 @@ type Student struct {
 	CreatedAt       pq.NullTime    `db:"created_at" json:"created_at"`               // created_at timestamp without time zone
 	TgAdminUsername sql.NullString `db:"tg_admin_username" json:"tg_admin_username"` // tg_admin_username text
 	IsArchive       sql.NullBool   `db:"is_archive" json:"is_archive"`               // is_archive boolean
+	PaymentID       sql.NullInt64  `db:"payment_id" json:"payment_id"`               // payment_id bigint
 }
 
 // zeroStudent zero value of dto
@@ -58,6 +59,7 @@ const (
 	Field_Student_CreatedAt       = "created_at"
 	Field_Student_TgAdminUsername = "tg_admin_username"
 	Field_Student_IsArchive       = "is_archive"
+	Field_Student_PaymentID       = "payment_id"
 )
 
 func (t Student) SelectColumnsWithCoalesce() []string {
@@ -79,6 +81,7 @@ func (t Student) SelectColumnsWithCoalesce() []string {
 		"s.created_at",
 		"s.tg_admin_username",
 		fmt.Sprintf("COALESCE(s.is_archive, %v) as is_archive", zeroStudent.IsArchive),
+		"s.payment_id",
 	}
 }
 
@@ -101,11 +104,12 @@ func (t Student) SelectColumns() []string {
 		"s.created_at",
 		"s.tg_admin_username",
 		"s.is_archive",
+		"s.payment_id",
 	}
 }
 
 func (t Student) Columns(without ...string) []string {
-	var str = "id, first_name, last_name, middle_name, phone, tg, cost_per_hour, subject_id, tutor_id, is_finished_trial, parent_full_name, parent_phone, parent_tg, parent_tg_id, created_at, tg_admin_username, is_archive"
+	var str = "id, first_name, last_name, middle_name, phone, tg, cost_per_hour, subject_id, tutor_id, is_finished_trial, parent_full_name, parent_phone, parent_tg, parent_tg_id, created_at, tg_admin_username, is_archive, payment_id"
 	for _, exc := range without {
 		str = strings.Replace(str+", ", exc+", ", "", 1)
 	}
@@ -143,6 +147,7 @@ func (t *Student) ToMap() map[string]interface{} {
 		"created_at":        t.CreatedAt,
 		"tg_admin_username": t.TgAdminUsername,
 		"is_archive":        t.IsArchive,
+		"payment_id":        t.PaymentID,
 	}
 }
 

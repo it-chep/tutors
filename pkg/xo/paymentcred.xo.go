@@ -17,6 +17,8 @@ type PaymentCred struct {
 	Bank        sql.NullString `db:"bank" json:"bank"`                 // bank text
 	BaseURL     sql.NullString `db:"base_url" json:"base_url"`         // base_url text
 	Cred        []byte         `db:"cred" json:"cred"`                 // cred jsonb
+	ID          int64          `db:"id" json:"id"`                     // id bigint
+	IsDefault   bool           `db:"is_default" json:"is_default"`     // is_default boolean
 }
 
 // zeroPaymentCred zero value of dto
@@ -33,6 +35,8 @@ const (
 	Field_PaymentCred_Bank        = "bank"
 	Field_PaymentCred_BaseURL     = "base_url"
 	Field_PaymentCred_Cred        = "cred"
+	Field_PaymentCred_ID          = "id"
+	Field_PaymentCred_IsDefault   = "is_default"
 )
 
 func (t PaymentCred) SelectColumnsWithCoalesce() []string {
@@ -43,6 +47,8 @@ func (t PaymentCred) SelectColumnsWithCoalesce() []string {
 		"pc.bank",
 		"pc.base_url",
 		"pc.cred",
+		fmt.Sprintf("COALESCE(pc.id, %v) as id", zeroPaymentCred.ID),
+		fmt.Sprintf("COALESCE(pc.is_default, %v) as is_default", zeroPaymentCred.IsDefault),
 	}
 }
 
@@ -54,11 +60,13 @@ func (t PaymentCred) SelectColumns() []string {
 		"pc.bank",
 		"pc.base_url",
 		"pc.cred",
+		"pc.id",
+		"pc.is_default",
 	}
 }
 
 func (t PaymentCred) Columns(without ...string) []string {
-	var str = "admin_id, user_pay, password_pay, bank, base_url, cred"
+	var str = "admin_id, user_pay, password_pay, bank, base_url, cred, id, is_default"
 	for _, exc := range without {
 		str = strings.Replace(str+", ", exc+", ", "", 1)
 	}
@@ -85,6 +93,8 @@ func (t *PaymentCred) ToMap() map[string]interface{} {
 		"bank":         t.Bank,
 		"base_url":     t.BaseURL,
 		"cred":         t.Cred,
+		"id":           t.ID,
+		"is_default":   t.IsDefault,
 	}
 }
 

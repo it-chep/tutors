@@ -25,6 +25,9 @@ type Student struct {
 
 	ParentTgID int64 `json:"tg_id"`
 	IsArchived bool  `json:"is_archive"`
+
+	PaymentName string `json:"payment_name"`
+	PaymentID   int64  `json:"payment_id"`
 }
 
 type Response struct {

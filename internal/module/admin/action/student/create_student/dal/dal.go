@@ -2,6 +2,7 @@ package dal
 
 import (
 	"context"
+	"github.com/georgysavva/scany/v2/pgxscan"
 	"strings"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/create_student/dto"
@@ -21,8 +22,8 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 // CreateStudent создание студента
 func (r *Repository) CreateStudent(ctx context.Context, createDTO dto.CreateRequest) (int64, error) {
 	sql := `
-		insert into students (first_name, last_name, middle_name, phone, tg, cost_per_hour, subject_id, tutor_id, is_finished_trial, parent_full_name, parent_phone, parent_tg, tg_admin_username) 
-		values ($1, $2, $3, $4, $5, $6, $7, $8, false, $9, $10, $11, $12)
+		insert into students (first_name, last_name, middle_name, phone, tg, cost_per_hour, subject_id, tutor_id, is_finished_trial, parent_full_name, parent_phone, parent_tg, tg_admin_username, payment_id) 
+		values ($1, $2, $3, $4, $5, $6, $7, $8, false, $9, $10, $11, $12, $13)
 		returning id
 	`
 	args := []interface{}{
@@ -38,6 +39,7 @@ func (r *Repository) CreateStudent(ctx context.Context, createDTO dto.CreateRequ
 		createDTO.ParentPhone,
 		createDTO.ParentTg,
 		strings.TrimSpace(createDTO.TgAdminUsername),
+		createDTO.PaymentID,
 	}
 
 	var id int64
@@ -59,6 +61,21 @@ func (r *Repository) CreateWallet(ctx context.Context, studentID int64) error {
 	}
 	_, err := r.pool.Exec(ctx, sql, args...)
 	return err
+}
+
+// GetDefaultAdminPaymentID получение дефолтной платежки админа
+func (r *Repository) GetDefaultAdminPaymentID(ctx context.Context, adminID int64) (int64, error) {
+	sql := `
+		select id from payment_cred where admin_id = $1 and is_default is true
+	`
+
+	var paymentID int64
+	err := pgxscan.Get(ctx, r.pool, &paymentID, sql, adminID)
+	if err != nil {
+		return 0, err
+	}
+
+	return paymentID, nil
 }
 
 // AddTgToAssistant добавление тг ассистенту

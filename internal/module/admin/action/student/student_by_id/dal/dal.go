@@ -97,3 +97,17 @@ func (r *Repository) HasStudentPayments(ctx context.Context, studentID int64) (b
 	}
 	return count > 0, nil
 }
+
+func (r *Repository) GetStudentPayment(ctx context.Context, paymentID int64) (dto.Payment, error) {
+	sql := `
+		select id, bank from payment_cred where id = $1
+	`
+
+	var payment dao.Payment
+	err := pgxscan.Get(ctx, r.pool, &payment, sql, paymentID)
+	if err != nil {
+		return dto.Payment{}, err
+	}
+
+	return payment.ToDomain(), nil
+}

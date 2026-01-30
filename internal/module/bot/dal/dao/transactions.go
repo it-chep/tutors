@@ -34,5 +34,8 @@ func (s *TransactionDAO) ToDomain() *business.Transaction {
 	if s.OrderID.Valid {
 		transaction.OrderID = lo.ToPtr(s.OrderID.String)
 	}
+	if s.PaymentID.Valid {
+		transaction.PaymentID = s.PaymentID.Int64
+	}
 	return transaction
 }

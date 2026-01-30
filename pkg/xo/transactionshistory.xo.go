@@ -22,6 +22,7 @@ type TransactionsHistory struct {
 	ConfirmedAt pq.NullTime    `db:"confirmed_at" json:"confirmed_at"` // confirmed_at timestamp without time zone
 	Amount      pgtype.Numeric `db:"amount" json:"amount"`             // amount numeric
 	StudentID   int64          `db:"student_id" json:"student_id"`     // student_id bigint
+	PaymentID   sql.NullInt64  `db:"payment_id" json:"payment_id"`     // payment_id bigint
 }
 
 // zeroTransactionsHistory zero value of dto
@@ -38,6 +39,7 @@ const (
 	Field_TransactionsHistory_ConfirmedAt = "confirmed_at"
 	Field_TransactionsHistory_Amount      = "amount"
 	Field_TransactionsHistory_StudentID   = "student_id"
+	Field_TransactionsHistory_PaymentID   = "payment_id"
 )
 
 func (t TransactionsHistory) SelectColumnsWithCoalesce() []string {
@@ -48,6 +50,7 @@ func (t TransactionsHistory) SelectColumnsWithCoalesce() []string {
 		"th.confirmed_at",
 		fmt.Sprintf("COALESCE(th.amount, %v) as amount", zeroTransactionsHistory.Amount),
 		fmt.Sprintf("COALESCE(th.student_id, %v) as student_id", zeroTransactionsHistory.StudentID),
+		"th.payment_id",
 	}
 }
 
@@ -59,11 +62,12 @@ func (t TransactionsHistory) SelectColumns() []string {
 		"th.confirmed_at",
 		"th.amount",
 		"th.student_id",
+		"th.payment_id",
 	}
 }
 
 func (t TransactionsHistory) Columns(without ...string) []string {
-	var str = "id, order_id, created_at, confirmed_at, amount, student_id"
+	var str = "id, order_id, created_at, confirmed_at, amount, student_id, payment_id"
 	for _, exc := range without {
 		str = strings.Replace(str+", ", exc+", ", "", 1)
 	}
@@ -90,6 +94,7 @@ func (t *TransactionsHistory) ToMap() map[string]interface{} {
 		"confirmed_at": t.ConfirmedAt,
 		"amount":       t.Amount,
 		"student_id":   t.StudentID,
+		"payment_id":   t.PaymentID,
 	}
 }
 

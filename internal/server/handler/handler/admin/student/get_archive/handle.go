@@ -65,6 +65,7 @@ func (h *Handler) prepareResponse(students []dto.Student) Response {
 				IsNewbie:            item.IsNewbie,
 				Balance:             item.Balance.String(),
 				IsArchived:          item.IsArchived,
+				PaymentName:         item.Payment.String(),
 			}
 		}),
 		StudentsCount: int64(len(students)),

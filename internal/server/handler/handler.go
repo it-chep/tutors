@@ -131,6 +131,7 @@ func (h *Handler) setupRoutes(cfg Config) {
 			r.Post("/{student_id}/finance", h.adminAgg.Students.GetStudentFinance.Handle())            // POST /admin/students/{id}/finance
 			r.Post("/move", h.adminAgg.Students.MoveStudent.Handle())                                  // POST /admin/students/move
 			r.Post("/{student_id}/wallet", h.adminAgg.Students.UpdateWallet.Handle())                  // POST /admin/students/{id}/wallet
+			r.Post("/{student_id}/change_payment", h.adminAgg.Students.ChangeStudentPayment.Handle())  // POST /admin/students/{id}/change_payment
 			r.Post("/{student_id}/lessons", h.adminAgg.Students.GetLessons.Handle())                   // POST /admin/students/{id}/lessons
 			r.Post("/{student_id}/transactions", h.adminAgg.Students.GetTransactionHistory.Handle())   // POST /admin/students/{id}/transactions
 			r.Post("/{student_id}/notifications", h.adminAgg.Students.GetNotificationHistory.Handle()) // POST /admin/students/{id}/notifications
@@ -151,6 +152,7 @@ func (h *Handler) setupRoutes(cfg Config) {
 		r.Post("/finance", h.adminAgg.GetAllFinance.Handle())             // POST /admin/finance
 		r.Post("/finance_by_tgs", h.adminAgg.GetAllFinanceByTGs.Handle()) // POST /admin/finance_by_tgs
 		r.Post("/transactions", h.adminAgg.GetAllTransactions.Handle())   // POST /admin/transactions
+		r.Post("/payments", h.adminAgg.GetAdminPayments.Handle())         // POST /admin/payments
 	})
 
 	h.router.Post("/webhook/alpha", h.adminAgg.AlphaHook.Handle())      // POST /alpha/hook

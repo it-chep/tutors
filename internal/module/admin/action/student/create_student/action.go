@@ -2,8 +2,10 @@ package create_student
 
 import (
 	"context"
+	"fmt"
 	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
 	userCtx "github.com/it-chep/tutors.git/pkg/context"
+	"github.com/pkg/errors"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/create_student/dal"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/create_student/dto"
@@ -20,11 +22,18 @@ func New(pool *pgxpool.Pool) *Action {
 	}
 }
 
-func (a *Action) Do(ctx context.Context, createDTO dto.CreateRequest) error {
+func (a *Action) Do(ctx context.Context, adminID int64, createDTO dto.CreateRequest) error {
+	paymentID, err := a.dal.GetDefaultAdminPaymentID(ctx, adminID)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Ошибка получения дефолтной платежки админа %s", err))
+	}
+	createDTO.PaymentID = paymentID
+
 	studentID, err := a.dal.CreateStudent(ctx, createDTO)
 	if err != nil {
 		return err
 	}
+
 	err = a.dal.CreateWallet(ctx, studentID)
 	if err != nil {
 		return err

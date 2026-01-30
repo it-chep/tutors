@@ -14,16 +14,21 @@ type CredDAOs []*Cred
 func (daos CredDAOs) ToDomain(ctx context.Context) config.PaymentConfig {
 	cfg := config.PaymentConfig{
 		AlphaConf: config.AlphaConf{
-			BaseUrl:     "",
-			Bank:        "",
-			CredByAdmin: make(map[int64]config.AlphaCred, len(daos)),
+			BaseUrl:  "",
+			Bank:     "",
+			CredByID: make(map[int64]config.AlphaCred, len(daos)),
 		},
 		TBankConf: config.TBankConf{
-			BaseUrl:     "",
-			Bank:        "",
-			CredByAdmin: make(map[int64]config.TBankCred, len(daos)),
+			BaseUrl:  "",
+			Bank:     "",
+			CredByID: make(map[int64]config.TBankCred, len(daos)),
 		},
-		BankByAdmin: make(map[int64]config.Bank, len(daos)),
+		TochkaConf: config.TochkaConf{
+			BaseUrl:  "",
+			Bank:     "",
+			CredByID: make(map[int64]config.TochkaCred, len(daos)),
+		},
+		PaymentsByAdmin: make(map[int64][]config.AdminPayment, len(daos)),
 	}
 
 	for _, dao := range daos {
@@ -37,7 +42,7 @@ func (daos CredDAOs) ToDomain(ctx context.Context) config.PaymentConfig {
 			if err != nil {
 				logger.Error(ctx, "ошибка анмаршалинга конфига т банка", err)
 			}
-			cfg.TBankConf.CredByAdmin[dao.AdminID] = adminCred
+			cfg.TBankConf.CredByID[dao.ID] = adminCred
 		case string(config.Alpha):
 			cfg.AlphaConf.Bank = config.Alpha
 			cfg.AlphaConf.BaseUrl = dao.BaseURL.String
@@ -47,9 +52,23 @@ func (daos CredDAOs) ToDomain(ctx context.Context) config.PaymentConfig {
 			if err != nil {
 				logger.Error(ctx, "ошибка анмаршалинга конфига т банка", err)
 			}
-			cfg.AlphaConf.CredByAdmin[dao.AdminID] = adminCred
+			cfg.AlphaConf.CredByID[dao.ID] = adminCred
+		case string(config.Tochka):
+			cfg.TochkaConf.Bank = config.Tochka
+			cfg.TochkaConf.BaseUrl = dao.BaseURL.String
+
+			var adminCred config.TochkaCred
+			err := json.Unmarshal(dao.Cred, &adminCred)
+			if err != nil {
+				logger.Error(ctx, "ошибка анмаршалинга конфига т банка", err)
+			}
+			cfg.TochkaConf.CredByID[dao.ID] = adminCred
 		}
-		cfg.BankByAdmin[dao.AdminID] = config.Bank(dao.Bank.String)
+		cfg.PaymentsByAdmin[dao.AdminID] = append(cfg.PaymentsByAdmin[dao.AdminID], config.AdminPayment{
+			PaymentID: dao.ID,
+			Bank:      config.Bank(dao.Bank.String),
+			Default:   dao.IsDefault,
+		})
 	}
 	return cfg
 }

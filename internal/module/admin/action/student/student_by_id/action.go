@@ -74,6 +74,12 @@ func (a *Action) Do(ctx context.Context, studentID int64) (dto.Student, error) {
 		}, nil
 	}
 
+	payment, err := a.dal.GetStudentPayment(ctx, studentID)
+	if err != nil {
+		logger.Error(ctx, "Ошибка при получении имени платежки студента", err)
+	}
+	student.Payment = payment
+
 	tutorName, err := a.dal.GetTutorName(ctx, student.TutorID)
 	if err != nil {
 		logger.Error(ctx, "Ошибка при получении имени репетитора", err)

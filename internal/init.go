@@ -7,6 +7,7 @@ import (
 
 	"github.com/georgysavva/scany/v2/dbscan"
 	"github.com/georgysavva/scany/v2/pgxscan"
+	dtoInternal "github.com/it-chep/tutors.git/internal/dto"
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/bot"
 	"github.com/it-chep/tutors.git/internal/module/bot/dal"
@@ -15,6 +16,8 @@ import (
 	"github.com/it-chep/tutors.git/internal/pkg/tbank"
 	tbankDto "github.com/it-chep/tutors.git/internal/pkg/tbank/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
+	"github.com/it-chep/tutors.git/internal/pkg/tochka"
+	tochkaDto "github.com/it-chep/tutors.git/internal/pkg/tochka/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/worker"
 	"github.com/it-chep/tutors.git/internal/server"
 	"github.com/it-chep/tutors.git/internal/server/handler"
@@ -58,14 +61,22 @@ func (a *App) initSmtp(_ context.Context) *App {
 }
 
 func (a *App) initPaymentGateways(_ context.Context) *App {
-	a.alfa = alfa.NewClient(dto.Credentials{
-		BaseURL:   a.config.PaymentConfig.AlphaConf.BaseUrl,
-		UsersConf: a.config.PaymentConfig.AlphaConf.CredByAdmin,
-	})
-	a.tBank = tbank.NewClient(tbankDto.Credentials{
-		BaseURL:   a.config.PaymentConfig.TBankConf.BaseUrl,
-		UsersConf: a.config.PaymentConfig.TBankConf.CredByAdmin,
-	})
+	paymentGates := &dtoInternal.PaymentGateways{
+		Alfa: alfa.NewClient(dto.Credentials{
+			BaseURL:         a.config.PaymentConfig.AlphaConf.BaseUrl,
+			CredByPaymentID: a.config.PaymentConfig.AlphaConf.CredByID,
+		}),
+		TBank: tbank.NewClient(tbankDto.Credentials{
+			BaseURL:         a.config.PaymentConfig.TBankConf.BaseUrl,
+			CredByPaymentID: a.config.PaymentConfig.TBankConf.CredByID,
+		}),
+		Tochka: tochka.NewClient(tochkaDto.Credentials{
+			BaseURL:         a.config.PaymentConfig.TochkaConf.BaseUrl,
+			CredByPaymentID: a.config.PaymentConfig.TochkaConf.CredByID,
+		}),
+	}
+	a.paymentGateways = paymentGates
+
 	return a
 }
 
@@ -84,11 +95,11 @@ func (a *App) initTgBot(_ context.Context) *App {
 
 func (a *App) initModules(ctx context.Context) *App {
 	a.modules = Modules{
-		Bot:   bot.New(a.pool, a.config, a.bot, a.alfa, a.tBank),
-		Admin: admin.New(a.pool, a.smtp, a.config, a.bot, a.alfa, a.tBank),
+		Bot:   bot.New(a.pool, a.config, a.bot, a.paymentGateways),
+		Admin: admin.New(a.pool, a.smtp, a.config, a.bot, a.paymentGateways),
 	}
 
-	a.workers = append(a.workers, worker.NewWorker(ctx, a.modules.Admin.Checker.Start, 5*time.Minute, 1))
+	a.workers = append(a.workers, worker.NewWorker(ctx, a.modules.Admin.Checker.Start, 2*time.Minute, 1))
 	return a
 }
 

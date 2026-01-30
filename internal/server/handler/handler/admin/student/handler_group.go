@@ -3,6 +3,7 @@ package student
 import (
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/archive_student"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/change_student_payment"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/create_student"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/delete_student"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/filter_students"
@@ -43,6 +44,7 @@ type HandlerGroup struct {
 	GetNotificationHistory *get_notification_history.Handler
 	PushNotification       *push_notification.Handler
 	PushAllDebitors        *push_all_debitors.Handler
+	ChangeStudentPayment   *change_student_payment.Handler
 
 	GetArchive         *get_archive.Handler
 	ArchiveStudent     *archive_student.Handler
@@ -70,6 +72,7 @@ func NewGroup(adminModule *admin.Module) *HandlerGroup {
 		GetNotificationHistory: get_notification_history.NewHandler(adminModule),
 		PushNotification:       push_notification.NewHandler(adminModule),
 		PushAllDebitors:        push_all_debitors.NewHandler(adminModule),
+		ChangeStudentPayment:   change_student_payment.NewHandler(adminModule),
 
 		GetArchive:         get_archive.NewHandler(adminModule),
 		ArchiveStudent:     archive_student.NewHandler(adminModule),

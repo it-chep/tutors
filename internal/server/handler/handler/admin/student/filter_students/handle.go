@@ -80,6 +80,7 @@ func (h *Handler) prepareResponse(students []dto.Student) Response {
 				IsBalanceNegative:   item.IsBalanceNegative,
 				IsNewbie:            item.IsNewbie,
 				Balance:             item.Balance.String(),
+				PaymentName:         item.Payment.String(),
 			}
 		}),
 		StudentsCount: int64(len(students)),

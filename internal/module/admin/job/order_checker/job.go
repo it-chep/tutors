@@ -2,81 +2,29 @@ package order_checker
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/it-chep/tutors.git/internal/config"
+	dtoInternal "github.com/it-chep/tutors.git/internal/dto"
 	job_dal "github.com/it-chep/tutors.git/internal/module/admin/job/order_checker/dal"
 	"github.com/it-chep/tutors.git/internal/module/bot/dto/business"
-	alfa "github.com/it-chep/tutors.git/internal/pkg/alpha"
 	alfaDto "github.com/it-chep/tutors.git/internal/pkg/alpha/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
-	"github.com/it-chep/tutors.git/internal/pkg/tbank"
 	tbankDto "github.com/it-chep/tutors.git/internal/pkg/tbank/dto"
+	tochkaDto "github.com/it-chep/tutors.git/internal/pkg/tochka/dto"
 	"github.com/samber/lo"
-	"github.com/shopspring/decimal"
 )
 
 type TransactionChecker struct {
-	dal         *job_dal.Repository
-	alfa        *alfa.Client
-	tbank       *tbank.Client
-	bankByAdmin map[int64]config.Bank
+	dal            *job_dal.Repository
+	gateways       *dtoInternal.PaymentGateways
+	paymentByAdmin config.PaymentsByAdmin
 }
 
-func NewTransactionChecker(dal *job_dal.Repository, alfa *alfa.Client, tbank *tbank.Client, bankByAdmin map[int64]config.Bank) *TransactionChecker {
-	return &TransactionChecker{dal: dal, alfa: alfa, tbank: tbank, bankByAdmin: bankByAdmin}
+func NewTransactionChecker(dal *job_dal.Repository, gateways *dtoInternal.PaymentGateways, paymentByAdmin config.PaymentsByAdmin) *TransactionChecker {
+	return &TransactionChecker{dal: dal, gateways: gateways, paymentByAdmin: paymentByAdmin}
 }
-
-func (c *TransactionChecker) UpdateTransactionsByAmount(ctx context.Context, amount decimal.Decimal) error {
-	transactions, err := c.dal.GetOrdersByAmount(ctx, amount)
-	if err != nil {
-		return err
-	}
-
-	if len(transactions) == 0 {
-		return nil
-	}
-
-	transactions = lo.Filter(transactions, func(item *business.Transaction, _ int) bool {
-		if item.OrderID == nil {
-			logger.Message(ctx, fmt.Sprintf("у транзакции %s нет номера заказа", item.ID))
-			return false
-		}
-		return true
-	})
-
-	studentIDs := lo.Map(transactions, func(item *business.Transaction, _ int) int64 {
-		return item.StudentID
-	})
-
-	adminByStudent, err := c.dal.AdminIDByStudents(ctx, studentIDs)
-	if err != nil {
-		logger.Error(ctx, "ошибка получения админов по студентам в вебхуке", err)
-		return err
-	}
-
-	for _, transaction := range transactions {
-		adminID := adminByStudent[transaction.StudentID]
-		bank := c.bankByAdmin[adminID]
-		if bank == config.Alpha {
-			status, errG := c.alfa.GetOrderStatus(ctx, alfaDto.NewStatusRequest(adminID, lo.FromPtr(transaction.OrderID)))
-			if errG != nil {
-				logger.Error(ctx, "ошибка получения статуса заказа", err)
-				return errG
-			}
-			if status.OrderStatus.Confirmed() {
-				if err = c.dal.UpdateBalance(ctx, status.OrderNumber); err != nil {
-					logger.Error(ctx, "ошибка обновления баланса пользователя", err)
-					return err
-				}
-			}
-		}
-	}
-	return nil
-}
-
 func (c *TransactionChecker) ConfirmOrder(ctx context.Context, orderID, terminal string) error {
-	if !c.tbank.KnownTerminal(ctx, terminal) {
+	if !c.gateways.TBank.KnownTerminal(ctx, terminal) {
 		return nil
 	}
 
@@ -105,11 +53,10 @@ func (c *TransactionChecker) Start(ctx context.Context) {
 	}
 
 	for _, transaction := range transactions {
-		adminID := adminByStudent[transaction.StudentID]
-		bank := c.bankByAdmin[adminID]
+		payment := c.paymentByAdmin.Payment(adminByStudent[transaction.StudentID], transaction.PaymentID)
 
-		if bank == config.Alpha {
-			status, err := c.alfa.GetOrderStatus(ctx, alfaDto.NewStatusRequest(adminByStudent[transaction.StudentID], lo.FromPtr(transaction.OrderID)))
+		if payment.Bank == config.Alpha {
+			status, err := c.gateways.Alfa.GetOrderStatus(ctx, alfaDto.NewStatusRequest(payment.PaymentID, lo.FromPtr(transaction.OrderID)))
 			if err != nil {
 				logger.Error(ctx, "ошибка получения статуса заказа", err)
 			}
@@ -121,8 +68,8 @@ func (c *TransactionChecker) Start(ctx context.Context) {
 			}
 		}
 
-		if bank == config.TBank {
-			status, err := c.tbank.GetOrderStatus(ctx, tbankDto.NewGetOrderRequest(adminByStudent[transaction.StudentID], lo.FromPtr(transaction.OrderID)))
+		if payment.Bank == config.TBank {
+			status, err := c.gateways.TBank.GetOrderStatus(ctx, tbankDto.NewGetOrderRequest(payment.PaymentID, lo.FromPtr(transaction.OrderID)))
 			if err != nil {
 				logger.Error(ctx, "ошибка получения статуса заказа", err)
 			}
@@ -133,6 +80,23 @@ func (c *TransactionChecker) Start(ctx context.Context) {
 				}
 			}
 			if status.Cancelled() {
+				if err = c.dal.DropTransaction(ctx, lo.FromPtr(transaction.OrderID)); err != nil {
+				}
+			}
+		}
+
+		if payment.Bank == config.Tochka {
+			status, err := c.gateways.Tochka.GetOrderStatus(ctx, tochkaDto.NewGetOrderRequest(payment.PaymentID, lo.FromPtr(transaction.OrderID)))
+			if err != nil {
+				logger.Error(ctx, "ошибка получения статуса заказа", err)
+			}
+			if status.IsPaid() {
+				if err = c.dal.UpdateBalanceByOrderID(ctx, lo.FromPtr(transaction.OrderID)); err != nil {
+					logger.Error(ctx, "ошибка обновления баланса пользователя", err)
+					return
+				}
+			}
+			if status.Expired() {
 				if err = c.dal.DropTransaction(ctx, lo.FromPtr(transaction.OrderID)); err != nil {
 				}
 			}
