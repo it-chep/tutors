@@ -3,6 +3,7 @@ package get_archive
 import (
 	"context"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_archive/dal"
+	commondal "github.com/it-chep/tutors.git/internal/module/admin/dal"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	userCtx "github.com/it-chep/tutors.git/pkg/context"
@@ -11,12 +12,14 @@ import (
 )
 
 type Action struct {
-	dal *dal.Repository
+	dal       *dal.Repository
+	commonDal *commondal.Repository
 }
 
 func New(pool *pgxpool.Pool) *Action {
 	return &Action{
-		dal: dal.NewRepository(pool),
+		dal:       dal.NewRepository(pool),
+		commonDal: commondal.NewRepository(pool),
 	}
 }
 
@@ -134,11 +137,16 @@ func (a *Action) enrichStudents(ctx context.Context, students dto.Students) {
 	if err != nil {
 		logger.Error(ctx, "Ошибка при получении информации об оплатах студентов репетитора", err)
 	}
+	paymentsInfo, err := a.commonDal.GetStudentsPayments(ctx, studentIDs)
+	if err != nil {
+		logger.Error(ctx, "Ошибка при получении информации о платежках студентов", err)
+	}
 
 	for i, _ := range students {
 		// Задолженности
 		wallet, ok := info[students[i].ID]
 		students[i].Balance = wallet.Balance
+		students[i].Payment = paymentsInfo[students[i].ID]
 
 		if !ok {
 			students[i].IsBalanceNegative = false
