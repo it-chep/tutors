@@ -3,6 +3,7 @@ package top_up_balance_dal
 import (
 	"context"
 	"fmt"
+
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
@@ -81,14 +82,14 @@ func (d *Dal) SetTransactionAmount(ctx context.Context, transactionID string, am
 	return err
 }
 
-func (d *Dal) SetOrderID(ctx context.Context, transactionID, orderID string) error {
+func (d *Dal) SetOrderID(ctx context.Context, transactionID, orderID string, paymentID int64) error {
 	sql := `
 		update transactions_history 
-			set order_id = $2
+			set order_id = $2, payment_id = $3
 		where id = $1
 	`
 
-	_, err := d.pool.Exec(ctx, sql, transactionID, orderID)
+	_, err := d.pool.Exec(ctx, sql, transactionID, orderID, paymentID)
 	return err
 }
 
@@ -101,28 +102,28 @@ func (d *Dal) DropTransaction(ctx context.Context, transactionID string) error {
 	return err
 }
 
-func (d *Dal) AdminIDByParent(ctx context.Context, parentTG int64) (int64, error) {
+func (d *Dal) AdminIDByParent(ctx context.Context, parentTG int64) (int64, int64, error) {
 	var (
-		adminID int64
-		sql     = `
+		adminID, paymentID int64
+		sql                = `
 			with tutor_id_sel as (
-    			select tutor_id 
+    			select tutor_id, payment_id
 					from students 
 				where parent_tg_id = $1
 			)
-			select admin_id
-				from tutors
-			where id = (select tutor_id from tutor_id_sel)
+			select t.admin_id, s.payment_id
+			from tutor_id_sel s
+				join tutors t on t.id = s.tutor_id
 		`
 	)
 
-	if err := d.pool.QueryRow(ctx, sql, parentTG).Scan(&adminID); err != nil {
-		return 0, err
+	if err := d.pool.QueryRow(ctx, sql, parentTG).Scan(&adminID, &paymentID); err != nil {
+		return 0, 0, err
 	}
 
 	if adminID == 0 {
-		return 0, fmt.Errorf("admin id is zero")
+		return 0, 0, fmt.Errorf("admin id is zero")
 	}
 
-	return adminID, nil
+	return adminID, paymentID, nil
 }

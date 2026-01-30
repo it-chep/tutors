@@ -29,7 +29,11 @@ update students s
 SET payment_id = pc.id
 from tutors t
          join payment_cred pc ON t.admin_id = pc.admin_id
-where s.tutor_id = t.id
+where s.tutor_id = t.id;
+
+alter table transactions_history
+    add column payment_id bigint;
+
 -- +goose StatementEnd
 
 -- +goose Down

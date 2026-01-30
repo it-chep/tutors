@@ -4,12 +4,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/it-chep/tutors.git/internal/config"
+	dtoInternal "github.com/it-chep/tutors.git/internal/dto"
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/bot"
 	"github.com/it-chep/tutors.git/internal/module/bot/dto"
-	alfa "github.com/it-chep/tutors.git/internal/pkg/alpha"
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
-	"github.com/it-chep/tutors.git/internal/pkg/tbank"
 	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
 	"github.com/it-chep/tutors.git/internal/pkg/worker"
 	"github.com/it-chep/tutors.git/internal/server"
@@ -25,11 +24,10 @@ type App struct {
 	config *config.Config
 	pool   *pgxpool.Pool
 
-	server *server.Server
-	bot    *tg_bot.Bot
-	smtp   *smtp.ClientSmtp
-	alfa   *alfa.Client
-	tBank  *tbank.Client
+	server          *server.Server
+	bot             *tg_bot.Bot
+	smtp            *smtp.ClientSmtp
+	paymentGateways *dtoInternal.PaymentGateways
 
 	modules Modules
 	workers Workers

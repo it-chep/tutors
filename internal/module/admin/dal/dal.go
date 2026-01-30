@@ -3,6 +3,7 @@ package dal
 import (
 	"context"
 	"github.com/georgysavva/scany/v2/pgxscan"
+	"github.com/it-chep/tutors.git/internal/config"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -44,7 +45,7 @@ func (r *Repository) GetStudentsPayments(ctx context.Context, studentIDs []int64
 	for _, studentPayment := range studentPayments {
 		paymentsMap[studentPayment.StudentID] = dto.Payment{
 			ID:   studentPayment.PaymentID,
-			Bank: studentPayment.Bank,
+			Bank: config.Bank(studentPayment.Bank),
 		}
 	}
 

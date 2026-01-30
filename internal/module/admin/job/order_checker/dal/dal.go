@@ -38,6 +38,23 @@ func (r *Repository) UpdateBalance(ctx context.Context, orderNumber string) erro
 	return err
 }
 
+func (r *Repository) UpdateBalanceByOrderID(ctx context.Context, orderID string) error {
+	sql := `
+		with upd as (
+			update transactions_history 
+				set confirmed_at = now() 
+			where order_id = $1 and confirmed_at is null
+			returning student_id, amount
+		)
+		update wallet w set  
+			balance = balance + u.amount
+		from upd u
+		where w.student_id = u.student_id
+	`
+	_, err := r.pool.Exec(ctx, sql, orderID)
+	return err
+}
+
 func (r *Repository) GetOrdersByAmount(ctx context.Context, amount decimal.Decimal) ([]*business.Transaction, error) {
 	var (
 		daos dao.TransactionDAOs

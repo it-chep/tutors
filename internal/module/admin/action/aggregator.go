@@ -110,7 +110,7 @@ type Aggregator struct {
 	Auth *auth.Aggregator
 
 	// Платежки
-	GetAdminAvailablePayments get_admin_available_payments.Action
+	GetAdminAvailablePayments *get_admin_available_payments.Action
 
 	// Админы
 	CreateAdmin  *create_admin.Action

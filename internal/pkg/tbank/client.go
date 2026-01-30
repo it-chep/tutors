@@ -49,7 +49,7 @@ func (c *Client) GetOrderStatus(ctx context.Context, req *dto.GetOrderRequest) (
 }
 
 func (c *Client) KnownTerminal(ctx context.Context, terminal string) bool {
-	for _, cred := range c.cred.UsersConf {
+	for _, cred := range c.cred.CredByPaymentID {
 		if cred.TerminalKey == terminal {
 			return true
 		}

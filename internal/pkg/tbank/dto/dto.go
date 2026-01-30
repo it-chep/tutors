@@ -21,8 +21,8 @@ const (
 )
 
 type Credentials struct {
-	BaseURL   string
-	UsersConf map[int64]config.TBankCred
+	BaseURL         string
+	CredByPaymentID map[int64]config.TBankCred
 }
 
 type InitRequest struct {
@@ -40,10 +40,10 @@ type InitRequest struct {
 	SuccessURL      string `json:"SuccessURL,omitempty"`
 	FailURL         string `json:"FailURL,omitempty"`
 
-	adminID int64
+	paymentID int64
 }
 
-func NewInitRequest(adminID int64, orderID string, amount int64) *InitRequest {
+func NewInitRequest(paymentID int64, orderID string, amount int64) *InitRequest {
 	return &InitRequest{
 		Amount:  amount * 100,
 		OrderID: orderID,
@@ -54,7 +54,7 @@ func NewInitRequest(adminID int64, orderID string, amount int64) *InitRequest {
 		FailURL:         "https://t.me/Payments_A_bot",
 		NotificationURL: "https://100rep.ru/callback/tbank",
 		Description:     "Оплата консультаций репетитора",
-		adminID:         adminID,
+		paymentID:       paymentID,
 	}
 }
 
@@ -87,8 +87,8 @@ func (r *InitRequest) GenerateToken(password string) {
 }
 
 func (r *InitRequest) ToHttp(ctx context.Context, cred Credentials) *http.Request {
-	r.TerminalKey = cred.UsersConf[r.adminID].TerminalKey
-	r.GenerateToken(cred.UsersConf[r.adminID].Password)
+	r.TerminalKey = cred.CredByPaymentID[r.paymentID].TerminalKey
+	r.GenerateToken(cred.CredByPaymentID[r.paymentID].Password)
 
 	body, _ := json.Marshal(r)
 	httpReq, _ := http.NewRequestWithContext(ctx, http.MethodPost, cred.BaseURL+"Init", bytes.NewReader(body))
@@ -128,13 +128,13 @@ type GetOrderRequest struct {
 	OrderID     string `json:"OrderId"`
 	Token       string `json:"Token"`
 
-	adminID int64
+	paymentID int64
 }
 
-func NewGetOrderRequest(adminID int64, orderID string) *GetOrderRequest {
+func NewGetOrderRequest(paymentID int64, orderID string) *GetOrderRequest {
 	return &GetOrderRequest{
-		OrderID: orderID,
-		adminID: adminID,
+		OrderID:   orderID,
+		paymentID: paymentID,
 	}
 }
 
@@ -160,8 +160,8 @@ func (r *GetOrderRequest) GenerateToken(password string) {
 }
 
 func (r *GetOrderRequest) ToHttp(ctx context.Context, cred Credentials) *http.Request {
-	r.TerminalKey = cred.UsersConf[r.adminID].TerminalKey
-	r.GenerateToken(cred.UsersConf[r.adminID].Password)
+	r.TerminalKey = cred.CredByPaymentID[r.paymentID].TerminalKey
+	r.GenerateToken(cred.CredByPaymentID[r.paymentID].Password)
 
 	body, _ := json.Marshal(r)
 	httpReq, _ := http.NewRequestWithContext(ctx, http.MethodPost, cred.BaseURL+"CheckOrder", bytes.NewReader(body))

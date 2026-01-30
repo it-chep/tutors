@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"github.com/it-chep/tutors.git/internal/config"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/samber/lo"
 )
@@ -13,7 +14,7 @@ type Payment struct {
 func (p *Payment) ToDomain() dto.Payment {
 	return dto.Payment{
 		ID:   p.ID,
-		Bank: p.Bank,
+		Bank: config.Bank(p.Bank),
 	}
 }
 
