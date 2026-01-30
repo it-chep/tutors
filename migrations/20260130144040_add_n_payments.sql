@@ -10,7 +10,7 @@ alter table payment_cred
     add primary key (id);
 
 alter table payment_cred
-    add column id_default bool;
+    add column is_default bool;
 
 alter table students
     add column payment_id bigint;
