@@ -11,6 +11,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/assistant/get_assistance"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/assistant/get_available_tg"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/auth"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/get_admin_available_payments"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance_by_tgs"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_lessons"
@@ -20,6 +21,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/lessons/update_lesson"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/archivate_student"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/archive_filter"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/student/change_student_payment"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/filter_students"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_archive"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_notification_history"
@@ -80,6 +82,8 @@ type Aggregator struct {
 	GetTgAdminsUsernames   *get_tg_admins_usernames.Action
 	GetTransactionHistory  *get_transaction_history.Action
 	GetNotificationHistory *get_notification_history.Action
+	ChangeStudentPayment   *change_student_payment.Action
+
 	// пуши
 	PushNotification *push_notification.Action
 	PushAllDebitors  *push_all_debitors.Action
@@ -104,6 +108,9 @@ type Aggregator struct {
 
 	// AUTH
 	Auth *auth.Aggregator
+
+	// Платежки
+	GetAdminAvailablePayments get_admin_available_payments.Action
 
 	// Админы
 	CreateAdmin  *create_admin.Action
@@ -150,6 +157,8 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 		GetTgAdminsUsernames:   get_tg_admins_usernames.New(pool),
 		GetTransactionHistory:  get_transaction_history.New(pool),
 		GetNotificationHistory: get_notification_history.New(pool),
+		ChangeStudentPayment:   change_student_payment.New(pool),
+
 		// пуши
 		PushNotification: push_notification.New(pool, bot),
 		PushAllDebitors:  push_all_debitors.New(pool, bot),
@@ -174,6 +183,9 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 
 		// AUTH
 		Auth: auth.NewAggregator(pool, smtp, config),
+
+		// Платежки
+		GetAdminAvailablePayments: get_admin_available_payments.New(pool),
 
 		// Админы
 		CreateAdmin:  create_admin.New(pool),

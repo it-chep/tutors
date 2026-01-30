@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/archive_filter/dal"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/archive_filter/dto"
+	commondal "github.com/it-chep/tutors.git/internal/module/admin/dal"
 	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	userCtx "github.com/it-chep/tutors.git/pkg/context"
@@ -12,12 +13,14 @@ import (
 )
 
 type Action struct {
-	dal *dal.Repository
+	dal       *dal.Repository
+	commonDal *commondal.Repository
 }
 
 func New(pool *pgxpool.Pool) *Action {
 	return &Action{
-		dal: dal.NewRepository(pool),
+		dal:       dal.NewRepository(pool),
+		commonDal: commondal.NewRepository(pool),
 	}
 }
 
@@ -30,20 +33,26 @@ func (a *Action) Do(ctx context.Context, filter dto.FilterRequest) ([]indto.Stud
 		return nil, err
 	}
 
-	studentsWalletMap, err := a.dal.GetStudentsWallets(ctx, students.IDs())
+	studentIDs := students.IDs()
+	studentsWalletMap, err := a.dal.GetStudentsWallets(ctx, studentIDs)
 	if err != nil {
 		return nil, err
 	}
 
-	payments, err := a.dal.HasStudentsPayments(ctx, students.IDs())
+	payments, err := a.dal.HasStudentsPayments(ctx, studentIDs)
 	if err != nil {
 		logger.Error(ctx, "Ошибка при получении информации об оплатах студентов репетитора", err)
+	}
+	paymentsInfo, err := a.commonDal.GetStudentsPayments(ctx, studentIDs)
+	if err != nil {
+		logger.Error(ctx, "Ошибка при получении информации о платежках студентов", err)
 	}
 
 	for i, _ := range students {
 		// Задолженности
 		wallet, ok := studentsWalletMap[students[i].ID]
 		students[i].Balance = wallet.Balance
+		students[i].Payment = paymentsInfo[students[i].ID]
 
 		if !ok {
 			students[i].IsBalanceNegative = false
