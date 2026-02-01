@@ -25,12 +25,6 @@ values (122, 2, 44),
        (124, 4, 44),
        (125, 4, 45);
 
-update students s
-SET payment_id = pc.id
-from tutors t
-         join payment_cred pc ON t.admin_id = pc.admin_id
-where s.tutor_id = t.id;
-
 alter table transactions_history
     add column payment_id bigint;
 
