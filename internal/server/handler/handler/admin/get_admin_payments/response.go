@@ -7,8 +7,8 @@ import (
 )
 
 type Payment struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
+	ID   int64  `json:"payment_id"`
+	Name string `json:"payment_name"`
 }
 type Response struct {
 	Payments []Payment `json:"payments"`
