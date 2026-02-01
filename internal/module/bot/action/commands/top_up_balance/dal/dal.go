@@ -7,6 +7,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/google/uuid"
@@ -104,8 +105,9 @@ func (d *Dal) DropTransaction(ctx context.Context, transactionID string) error {
 
 func (d *Dal) AdminIDByParent(ctx context.Context, parentTG int64) (int64, int64, error) {
 	var (
-		adminID, paymentID int64
-		sql                = `
+		adminID   int64
+		paymentID *int64
+		sql       = `
 			with tutor_id_sel as (
     			select tutor_id, payment_id
 					from students 
@@ -125,5 +127,5 @@ func (d *Dal) AdminIDByParent(ctx context.Context, parentTG int64) (int64, int64
 		return 0, 0, fmt.Errorf("admin id is zero")
 	}
 
-	return adminID, paymentID, nil
+	return adminID, lo.FromPtr(paymentID), nil
 }
