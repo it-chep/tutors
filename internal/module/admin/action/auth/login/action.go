@@ -3,18 +3,18 @@ package login
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/it-chep/tutors.git/internal/pkg/logger"
-	"net/http"
-	"time"
-
 	"github.com/it-chep/tutors.git/internal/config"
 	register_dto "github.com/it-chep/tutors.git/internal/module/admin/action/auth/dto"
 	login_dal "github.com/it-chep/tutors.git/internal/module/admin/action/auth/login/dal"
+	"github.com/it-chep/tutors.git/internal/p
 	"github.com/it-chep/tutors.git/pkg/cache"
 	"github.com/it-chep/tutors.git/pkg/smtp"
 	"github.com/it-chep/tutors.git/pkg/token"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
+o/bcrypt"
+	"net/http"
+	
 )
 
 type Action struct {
@@ -57,14 +57,16 @@ func (a *Action) LoginHandler() http.HandlerFunc {
 		code := smtp.GenerateCode()
 		//fmt.Println("code: ", code)
 		a.codes.Put(req.Email, code)
-		err = a.smtp.SendEmail(smtp.EmailParams{
-			Body: fmt.Sprintf("Ваш код %s", code), Destination: req.Email,
-			Subject: "Авторизация в системе 100rep.ru",
-		})
-		if err != nil {
-			http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusInternalServerError)
-			logger.Error(r.Context(), "Ошибка при отправке кода", err)
-			return
+		if os.Getenv("DEBUG") != "True" {
+			err = a.smtp.SendEmail(smtp.EmailParams{
+				Body: fmt.Sprintf("Ваш код %s", code), Destination: req.Email,
+				Subject: "Авторизация в системе 100rep.ru",
+			})
+			if err != nil {
+				http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusInternalServerError)
+				logger.Error(r.Context(), "Ошибка при отправке кода", err)
+				return
+			}
 		}
 
 		err = a.repo.SaveCode(r.Context(), req.Email, code)

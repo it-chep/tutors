@@ -46,13 +46,18 @@ func (a *Action) Handle() http.HandlerFunc {
 			return
 		}
 
+		functions := make(map[string]bool)
+		if paid != nil {
+			functions = paid.PaidFunctions
+		}
+
 		resp := Response{
 			User: User{
 				ID:      user.ID,
 				Role:    user.Role.FrontString(),
 				TutorID: user.TutorID,
 			},
-			PaidFunctions: paid.PaidFunctions,
+			PaidFunctions: functions,
 		}
 		w.Header().Set("Content-Type", "application/json")
 		if err = json.NewEncoder(w).Encode(resp); err != nil {

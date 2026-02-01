@@ -152,7 +152,7 @@ func (h *Handler) setupRoutes(cfg Config) {
 		r.Post("/finance", h.adminAgg.GetAllFinance.Handle())             // POST /admin/finance
 		r.Post("/finance_by_tgs", h.adminAgg.GetAllFinanceByTGs.Handle()) // POST /admin/finance_by_tgs
 		r.Post("/transactions", h.adminAgg.GetAllTransactions.Handle())   // POST /admin/transactions
-		r.Post("/payments", h.adminAgg.GetAdminPayments.Handle())         // POST /admin/payments
+		r.Get("/payments", h.adminAgg.GetAdminPayments.Handle())          // POST /admin/payments
 	})
 
 	h.router.Post("/webhook/alpha", h.adminAgg.AlphaHook.Handle())      // POST /alpha/hook
