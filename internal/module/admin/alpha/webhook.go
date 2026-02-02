@@ -68,8 +68,8 @@ func (hook *WebHookAlpha) webHook(r *http.Request) (*WebhookEnvelope, error) {
 func (hook *WebHookAlpha) processWebhook(ctx context.Context, webhook *WebhookEnvelope) error {
 	amount := webhook.Amount()
 	logger.Message(ctx, fmt.Sprintf("величина поступления на счет: %s", amount.String()))
-	if amount.IsZero() {
-		return nil
-	}
-	return hook.checker.UpdateTransactionsByAmount(ctx, amount)
+	//if amount.IsZero() {
+	return nil
+	//}
+	//return hook.checker.UpdateTransactionsByAmount(ctx, amount)
 }

@@ -33,6 +33,9 @@ type Student struct {
 
 	ParentTgID int64
 	IsArchived bool
+	PaymentID  int64
+
+	Payment Payment
 }
 
 type Students []Student

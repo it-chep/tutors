@@ -12,6 +12,7 @@ type Student struct {
 	IsNewbie            bool   `json:"is_newbie"`
 	Balance             string `json:"balance"`
 	IsArchived          bool   `json:"is_archive"`
+	PaymentName         string `json:"payment_name"`
 }
 
 type Response struct {

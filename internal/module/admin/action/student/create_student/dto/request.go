@@ -16,4 +16,6 @@ type CreateRequest struct {
 	ParentTg       string
 
 	TgAdminUsername string
+
+	PaymentID int64
 }

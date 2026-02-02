@@ -2,6 +2,7 @@ package create_student
 
 import (
 	"encoding/json"
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
 	"github.com/samber/lo"
 	"net/http"
 
@@ -29,7 +30,9 @@ func (h *Handler) Handle() http.HandlerFunc {
 			return
 		}
 
-		err := h.adminModule.Actions.CreateStudent.Do(ctx, dto.CreateRequest{
+		adminID := userCtx.AdminIDFromContext(ctx)
+
+		err := h.adminModule.Actions.CreateStudent.Do(ctx, adminID, dto.CreateRequest{
 			FirstName:  req.FirstName,
 			LastName:   req.LastName,
 			MiddleName: req.MiddleName,

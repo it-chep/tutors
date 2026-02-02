@@ -15,4 +15,5 @@ type Transaction struct {
 	ConfirmedAt *time.Time
 	Amount      *decimal.Decimal
 	StudentID   int64
+	PaymentID   int64
 }
