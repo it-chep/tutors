@@ -43,6 +43,10 @@ type InitRequest struct {
 	paymentID int64
 }
 
+func (r *InitRequest) PaymentID() int64 {
+	return r.paymentID
+}
+
 func NewInitRequest(paymentID int64, orderID string, amount int64) *InitRequest {
 	return &InitRequest{
 		Amount:  amount * 100,
@@ -107,6 +111,54 @@ type InitResponse struct {
 	PaymentURL  string `json:"PaymentURL"`
 	Message     string `json:"Message"`
 	Details     string `json:"Details"`
+}
+
+type GetQrRequest struct {
+	TerminalKey string `json:"TerminalKey"`
+	PaymentId   int64  `json:"PaymentId"`
+
+	Token string `json:"Token"`
+}
+
+func (r *GetQrRequest) GenerateToken(password string) {
+	data := []struct{ Name, Val string }{
+		{Name: "Password", Val: password},
+		{Name: "PaymentId", Val: strconv.FormatInt(r.PaymentId, 10)},
+		{Name: "TerminalKey", Val: r.TerminalKey},
+	}
+
+	// сортируем по ключу (Name)
+	sort.Slice(data, func(i, j int) bool {
+		return data[i].Name < data[j].Name
+	})
+
+	var str string
+	for _, v := range data {
+		str += v.Val
+	}
+	// считаем sha256
+	h := sha256.Sum256([]byte(str))
+	r.Token = hex.EncodeToString(h[:])
+}
+
+func (r *InitResponse) ToQr(ctx context.Context, paymentID int64, cred Credentials) *http.Request {
+	tPayment, _ := strconv.Atoi(r.PaymentID)
+	getQr := &GetQrRequest{
+		TerminalKey: cred.CredByPaymentID[paymentID].TerminalKey,
+		PaymentId:   int64(tPayment),
+	}
+	getQr.GenerateToken(cred.CredByPaymentID[paymentID].Password)
+	body, _ := json.Marshal(getQr)
+	httpReq, _ := http.NewRequestWithContext(ctx, http.MethodPost, cred.BaseURL+"GetQr", bytes.NewReader(body))
+	httpReq.Header.Set("Content-Type", "application/json")
+	return httpReq
+}
+
+type GetQrResponse struct {
+	Success   bool   `json:"Success"`
+	ErrorCode string `json:"ErrorCode"`
+	Message   string `json:"Message"`
+	Data      string `json:"Data"`
 }
 
 type PaymentNotification struct {

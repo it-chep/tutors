@@ -21,6 +21,7 @@ type InitReqData struct {
 	PaymentMode  []string `json:"paymentMode"` // "card" | "sbp" | "tinkoff"
 	RedirectURL  string   `json:"redirectUrl"`
 	SaveCard     bool     `json:"saveCard"`
+	Ttl          int      `json:"ttl"`
 	paymentID    int64
 }
 
@@ -36,6 +37,7 @@ func NewInitRequest(paymentID int64, amount int64) *InitRequest {
 			PaymentMode: []string{"card", "sbp", "tinkoff"},
 			RedirectURL: "https://t.me/Payments_A_bot",
 			SaveCard:    true,
+			Ttl:         20,
 			paymentID:   paymentID,
 		},
 	}

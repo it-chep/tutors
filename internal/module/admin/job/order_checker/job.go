@@ -13,6 +13,7 @@ import (
 	tbankDto "github.com/it-chep/tutors.git/internal/pkg/tbank/dto"
 	tochkaDto "github.com/it-chep/tutors.git/internal/pkg/tochka/dto"
 	"github.com/samber/lo"
+	"golang.org/x/sync/errgroup"
 )
 
 type TransactionChecker struct {
@@ -53,58 +54,118 @@ func (c *TransactionChecker) Start(ctx context.Context) {
 		return
 	}
 
+	grouppedByAdminPayment := make(map[int64]map[int64][]*business.Transaction)
 	for _, transaction := range transactions {
-		payment := c.paymentByAdmin.Payment(adminByStudent[transaction.StudentID], transaction.PaymentID)
+		adminID := adminByStudent[transaction.StudentID]
 
-		time.Sleep(300 * time.Millisecond)
-		if payment.Bank == config.Alpha {
-			status, err := c.gateways.Alfa.GetOrderStatus(ctx, alfaDto.NewStatusRequest(payment.PaymentID, lo.FromPtr(transaction.OrderID)))
-			if err != nil {
-				logger.Error(ctx, "ошибка получения статуса заказа", err)
-			}
-			if status.OrderStatus.Confirmed() {
-				if err = c.dal.UpdateBalance(ctx, status.OrderNumber); err != nil {
-					logger.Error(ctx, "ошибка обновления баланса пользователя", err)
-					return
-				}
-			}
+		payment := c.paymentByAdmin.Payment(adminID, transaction.PaymentID)
+
+		if len(grouppedByAdminPayment[adminID]) == 0 {
+			grouppedByAdminPayment[adminID] = make(map[int64][]*business.Transaction, 3)
 		}
 
-		if payment.Bank == config.TBank {
-			status, err := c.gateways.TBank.GetOrderStatus(ctx, tbankDto.NewGetOrderRequest(payment.PaymentID, lo.FromPtr(transaction.OrderID)))
-			if err != nil {
-				logger.Error(ctx, "ошибка получения статуса заказа", err)
-			}
-			if status.IsPaid() {
-				if err = c.dal.UpdateBalance(ctx, status.OrderID); err != nil {
-					logger.Error(ctx, "ошибка обновления баланса пользователя", err)
-					return
-				}
-			}
-			if status.Cancelled() {
-				if err = c.dal.DropTransaction(ctx, lo.FromPtr(transaction.OrderID)); err != nil {
-				}
-			}
-		}
-
-		if payment.Bank == config.Tochka {
-			status, err := c.gateways.Tochka.GetOrderStatus(ctx, tochkaDto.NewGetOrderRequest(payment.PaymentID, lo.FromPtr(transaction.OrderID)))
-			if err != nil {
-				logger.Error(ctx, "ошибка получения статуса заказа", err)
-			}
-			if status.IsPaid() {
-				if err = c.dal.UpdateBalanceByOrderID(ctx, lo.FromPtr(transaction.OrderID)); err != nil {
-					logger.Error(ctx, "ошибка обновления баланса пользователя", err)
-					return
-				}
-			}
-			if status.Expired() {
-				if err = c.dal.DropTransaction(ctx, lo.FromPtr(transaction.OrderID)); err != nil {
-				}
-			}
-		}
+		grouppedByAdminPayment[adminID][payment.PaymentID] = append(grouppedByAdminPayment[adminID][payment.PaymentID], transaction)
 	}
-	return
+
+	g, gCtx := errgroup.WithContext(ctx)
+	for adminID, adminPayments := range grouppedByAdminPayment {
+
+		adminID := adminID
+		adminPayments := adminPayments
+
+		g.Go(func() (gErr error) {
+			for paymentID, paymentTransactions := range adminPayments {
+				var (
+					payment = c.paymentByAdmin.Payment(adminID, paymentID)
+				)
+
+				switch payment.Bank {
+				case config.Alpha:
+					gErr = c.ProcessAlfa(gCtx, payment, paymentTransactions)
+				case config.TBank:
+					gErr = c.ProcessTbank(gCtx, payment, paymentTransactions)
+				case config.Tochka:
+					gErr = c.ProcessTochka(gCtx, payment, paymentTransactions)
+				}
+
+				if gErr != nil {
+					return err
+				}
+			}
+			return gErr
+		})
+
+	}
+
+	if err = g.Wait(); err != nil {
+		logger.Error(ctx, "обработка транзакций завершена ошибкой", err)
+	}
+}
+
+func (c *TransactionChecker) ProcessAlfa(ctx context.Context, payment config.AdminPayment, transactions []*business.Transaction) error {
+	for _, transaction := range transactions {
+		status, err := c.gateways.Alfa.GetOrderStatus(ctx, alfaDto.NewStatusRequest(payment.PaymentID, lo.FromPtr(transaction.OrderID)))
+		if err != nil {
+			if status.ErrorCode == "6" {
+				_ = c.dal.DropTransaction(ctx, transaction.ID)
+				continue
+			}
+		}
+		if status.OrderStatus.Confirmed() {
+			if err = c.dal.UpdateBalance(ctx, status.OrderNumber); err != nil {
+				logger.Error(ctx, "ошибка обновления баланса пользователя", err)
+				return err
+			}
+		}
+		if status.OrderStatus.Cancelled() {
+			_ = c.dal.DropTransaction(ctx, transaction.ID)
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+
+	return nil
+}
+
+func (c *TransactionChecker) ProcessTbank(ctx context.Context, payment config.AdminPayment, transactions []*business.Transaction) error {
+	for _, transaction := range transactions {
+		status, err := c.gateways.TBank.GetOrderStatus(ctx, tbankDto.NewGetOrderRequest(payment.PaymentID, lo.FromPtr(transaction.OrderID)))
+		if err != nil {
+			logger.Error(ctx, "ошибка получения статуса заказа", err)
+		}
+		if status.IsPaid() {
+			if err = c.dal.UpdateBalance(ctx, status.OrderID); err != nil {
+				logger.Error(ctx, "ошибка обновления баланса пользователя", err)
+				return err
+			}
+		}
+		if status.Cancelled() {
+			_ = c.dal.DropTransaction(ctx, transaction.ID)
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+
+	return nil
+}
+
+func (c *TransactionChecker) ProcessTochka(ctx context.Context, payment config.AdminPayment, transactions []*business.Transaction) error {
+	for _, transaction := range transactions {
+		status, err := c.gateways.Tochka.GetOrderStatus(ctx, tochkaDto.NewGetOrderRequest(payment.PaymentID, lo.FromPtr(transaction.OrderID)))
+		if err != nil {
+			logger.Error(ctx, "ошибка получения статуса заказа", err)
+		}
+		if status.IsPaid() {
+			if err = c.dal.UpdateBalanceByOrderID(ctx, lo.FromPtr(transaction.OrderID)); err != nil {
+				logger.Error(ctx, "ошибка обновления баланса пользователя", err)
+				return err
+			}
+		}
+		if status.Expired() {
+			_ = c.dal.DropTransaction(ctx, transaction.ID)
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+
+	return nil
 }
 
 func (c *TransactionChecker) Stop() {}
