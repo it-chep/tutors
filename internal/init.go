@@ -99,7 +99,7 @@ func (a *App) initModules(ctx context.Context) *App {
 		Admin: admin.New(a.pool, a.smtp, a.config, a.bot, a.paymentGateways),
 	}
 
-	a.workers = append(a.workers, worker.NewWorker(ctx, a.modules.Admin.Checker.Start, 10*time.Second, 1))
+	a.workers = append(a.workers, worker.NewWorker(ctx, a.modules.Admin.Checker.Start, 1*time.Minute, 1))
 	return a
 }
 
