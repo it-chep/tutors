@@ -2,6 +2,7 @@ package order_checker
 
 import (
 	"context"
+	"time"
 
 	"github.com/it-chep/tutors.git/internal/config"
 	dtoInternal "github.com/it-chep/tutors.git/internal/dto"
@@ -55,6 +56,7 @@ func (c *TransactionChecker) Start(ctx context.Context) {
 	for _, transaction := range transactions {
 		payment := c.paymentByAdmin.Payment(adminByStudent[transaction.StudentID], transaction.PaymentID)
 
+		time.Sleep(300 * time.Millisecond)
 		if payment.Bank == config.Alpha {
 			status, err := c.gateways.Alfa.GetOrderStatus(ctx, alfaDto.NewStatusRequest(payment.PaymentID, lo.FromPtr(transaction.OrderID)))
 			if err != nil {
