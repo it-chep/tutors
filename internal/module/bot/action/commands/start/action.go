@@ -2,6 +2,7 @@ package start
 
 import (
 	"context"
+	"fmt"
 
 	start_dal "github.com/it-chep/tutors.git/internal/module/bot/action/commands/start/dal"
 	"github.com/it-chep/tutors.git/internal/module/bot/dto"
@@ -36,7 +37,12 @@ func (a *Action) Start(ctx context.Context, msg dto.Message) error {
 
 	if !known {
 		return a.bot.SendMessages([]bot_dto.Message{
-			{Chat: msg.ChatID, Text: "Привет, кажется мы с вами пока что не знакомы, давайте это исправим! Как вас зовут? Напишите свои Фамилию Имя"},
+			{
+				Chat: msg.ChatID,
+				Text: fmt.Sprintf(
+					"Привет, мы с вами не знакомы, чтобы исправить это, обратитесь к администратору. Ваш номер %d", msg.ChatID,
+				),
+			},
 		})
 	}
 
