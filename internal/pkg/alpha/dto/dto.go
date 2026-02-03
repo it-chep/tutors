@@ -56,6 +56,7 @@ func (r OrderRequest) FormData(ctx context.Context, cred Credentials) (*http.Req
 	formData.Set("description", r.description)
 	formData.Set("currency", r.currency) // RUB
 	formData.Set("language", r.language)
+	formData.Set("sessionTimeoutSecs", "1200")
 
 	req, err := http.NewRequestWithContext(ctx, "POST", cred.BaseURL+"/register.do", strings.NewReader(formData.Encode()))
 	if err != nil {
@@ -125,6 +126,10 @@ type OrderStatus int
 
 func (r OrderStatus) Confirmed() bool {
 	return r == 2
+}
+
+func (r OrderStatus) Cancelled() bool {
+	return r == 3 || r == 6
 }
 
 type StatusResponse struct {
