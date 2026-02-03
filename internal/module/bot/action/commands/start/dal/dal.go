@@ -19,14 +19,7 @@ func NewDal(pool *pgxpool.Pool) *Dal {
 func (d *Dal) IsKnown(ctx context.Context, parentTG int64) (bool, error) {
 	var exists bool
 	sql := `
-		with known as (
-    		select exists (select 1 from students where parent_tg_id = $1) as is_known
-		), ins as (
-     		insert into registration (tg_id) select $1
-        		where (select not is_known from known)
-     		on conflict (tg_id) do nothing
-		)
-		select is_known from known
+		select exists(select * from students where parent_tg_id = $1)
 	`
 
 	if err := d.pool.QueryRow(ctx, sql, parentTG).Scan(&exists); err != nil {
