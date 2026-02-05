@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/it-chep/tutors.git/internal/module/bot/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	"net/http"
@@ -22,19 +23,9 @@ func (h *Handler) bot() http.HandlerFunc {
 			return
 		}
 
-		txt := ""
-		if event.Message != nil {
-			txt = event.Message.Text
-			if strings.Contains(txt, "/start ") {
-				txt = txt[len("/start "):]
-			}
-		} else if event.CallbackQuery != nil {
-			txt = event.CallbackQuery.Data
-		}
-
 		msg := dto.Message{
 			User:   event.SentFrom().ID,
-			Text:   txt,
+			Text:   getTxt(event),
 			ChatID: event.FromChat().ID,
 		}
 
@@ -52,4 +43,22 @@ func (h *Handler) bot() http.HandlerFunc {
 			return
 		}
 	}
+}
+
+func getTxt(update *tgbotapi.Update) string {
+	txt := ""
+
+	if update.Message != nil {
+		txt = update.Message.Text
+		if txt == "/start" {
+			return txt
+		}
+		if strings.Contains(txt, "/start ") {
+			return txt[len("/start "):]
+		}
+	} else if update.CallbackQuery != nil {
+		return update.CallbackQuery.Data
+	}
+
+	return txt
 }

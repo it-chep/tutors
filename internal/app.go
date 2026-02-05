@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"fmt"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/it-chep/tutors.git/internal/config"
 	dtoInternal "github.com/it-chep/tutors.git/internal/dto"
 	"github.com/it-chep/tutors.git/internal/module/admin"
@@ -81,18 +82,9 @@ func (a *App) Run(ctx context.Context) {
 					return
 				}
 
-				txt := ""
-				if update.Message != nil {
-					txt = update.Message.Text
-					if strings.Contains(txt, "/start ") {
-						txt = txt[len("/start "):]
-					}
-				} else if update.CallbackQuery != nil {
-					txt = update.CallbackQuery.Data
-				}
 				msg := dto.Message{
 					User:   update.SentFrom().ID,
-					Text:   txt,
+					Text:   getTxt(update),
 					ChatID: update.FromChat().ID,
 				}
 				err := a.modules.Bot.Route(ctx, msg)
@@ -103,4 +95,22 @@ func (a *App) Run(ctx context.Context) {
 			}()
 		}
 	}
+}
+
+func getTxt(update tgbotapi.Update) string {
+	txt := ""
+
+	if update.Message != nil {
+		txt = update.Message.Text
+		if txt == "/start" {
+			return txt
+		}
+		if strings.Contains(txt, "/start ") {
+			return txt[len("/start "):]
+		}
+	} else if update.CallbackQuery != nil {
+		return update.CallbackQuery.Data
+	}
+
+	return txt
 }

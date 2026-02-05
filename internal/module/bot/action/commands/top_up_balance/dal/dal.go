@@ -49,23 +49,35 @@ func (d *Dal) TransactionByParent(ctx context.Context, parentTG int64) (*busines
 
 	return transaction.ToDomain(), nil
 }
+func (d *Dal) GetStudentIDByParentTG(ctx context.Context, parentTG int64) (int64, error) {
+	sql := `
+		select id from students where parent_tg_id = $1 
+	`
 
-func (d *Dal) InitTransaction(ctx context.Context, parentTG int64) (string, error) {
+	var studentID int64
+	err := pgxscan.Get(ctx, d.pool, &studentID, sql, parentTG)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, nil
+		}
+		return 0, err
+	}
+
+	return studentID, nil
+}
+
+func (d *Dal) InitTransaction(ctx context.Context, parentTGID, studentID int64) (string, error) {
 	order, err := uuid.NewV7()
 	if err != nil {
 		return "", err
 	}
 
 	sql := `
-		with student as (
-			select id from students where parent_tg_id = $1 
-		)
-		insert into transactions_history (id, student_id)
-			select $2, (select id from student)
+		insert into transactions_history (id, student_id) values ($1, $2)
 	`
 
-	if _, err = d.pool.Exec(ctx, sql, parentTG, order.String()); err != nil {
-		logger.Error(ctx, fmt.Sprintf("InitTransaction ERROR (parent_tg_id = %d, order = %s)", parentTG, order.String()), err)
+	if _, err = d.pool.Exec(ctx, sql, studentID, order.String()); err != nil {
+		logger.Error(ctx, fmt.Sprintf("InitTransaction ERROR (studentID = %d, order = %s, student = %d)", parentTGID, order.String(), studentID), err)
 		return "", err
 	}
 

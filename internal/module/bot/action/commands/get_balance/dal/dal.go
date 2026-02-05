@@ -2,6 +2,8 @@ package get_balance_dal
 
 import (
 	"context"
+	"errors"
+	"github.com/jackc/pgx/v5"
 
 	"github.com/it-chep/tutors.git/internal/pkg/convert"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -32,6 +34,9 @@ func (d *Dal) GetBalance(ctx context.Context, parentTG int64) (decimal.Decimal, 
 	`
 	var balance pgtype.Numeric
 	if err := d.pool.QueryRow(ctx, sql, parentTG).Scan(&balance); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return decimal.Zero, nil
+		}
 		return decimal.Decimal{}, err
 	}
 
