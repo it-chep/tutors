@@ -41,8 +41,18 @@ func (a *Action) TransactionExists(ctx context.Context, msg dto.Message) bool {
 }
 
 func (a *Action) InitTransaction(ctx context.Context, msg dto.Message) error {
+	studentID, err := a.dal.GetStudentIDByParentTG(ctx, msg.User)
+	if err != nil {
+		return err
+	}
+	if studentID == 0 {
+		return a.bot.SendMessages([]bot_dto.Message{
+			{Chat: msg.ChatID, Text: "Вы еще не прикреплены к студенту"},
+		})
+	}
+
 	if !a.TransactionExists(ctx, msg) {
-		_, err := a.dal.InitTransaction(ctx, msg.User)
+		_, err := a.dal.InitTransaction(ctx, msg.User, studentID)
 		if err != nil {
 			return err
 		}
