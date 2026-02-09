@@ -31,6 +31,7 @@ func (s StudentDAO) ToDomain() dto.Student {
 		TgAdminUsername: s.TgAdminUsername.String,
 		IsArchived:      s.IsArchive.Bool,
 		PaymentID:       s.PaymentID.Int64,
+		PaymentUUID:     s.PaymentUUID.String(),
 	}
 }
 
