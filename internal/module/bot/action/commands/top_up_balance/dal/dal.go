@@ -50,6 +50,21 @@ func (d *Dal) TransactionByParent(ctx context.Context, parentTG int64) (*busines
 	return transaction.ToDomain(), nil
 }
 
+func (d *Dal) PhoneByStudent(ctx context.Context, studentID int64) (string, error) {
+	var (
+		phone string
+		sql   = `
+			select phone from students where id = $1 
+        `
+	)
+
+	if err := d.pool.QueryRow(ctx, sql, studentID).Scan(&phone); err != nil {
+		return "", fmt.Errorf("failed to get phone by student: %w", err)
+	}
+
+	return phone, nil
+}
+
 func (d *Dal) InitTransaction(ctx context.Context, parentTG int64) (string, error) {
 	order, err := uuid.NewV7()
 	if err != nil {
