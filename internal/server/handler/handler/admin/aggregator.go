@@ -3,6 +3,7 @@ package admin
 import (
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/auth"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/generate_payment_url"
 	"github.com/it-chep/tutors.git/internal/module/admin/alpha"
 	"github.com/it-chep/tutors.git/internal/module/admin/tbank"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/admins"
@@ -36,6 +37,8 @@ type HandlerAggregator struct {
 	TbankCallBack *tbank.CallbackTbank
 
 	Auth *auth.Aggregator
+
+	GeneratePaymentURL *generate_payment_url.Action
 }
 
 func NewAggregator(adminModule *admin.Module) *HandlerAggregator {
@@ -56,5 +59,7 @@ func NewAggregator(adminModule *admin.Module) *HandlerAggregator {
 		AlphaHook:     adminModule.AlphaHook,
 		TbankCallBack: adminModule.TbankCallback,
 		Auth:          adminModule.Actions.Auth,
+
+		GeneratePaymentURL: adminModule.GeneratePaymentURL,
 	}
 }

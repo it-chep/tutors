@@ -56,6 +56,7 @@ func (h *Handler) setupHandlerAggregator(adminModule *admin.Module) {
 
 func (h *Handler) setupRoutes(cfg Config) {
 	h.router.Post(fmt.Sprintf("/%s/", cfg.Token()), h.bot())
+	h.router.Post("/payment/{hash}", h.adminAgg.GeneratePaymentURL.Handle()) // POST /payment/{hash}
 
 	h.router.Route("/auth", func(r chi.Router) {
 		// Регистрация
