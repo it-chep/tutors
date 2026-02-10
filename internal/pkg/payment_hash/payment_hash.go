@@ -8,124 +8,131 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/pkg/errors"
 	"io"
 	"os"
 	"strings"
+	"time"
 )
 
-// PaymentToken структура для хранения данных студента
+// paymentToken структура для хранения данных
 type paymentToken struct {
-	StudentID   int64  `json:"id"`
+	StudentID   int64  `json:"sid"`
 	StudentUUID string `json:"uuid"`
+	Timestamp   int64  `json:"ts"`   // время создания
+	Salt        string `json:"salt"` // случайная строка для уникальности
 }
 
 // DecryptPaymentHash расшифровывает хэш и возвращает данные студента
 func DecryptPaymentHash(encryptedHash string) (studentID int64, studentUUID string, err error) {
 	var token paymentToken
+
+	// Получаем секретный ключ
 	secretKey := os.Getenv("PAYMENT_HASH_SECRET_KEY")
+	if secretKey == "" {
+		return 0, "", errors.New("PAYMENT_HASH_SECRET_KEY is not set")
+	}
 
 	// 1. Генерируем ключи из секрета
 	encryptionKey, hmacKey := generateKeys(secretKey)
 
-	// 2. Декодируем base64
-	data, err := base64.URLEncoding.DecodeString(encryptedHash + "==")
+	// 2. Декодируем base64 (добавляем padding если нужно)
+	encryptedHash = addBase64Padding(encryptedHash)
+	data, err := base64.URLEncoding.DecodeString(encryptedHash)
 	if err != nil {
-		return token.StudentID, token.StudentUUID, fmt.Errorf("base64 decode error: %v", err)
+		return 0, "", fmt.Errorf("base64 decode error: %v", err)
 	}
 
-	if len(data) < 48 { // Минимальный размер (nonce + HMAC)
-		return token.StudentID, token.StudentUUID, errors.New("invalid token length")
+	// 3. Проверяем минимальный размер
+	// AES-GCM nonce обычно 12 байт, HMAC-SHA256 32 байта, + минимум 1 байт данных
+	if len(data) < 12+32+1 {
+		return 0, "", errors.New("token too short")
 	}
 
-	// 3. Разделяем на части
+	// 4. Разделяем на части
 	// Формат: [12 байт nonce][шифртекст][32 байта HMAC]
 	hmacSize := 32
-	nonceSize := 12
-
-	if len(data) < nonceSize+hmacSize {
-		return token.StudentID, token.StudentUUID, errors.New("token too short")
-	}
-
-	// HMAC в конце
 	hmacStart := len(data) - hmacSize
+
 	ciphertextWithNonce := data[:hmacStart]
 	receivedHMAC := data[hmacStart:]
 
-	// 4. Проверяем HMAC
+	// 5. Проверяем HMAC
 	h := hmac.New(sha256.New, hmacKey)
 	h.Write(ciphertextWithNonce)
 	expectedHMAC := h.Sum(nil)
 
 	if !hmac.Equal(receivedHMAC, expectedHMAC) {
-		return token.StudentID, token.StudentUUID, errors.New("invalid signature")
+		return 0, "", errors.New("invalid signature")
 	}
 
-	// 5. Разделяем nonce и шифртекст
-	nonce := ciphertextWithNonce[:nonceSize]
-	ciphertext := ciphertextWithNonce[nonceSize:]
+	// 6. Разделяем nonce и шифртекст
+	// AES-GCM стандартный nonce size = 12 байт
+	gcmNonceSize := 12
+	if len(ciphertextWithNonce) < gcmNonceSize {
+		return 0, "", errors.New("ciphertext too short for nonce")
+	}
 
-	// 6. Создаем AES-GCM cipher
+	nonce := ciphertextWithNonce[:gcmNonceSize]
+	ciphertext := ciphertextWithNonce[gcmNonceSize:]
+
+	// 7. Создаем AES-GCM cipher
 	block, err := aes.NewCipher(encryptionKey)
 	if err != nil {
-		return token.StudentID, token.StudentUUID, fmt.Errorf("cipher error: %v", err)
+		return 0, "", fmt.Errorf("cipher error: %v", err)
 	}
 
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
-		return token.StudentID, token.StudentUUID, fmt.Errorf("GCM error: %v", err)
+		return 0, "", fmt.Errorf("GCM error: %v", err)
 	}
 
-	// 7. Дешифруем
+	// 8. Дешифруем
 	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
-		return token.StudentID, token.StudentUUID, fmt.Errorf("decryption failed: %v", err)
+		return 0, "", fmt.Errorf("decryption failed: %v", err)
 	}
 
-	// 8. Парсим JSON
+	// 9. Парсим JSON
 	if err := json.Unmarshal(plaintext, &token); err != nil {
-		return token.StudentID, token.StudentUUID, fmt.Errorf("invalid token data: %v", err)
+		return 0, "", fmt.Errorf("invalid token data: %v", err)
+	}
+
+	// 10. Проверяем timestamp (защита от replay)
+	// Токен действителен 24 часа
+	if time.Since(time.Unix(token.Timestamp, 0)) > 24*time.Hour {
+		return 0, "", errors.New("token expired")
 	}
 
 	return token.StudentID, token.StudentUUID, nil
 }
 
-// generateKeys создает два ключа из одного секрета
-func generateKeys(secret string) ([]byte, []byte) {
-	hash := sha256.New()
-
-	// Ключ для шифрования
-	hash.Write([]byte(secret + "-encryption-key-v1"))
-	encryptionKey := make([]byte, 32)
-	copy(encryptionKey, hash.Sum(nil))
-
-	// Ключ для HMAC
-	hash.Reset()
-	hash.Write([]byte(secret + "-hmac-key-v1"))
-	hmacKey := make([]byte, 32)
-	copy(hmacKey, hash.Sum(nil))
-
-	return encryptionKey, hmacKey
-}
-
 // EncryptPaymentData шифрует данные студента
 func EncryptPaymentData(studentID int64, studentUUID string) (string, error) {
+	// Получаем секретный ключ
 	secretKey := os.Getenv("PAYMENT_HASH_SECRET_KEY")
+	if secretKey == "" {
+		return "", errors.New("PAYMENT_HASH_SECRET_KEY is not set")
+	}
 
 	encryptionKey, hmacKey := generateKeys(secretKey)
 
+	// Создаем токен с timestamp
 	token := paymentToken{
 		StudentID:   studentID,
 		StudentUUID: studentUUID,
+		Timestamp:   time.Now().Unix(),
+		Salt:        generateRandomString(8), // добавляем случайность
 	}
 
+	// Сериализуем в JSON
 	plaintext, err := json.Marshal(token)
 	if err != nil {
 		return "", fmt.Errorf("marshal error: %v", err)
 	}
 
-	// 4. Создаем AES-GCM
+	// Создаем AES-GCM
 	block, err := aes.NewCipher(encryptionKey)
 	if err != nil {
 		return "", fmt.Errorf("cipher error: %v", err)
@@ -136,26 +143,74 @@ func EncryptPaymentData(studentID int64, studentUUID string) (string, error) {
 		return "", fmt.Errorf("GCM error: %v", err)
 	}
 
-	// 5. Генерируем nonce
+	// Генерируем nonce
 	nonce := make([]byte, gcm.NonceSize())
 	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
 		return "", fmt.Errorf("nonce error: %v", err)
 	}
 
-	// 6. Шифруем
+	// Шифруем
 	ciphertext := gcm.Seal(nonce, nonce, plaintext, nil)
 
-	// 7. Создаем HMAC
+	// Создаем HMAC подпись
 	h := hmac.New(sha256.New, hmacKey)
 	h.Write(ciphertext)
 	signature := h.Sum(nil)
 
-	// 8. Объединяем: шифртекст + HMAC
+	// Объединяем: шифртекст + HMAC
 	combined := append(ciphertext, signature...)
 
-	// 9. Кодируем в base64
+	// Кодируем в base64 URL-safe
 	encoded := base64.URLEncoding.EncodeToString(combined)
 
-	// 10. Убираем padding для чистоты URL
+	// Убираем padding для URL
 	return strings.TrimRight(encoded, "="), nil
+}
+
+// generateKeys создает два ключа из одного секрета
+func generateKeys(secret string) ([]byte, []byte) {
+	// Используем разные контексты для генерации ключей
+	encryptionKey := deriveKey(secret, "encryption-key")
+	hmacKey := deriveKey(secret, "hmac-key")
+	return encryptionKey, hmacKey
+}
+
+// deriveKey создает ключ фиксированной длины из секрета
+func deriveKey(secret, context string) []byte {
+	hash := sha256.New()
+	hash.Write([]byte(secret + "-" + context + "-v1.0"))
+	return hash.Sum(nil) // 32 байта
+}
+
+// generateRandomString создает случайную строку
+func generateRandomString(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, length)
+
+	// Используем crypto/rand для криптографической безопасности
+	if _, err := rand.Read(b); err != nil {
+		// Fallback на time-based случайность
+		nano := time.Now().UnixNano()
+		for i := range b {
+			b[i] = charset[int(nano>>uint(i*8))%len(charset)]
+		}
+	} else {
+		for i := range b {
+			b[i] = charset[int(b[i])%len(charset)]
+		}
+	}
+
+	return string(b)
+}
+
+// addBase64Padding добавляет padding к base64 строке если нужно
+func addBase64Padding(s string) string {
+	// Base64 требует длина кратной 4
+	switch len(s) % 4 {
+	case 2:
+		s += "=="
+	case 3:
+		s += "="
+	}
+	return s
 }

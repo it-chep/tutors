@@ -15,6 +15,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/pkg/payment_hash"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"net/http"
+	"strconv"
 )
 
 type Action struct {
@@ -43,7 +44,14 @@ func (a *Action) Handle() func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		amount := req.Amount
+		atoi, err := strconv.Atoi(req.Amount)
+		if err != nil {
+			logger.Error(ctx, fmt.Sprintf("Невалидное число : %s", req.Amount), err)
+			http.Error(w, "невалидный запрос", http.StatusBadRequest)
+			return
+		}
+		amount := int64(atoi)
+
 		studentID, studentUUID, err := payment_hash.DecryptPaymentHash(chi.URLParam(r, "hash"))
 		if err != nil {
 			logger.Error(ctx, fmt.Sprintf("ошибка дешифрования хэша: %s", chi.URLParam(r, "hash")), err)
@@ -84,7 +92,12 @@ func (a *Action) Handle() func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Redirect(w, r, url, http.StatusFound)
+		w.Header().Set("Content-Type", "application/json")
+		if err = json.NewEncoder(w).Encode(dto.Response{PaymentURL: url}); err != nil {
+			http.Error(w, "", http.StatusInternalServerError)
+			return
+		}
+
 		return
 	}
 }
