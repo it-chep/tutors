@@ -54,7 +54,7 @@ func (d *Dal) PhoneByStudent(ctx context.Context, studentID int64) (string, erro
 	var (
 		phone string
 		sql   = `
-			select phone from students where id = $1 
+			select parent_phone from students where id = $1 
         `
 	)
 
