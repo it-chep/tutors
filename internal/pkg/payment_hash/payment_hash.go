@@ -99,12 +99,6 @@ func DecryptPaymentHash(encryptedHash string) (studentID int64, studentUUID stri
 		return 0, "", fmt.Errorf("invalid token data: %v", err)
 	}
 
-	// 10. Проверяем timestamp (защита от replay)
-	// Токен действителен 24 часа
-	if time.Since(time.Unix(token.Timestamp, 0)) > 24*time.Hour {
-		return 0, "", errors.New("token expired")
-	}
-
 	return token.StudentID, token.StudentUUID, nil
 }
 
