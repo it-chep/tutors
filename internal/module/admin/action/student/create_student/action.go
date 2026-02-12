@@ -29,9 +29,22 @@ func (a *Action) Do(ctx context.Context, adminID int64, createDTO dto.CreateRequ
 	}
 	createDTO.PaymentID = paymentID
 
+	functions, err := a.dal.GetPaidFunctions(ctx, adminID)
+	if err != nil {
+		return err
+	}
+
 	studentID, err := a.dal.CreateStudent(ctx, createDTO)
 	if err != nil {
 		return err
+	}
+
+	_, ok := functions.PaidFunctions["payment_landing"]
+	if ok {
+		err = a.dal.SetUserPaymentUUID(ctx, studentID)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = a.dal.CreateWallet(ctx, studentID)

@@ -2,7 +2,13 @@ package dal
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/georgysavva/scany/v2/pgxscan"
+	"github.com/google/uuid"
+	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
+	"github.com/it-chep/tutors.git/pkg/xo"
+	"github.com/jackc/pgx/v5"
+	"github.com/pkg/errors"
 	"strings"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/create_student/dto"
@@ -96,5 +102,45 @@ func (r *Repository) AddTgToAssistant(ctx context.Context, assistantID int64, tg
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+// GetPaidFunctions получение оплаченых фич для пользователя
+func (r *Repository) GetPaidFunctions(ctx context.Context, adminID int64) (*indto.PaidFunctions, error) {
+	sql := "select * from paid_functions where admin_id = $1"
+	p := &xo.PaidFunction{}
+	if err := pgxscan.Get(ctx, r.pool, p, sql, adminID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	paid := &indto.PaidFunctions{
+		AdminID:       p.AdminID,
+		PaidFunctions: make(map[string]bool),
+	}
+
+	if err := json.Unmarshal(p.Functions, &paid.PaidFunctions); err != nil {
+		return nil, err
+	}
+
+	return paid, nil
+}
+
+// SetUserPaymentUUID сетим пользаку paymentUUID если у админа оплачена эта фича
+func (r *Repository) SetUserPaymentUUID(ctx context.Context, studentID int64) error {
+	paymentUUID, err := uuid.NewV7()
+	if err != nil {
+		return err
+	}
+
+	sql := `update students set payment_uuid = $1 where id = $2`
+
+	_, err = r.pool.Exec(ctx, sql, paymentUUID, studentID)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

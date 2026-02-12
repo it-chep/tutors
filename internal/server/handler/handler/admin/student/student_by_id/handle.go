@@ -2,6 +2,8 @@ package student_by_id
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/it-chep/tutors.git/internal/pkg/payment_hash"
 	"net/http"
 	"strconv"
 
@@ -48,6 +50,17 @@ func (h *Handler) Handle() http.HandlerFunc {
 }
 
 func (h *Handler) prepareResponse(student dto.Student) Response {
+	var (
+		paymentURL string
+	)
+	if len(student.PaymentUUID) != 0 {
+		hash, err := payment_hash.EncryptPaymentData(student.ID, student.PaymentUUID)
+		if err != nil {
+			paymentURL = ""
+		}
+		paymentURL = fmt.Sprintf("https://100rep.ru/payment/%s", hash)
+	}
+
 	return Response{
 		Student: Student{
 			ID:                  student.ID,
@@ -73,6 +86,7 @@ func (h *Handler) prepareResponse(student dto.Student) Response {
 
 			PaymentName: student.Payment.String(),
 			PaymentID:   student.Payment.ID,
+			PaymentURL:  paymentURL,
 		},
 	}
 }

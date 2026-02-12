@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/lib/pq"
 )
@@ -32,6 +33,7 @@ type Student struct {
 	TgAdminUsername sql.NullString `db:"tg_admin_username" json:"tg_admin_username"` // tg_admin_username text
 	IsArchive       sql.NullBool   `db:"is_archive" json:"is_archive"`               // is_archive boolean
 	PaymentID       sql.NullInt64  `db:"payment_id" json:"payment_id"`               // payment_id bigint
+	PaymentUUID     *uuid.UUID     `db:"payment_uuid" json:"payment_uuid"`           // payment_uuid uuid
 }
 
 // zeroStudent zero value of dto
@@ -60,6 +62,7 @@ const (
 	Field_Student_TgAdminUsername = "tg_admin_username"
 	Field_Student_IsArchive       = "is_archive"
 	Field_Student_PaymentID       = "payment_id"
+	Field_Student_PaymentUUID     = "payment_uuid"
 )
 
 func (t Student) SelectColumnsWithCoalesce() []string {
@@ -82,6 +85,7 @@ func (t Student) SelectColumnsWithCoalesce() []string {
 		"s.tg_admin_username",
 		fmt.Sprintf("COALESCE(s.is_archive, %v) as is_archive", zeroStudent.IsArchive),
 		"s.payment_id",
+		fmt.Sprintf("COALESCE(s.payment_uuid, %v) as payment_uuid", zeroStudent.PaymentUUID),
 	}
 }
 
@@ -105,11 +109,12 @@ func (t Student) SelectColumns() []string {
 		"s.tg_admin_username",
 		"s.is_archive",
 		"s.payment_id",
+		"s.payment_uuid",
 	}
 }
 
 func (t Student) Columns(without ...string) []string {
-	var str = "id, first_name, last_name, middle_name, phone, tg, cost_per_hour, subject_id, tutor_id, is_finished_trial, parent_full_name, parent_phone, parent_tg, parent_tg_id, created_at, tg_admin_username, is_archive, payment_id"
+	var str = "id, first_name, last_name, middle_name, phone, tg, cost_per_hour, subject_id, tutor_id, is_finished_trial, parent_full_name, parent_phone, parent_tg, parent_tg_id, created_at, tg_admin_username, is_archive, payment_id, payment_uuid"
 	for _, exc := range without {
 		str = strings.Replace(str+", ", exc+", ", "", 1)
 	}
@@ -148,6 +153,7 @@ func (t *Student) ToMap() map[string]interface{} {
 		"tg_admin_username": t.TgAdminUsername,
 		"is_archive":        t.IsArchive,
 		"payment_id":        t.PaymentID,
+		"payment_uuid":      t.PaymentUUID,
 	}
 }
 
