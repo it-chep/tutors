@@ -135,3 +135,18 @@ func (r *Repository) DropTransaction(ctx context.Context, transactionID string) 
 	_, err := r.pool.Exec(ctx, sql, transactionID)
 	return err
 }
+
+func (d *Repository) PhoneByStudent(ctx context.Context, studentID int64) (string, error) {
+	var (
+		phone string
+		sql   = `
+			select parent_phone from students where id = $1 
+        `
+	)
+
+	if err := d.pool.QueryRow(ctx, sql, studentID).Scan(&phone); err != nil {
+		return "", fmt.Errorf("failed to get phone by student: %w", err)
+	}
+
+	return phone, nil
+}

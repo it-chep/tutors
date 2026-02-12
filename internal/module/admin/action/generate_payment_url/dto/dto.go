@@ -6,4 +6,5 @@ type Agg struct {
 	InternalTransactionUUID string
 	Payment                 config.AdminPayment
 	Amount                  int
+	StudentID               int64
 }

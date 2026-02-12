@@ -79,6 +79,7 @@ func (a *Action) Handle() func(w http.ResponseWriter, r *http.Request) {
 			InternalTransactionUUID: internalTransactionUUID,
 			Payment:                 paymentData,
 			Amount:                  int(amount),
+			StudentID:               studentID,
 		})
 		if orderID == "" || err != nil {
 			logger.Error(ctx, fmt.Sprintf("ошибка создания заказа studentID: %d, transactionID: %s", studentID, internalTransactionUUID), err)

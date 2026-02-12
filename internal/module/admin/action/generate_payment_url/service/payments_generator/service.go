@@ -15,6 +15,7 @@ import (
 
 type Repository interface {
 	DropTransaction(ctx context.Context, internalTransactionID string) error
+	PhoneByStudent(ctx context.Context, studentID int64) (string, error)
 }
 
 type Service struct {
@@ -36,7 +37,7 @@ func (s *Service) GeneratePaymentURL(ctx context.Context, agg dto.Agg) (orderID 
 	case config.Alpha:
 		return s.regOrderAlpha(ctx, payment.PaymentID, agg.InternalTransactionUUID, agg.Amount)
 	case config.TBank:
-		return s.regOrderTbank(ctx, payment.PaymentID, agg.InternalTransactionUUID, agg.Amount)
+		return s.regOrderTbank(ctx, payment.PaymentID, agg.StudentID, agg.InternalTransactionUUID, agg.Amount)
 	case config.Tochka:
 		return s.regOrderTochka(ctx, payment.PaymentID, agg.InternalTransactionUUID, agg.Amount)
 	}
@@ -61,21 +62,22 @@ func (s *Service) regOrderAlpha(ctx context.Context, paymentID int64, internalTr
 	return resp.OrderID, resp.FormURL, nil
 }
 
-func (s *Service) regOrderTbank(ctx context.Context, paymentID int64, internalTransactionUUID string, amount int) (orderID, url string, _ error) {
-	resp, err := s.gateways.TBank.InitPayment(ctx, tbankDto.NewInitRequest(paymentID, internalTransactionUUID, int64(amount)))
+func (s *Service) regOrderTbank(ctx context.Context, paymentID, studentID int64, internalTransactionUUID string, amount int) (orderID, url string, _ error) {
+	phone, err := s.dal.PhoneByStudent(ctx, studentID)
 	if err != nil {
-		if resp != nil {
-			err = fmt.Errorf("%s: %s", err.Error(), resp.Message)
-		}
+		return "", "", err
+	}
+
+	orderID, url, err = s.gateways.TBank.InitPayment(ctx, tbankDto.NewInitRequest(paymentID, internalTransactionUUID, int64(amount), phone))
+	if err != nil {
 		logger.Error(ctx, "ошибка при создании платежки в т банке", err)
 		if err = s.dal.DropTransaction(ctx, internalTransactionUUID); err != nil {
 			logger.Error(ctx, "ошибка при удалении транзакции при ошибке от т банка", err)
 			return "", "", err
 		}
 		return "", "", errors.New("У банка возникли технические неполадки, пожалуйста, попробуйте чуть позже")
-
 	}
-	return resp.OrderID, resp.PaymentURL, nil
+	return orderID, url, nil
 }
 
 func (s *Service) regOrderTochka(ctx context.Context, paymentID int64, internalTransactionUUID string, amount int) (orderID, url string, _ error) {
