@@ -1,6 +1,8 @@
 package dto
 
 import (
+	"time"
+
 	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 )
@@ -35,6 +37,7 @@ type Student struct {
 	IsArchived  bool
 	PaymentID   int64
 	PaymentUUID string
+	CreatedAt   time.Time
 
 	Payment Payment
 }
@@ -48,8 +51,9 @@ func (s Students) IDs() []int64 {
 }
 
 type StudentFinance struct {
-	Count  int64
-	Amount decimal.Decimal
+	Count                int64
+	Amount               decimal.Decimal
+	TotalConfirmedAmount decimal.Decimal
 }
 
 type Wallet struct {

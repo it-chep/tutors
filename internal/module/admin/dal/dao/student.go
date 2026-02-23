@@ -37,6 +37,7 @@ func (s StudentDAO) ToDomain() dto.Student {
 			}
 			return ""
 		}(),
+		CreatedAt: s.CreatedAt.Time,
 	}
 }
 

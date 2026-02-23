@@ -2,13 +2,15 @@ package get_transaction_history
 
 import (
 	"encoding/json"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/samber/lo"
-	"net/http"
-	"strconv"
-	"time"
+	"github.com/shopspring/decimal"
 )
 
 type Handler struct {
@@ -61,6 +63,12 @@ func (h *Handler) Handle() http.HandlerFunc {
 }
 
 func (h *Handler) prepareResponse(transactions []dto.TransactionHistory) Response {
+	totalConfirmed := decimal.Zero
+	for _, t := range transactions {
+		if t.IsConfirmed {
+			totalConfirmed = totalConfirmed.Add(t.Amount)
+		}
+	}
 	return Response{
 		Transactions: lo.Map(transactions, func(t dto.TransactionHistory, _ int) Transaction {
 			return Transaction{
@@ -70,6 +78,7 @@ func (h *Handler) prepareResponse(transactions []dto.TransactionHistory) Respons
 				IsConfirmed: t.IsConfirmed,
 			}
 		}),
-		TransactionsCount: int64(len(transactions)),
+		TransactionsCount:    int64(len(transactions)),
+		TotalConfirmedAmount: totalConfirmed.String(),
 	}
 }

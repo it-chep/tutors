@@ -8,6 +8,7 @@ type Transaction struct {
 }
 
 type Response struct {
-	Transactions      []Transaction `json:"transactions"`
-	TransactionsCount int64         `json:"transactions_count"`
+	Transactions         []Transaction `json:"transactions"`
+	TransactionsCount    int64         `json:"transactions_count"`
+	TotalConfirmedAmount string        `json:"total_confirmed_amount"`
 }

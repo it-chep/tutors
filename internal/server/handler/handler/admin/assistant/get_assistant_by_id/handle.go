@@ -2,11 +2,11 @@ package get_assistant_by_id
 
 import (
 	"encoding/json"
-	"net/http"
-	"strconv"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
+	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/it-chep/tutors.git/internal/module/admin"
 )
@@ -60,6 +60,7 @@ func (h *Handler) prepareResponse(admin dto.User, tgs []string) Response {
 			Tg:           admin.Tg,
 			Phone:        admin.Phone,
 			AvailableTgs: tgs,
+			CreatedAt:    admin.CreatedAt.Format(time.DateTime),
 		},
 	}
 }

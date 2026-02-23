@@ -107,39 +107,46 @@ func (h *Handler) setupRoutes(cfg Config) {
 
 		// Репетиторы
 		r.Route("/tutors", func(r chi.Router) {
-			r.Get("/", h.adminAgg.Tutors.GetTutors.Handle())                          // GET /admin/tutors
-			r.Get("/search", h.adminAgg.Tutors.SearchTutor.Handle())                  // GET /admin/tutors/search
-			r.Get("/{tutor_id}", h.adminAgg.Tutors.GetTutorByID.Handle())             // GET /admin/tutors/{id}
-			r.Post("/", h.adminAgg.Tutors.CreateTutor.Handle())                       // POST /admin/tutors
-			r.Delete("/{tutor_id}", h.adminAgg.Tutors.DeleteTutor.Handle())           // DELETE /admin/tutors/{id}
-			r.Post("/{tutor_id}/finance", h.adminAgg.Tutors.GetTutorFinance.Handle()) // POST /admin/tutors/{id}/finance
-			r.Post("/trial_lesson", h.adminAgg.Tutors.ConductTrial.Handle())          // POST /admin/tutors/trial_lesson
-			r.Post("/conduct_lesson", h.adminAgg.Tutors.ConductLesson.Handle())       // POST /admin/tutors/conduct_lesson
-			r.Post("/{tutor_id}/lessons", h.adminAgg.Tutors.GetLessons.Handle())      // POST /admin/tutors/{id}/lessons
+			r.Get("/", h.adminAgg.Tutors.GetTutors.Handle())                             // GET /admin/tutors
+			r.Get("/search", h.adminAgg.Tutors.SearchTutor.Handle())                     // GET /admin/tutors/search
+			r.Get("/archive", h.adminAgg.Tutors.GetArchive.Handle())                     // GET /admin/tutors/archive
+			r.Post("/filter", h.adminAgg.Tutors.FilterTutors.Handle())                   // POST /admin/tutors/filter
+			r.Get("/{tutor_id}", h.adminAgg.Tutors.GetTutorByID.Handle())                // GET /admin/tutors/{id}
+			r.Post("/", h.adminAgg.Tutors.CreateTutor.Handle())                          // POST /admin/tutors
+			r.Delete("/{tutor_id}", h.adminAgg.Tutors.DeleteTutor.Handle())              // DELETE /admin/tutors/{id}
+			r.Post("/{tutor_id}/finance", h.adminAgg.Tutors.GetTutorFinance.Handle())    // POST /admin/tutors/{id}/finance
+			r.Post("/trial_lesson", h.adminAgg.Tutors.ConductTrial.Handle())             // POST /admin/tutors/trial_lesson
+			r.Post("/conduct_lesson", h.adminAgg.Tutors.ConductLesson.Handle())          // POST /admin/tutors/conduct_lesson
+			r.Post("/{tutor_id}/lessons", h.adminAgg.Tutors.GetLessons.Handle())         // POST /admin/tutors/{id}/lessons
+			r.Post("/{tutor_id}/archive", h.adminAgg.Tutors.ArchivateTutor.Handle())     // POST /admin/tutors/{id}/archive
+			r.Post("/{tutor_id}/unarchive", h.adminAgg.Tutors.UnArchivateTutor.Handle()) // POST /admin/tutors/{id}/unarchive
+			r.Post("/{tutor_id}/update", h.adminAgg.Tutors.UpdateTutor.Handle())         // POST /admin/tutors/{id}/update
 		})
 
 		// Студенты
 		r.Route("/students", func(r chi.Router) {
-			r.Get("/", h.adminAgg.Students.GetStudents.Handle())                                       // GET /admin/students
-			r.Get("/search", h.adminAgg.Students.SearchStudent.Handle())                               // GET /admin/students/search
-			r.Get("/archive", h.adminAgg.Students.GetArchive.Handle())                                 // GET /admin/students/archive
-			r.Post("/push_all_students", h.adminAgg.Students.PushAllDebitors.Handle())                 // POST /admin/students/push_all_students
-			r.Get("/tg_admins_usernames", h.adminAgg.Students.GetTgAdminsUsernames.Handle())           // GET /admin/students/tg_admins_usernames
-			r.Get("/{student_id}", h.adminAgg.Students.GetStudentByID.Handle())                        // GET /admin/students/{id}
-			r.Post("/", h.adminAgg.Students.CreateStudent.Handle())                                    // POST /admin/students
-			r.Post("/filter", h.adminAgg.Students.FilterStudents.Handle())                             // POST /admin/students/filter
-			r.Delete("/{student_id}", h.adminAgg.Students.DeleteStudent.Handle())                      // DELETE /admin/students/{id}
-			r.Post("/{student_id}/finance", h.adminAgg.Students.GetStudentFinance.Handle())            // POST /admin/students/{id}/finance
-			r.Post("/move", h.adminAgg.Students.MoveStudent.Handle())                                  // POST /admin/students/move
-			r.Post("/{student_id}/wallet", h.adminAgg.Students.UpdateWallet.Handle())                  // POST /admin/students/{id}/wallet
-			r.Post("/{student_id}/change_payment", h.adminAgg.Students.ChangeStudentPayment.Handle())  // POST /admin/students/{id}/change_payment
-			r.Post("/{student_id}/lessons", h.adminAgg.Students.GetLessons.Handle())                   // POST /admin/students/{id}/lessons
-			r.Post("/{student_id}/transactions", h.adminAgg.Students.GetTransactionHistory.Handle())   // POST /admin/students/{id}/transactions
-			r.Post("/{student_id}/notifications", h.adminAgg.Students.GetNotificationHistory.Handle()) // POST /admin/students/{id}/notifications
-			r.Post("/{student_id}/notifications/push", h.adminAgg.Students.PushNotification.Handle())  // POST /admin/students/{id}/notifications/push
-			r.Post("/{student_id}/archive", h.adminAgg.Students.ArchiveStudent.Handle())               // POST /admin/students/{id}/archive
-			r.Post("/{student_id}/unarchive", h.adminAgg.Students.UnArchivateStudent.Handle())         // POST /admin/students/{id}/unarchive
-			r.Post("/{student_id}", h.adminAgg.Students.UpdateStudent.Handle())                        // GET /admin/students/{id}
+			r.Get("/", h.adminAgg.Students.GetStudents.Handle())                                           // GET /admin/students
+			r.Get("/search", h.adminAgg.Students.SearchStudent.Handle())                                   // GET /admin/students/search
+			r.Get("/archive", h.adminAgg.Students.GetArchive.Handle())                                     // GET /admin/students/archive
+			r.Post("/push_all_students", h.adminAgg.Students.PushAllDebitors.Handle())                     // POST /admin/students/push_all_students
+			r.Get("/tg_admins_usernames", h.adminAgg.Students.GetTgAdminsUsernames.Handle())               // GET /admin/students/tg_admins_usernames
+			r.Post("/", h.adminAgg.Students.CreateStudent.Handle())                                        // POST /admin/students
+			r.Post("/filter", h.adminAgg.Students.FilterStudents.Handle())                                 // POST /admin/students/filter
+			r.Post("/move", h.adminAgg.Students.MoveStudent.Handle())                                      // POST /admin/students/move
+			r.Post("/change_all_payment", h.adminAgg.Students.ChangeAllPayment.Handle())                   // POST /admin/students/change_all_payment
+			r.Get("/{student_id}", h.adminAgg.Students.GetStudentByID.Handle())                            // GET /admin/students/{id}
+			r.Delete("/{student_id}", h.adminAgg.Students.DeleteStudent.Handle())                          // DELETE /admin/students/{id}
+			r.Post("/{student_id}", h.adminAgg.Students.UpdateStudent.Handle())                            // POST /admin/students/{id}
+			r.Post("/{student_id}/finance", h.adminAgg.Students.GetStudentFinance.Handle())                // POST /admin/students/{id}/finance
+			r.Post("/{student_id}/wallet", h.adminAgg.Students.UpdateWallet.Handle())                      // POST /admin/students/{id}/wallet
+			r.Post("/{student_id}/change_payment", h.adminAgg.Students.ChangeStudentPayment.Handle())      // POST /admin/students/{id}/change_payment
+			r.Post("/{student_id}/lessons", h.adminAgg.Students.GetLessons.Handle())                       // POST /admin/students/{id}/lessons
+			r.Post("/{student_id}/transactions", h.adminAgg.Students.GetTransactionHistory.Handle())       // POST /admin/students/{id}/transactions
+			r.Post("/{student_id}/transactions/manual", h.adminAgg.Students.AddManualTransaction.Handle()) // POST /admin/students/{id}/transactions/manual
+			r.Post("/{student_id}/notifications", h.adminAgg.Students.GetNotificationHistory.Handle())     // POST /admin/students/{id}/notifications
+			r.Post("/{student_id}/notifications/push", h.adminAgg.Students.PushNotification.Handle())      // POST /admin/students/{id}/notifications/push
+			r.Post("/{student_id}/archive", h.adminAgg.Students.ArchiveStudent.Handle())                   // POST /admin/students/{id}/archive
+			r.Post("/{student_id}/unarchive", h.adminAgg.Students.UnArchivateStudent.Handle())             // POST /admin/students/{id}/unarchive
 		})
 
 		// Уроки

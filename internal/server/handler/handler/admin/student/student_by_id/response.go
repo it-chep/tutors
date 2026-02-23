@@ -29,6 +29,7 @@ type Student struct {
 	PaymentName string `json:"payment_name"`
 	PaymentID   int64  `json:"payment_id"`
 	PaymentURL  string `json:"payment_url"`
+	CreatedAt   string `json:"created_at"`
 }
 
 type Response struct {

@@ -9,12 +9,14 @@ type Request struct {
 	AdminsUsernames []string `json:"tg_admins_usernames"`
 	IsLost          bool     `json:"is_lost"`
 	IsArchived      bool     `json:"is_archive"`
+	PaymentIDs      []int64  `json:"payment_ids"`
 }
 
 func (r Request) ToFilterRequest() dto.FilterRequest {
 	return dto.FilterRequest{
 		IsLost:      r.IsLost,
 		TgUsernames: r.AdminsUsernames,
+		PaymentIDs:  r.PaymentIDs,
 	}
 }
 
@@ -22,5 +24,6 @@ func (r Request) ToArchiveFilterRequest() archive.FilterRequest {
 	return archive.FilterRequest{
 		IsLost:      r.IsLost,
 		TgUsernames: r.AdminsUsernames,
+		PaymentIDs:  r.PaymentIDs,
 	}
 }

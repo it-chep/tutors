@@ -2,7 +2,10 @@ package student
 
 import (
 	"github.com/it-chep/tutors.git/internal/module/admin"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/add_manual_transaction"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/archive_student"
+	"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/change_all_payment"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/change_student_payment"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/create_student"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/delete_student"
@@ -43,8 +46,10 @@ type HandlerGroup struct {
 	GetTransactionHistory  *get_transaction_history.Handler
 	GetNotificationHistory *get_notification_history.Handler
 	PushNotification       *push_notification.Handler
-	PushAllDebitors        *push_all_debitors.Handler
 	ChangeStudentPayment   *change_student_payment.Handler
+	ChangeAllPayment       *change_all_payment.Handler
+	AddManualTransaction   *add_manual_transaction.Handler
+	AddManualTransaction  *add_manual_transaction.Handler
 
 	GetArchive         *get_archive.Handler
 	ArchiveStudent     *archive_student.Handler
@@ -71,8 +76,10 @@ func NewGroup(adminModule *admin.Module) *HandlerGroup {
 		GetTransactionHistory:  get_transaction_history.NewHandler(adminModule),
 		GetNotificationHistory: get_notification_history.NewHandler(adminModule),
 		PushNotification:       push_notification.NewHandler(adminModule),
-		PushAllDebitors:        push_all_debitors.NewHandler(adminModule),
 		ChangeStudentPayment:   change_student_payment.NewHandler(adminModule),
+		ChangeAllPayment:       change_all_payment.NewHandler(adminModule),
+		AddManualTransaction:   add_manual_transaction.NewHandler(adminModule),
+		AddManualTransaction:  add_manual_transaction.NewHandler(adminModule),
 
 		GetArchive:         get_archive.NewHandler(adminModule),
 		ArchiveStudent:     archive_student.NewHandler(adminModule),

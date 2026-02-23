@@ -1,0 +1,76 @@
+package get_archive
+
+import (
+	"cmp"
+	"context"
+	"slices"
+
+	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/get_archive/dal"
+	"github.com/it-chep/tutors.git/internal/module/admin/dto"
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/samber/lo"
+)
+
+type Action struct {
+	dal *dal.Repository
+}
+
+func New(pool *pgxpool.Pool) *Action {
+	return &Action{
+		dal: dal.NewRepository(pool),
+	}
+}
+
+func (a *Action) Do(ctx context.Context) ([]dto.Tutor, error) {
+	var (
+		tutors []dto.Tutor
+		err    error
+	)
+
+	if dto.IsSuperAdminRole(ctx) {
+		tutors, err = a.dal.GetAllTutorsForSuperAdmin(ctx)
+	} else if dto.IsAssistantRole(ctx) {
+		tutors, err = a.dal.GetTutorsAvailableToAssistant(ctx, userCtx.UserIDFromContext(ctx))
+	} else {
+		adminID := userCtx.AdminIDFromContext(ctx)
+		tutors, err = a.dal.GetAllTutorsForAdmin(ctx, adminID)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	tutorsIDs := make([]int64, 0, len(tutors))
+	tutorsMap := make(map[int64]dto.Tutor, len(tutors))
+	for _, tutor := range tutors {
+		tutorsIDs = append(tutorsIDs, tutor.ID)
+		tutorsMap[tutor.ID] = tutor
+	}
+
+	students, err := a.dal.GetTutorsStudents(ctx, tutorsIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, student := range students {
+		isNewBie := student.TransactionsCount == 0 && !student.IsFinishedTrial
+		isOnlyTrialFinished := student.IsFinishedTrial && student.TransactionsCount == 0
+		isBalanceNegative := student.Balance.IsNegative()
+
+		tutor := tutorsMap[student.TutorID]
+
+		tutor.HasNewBie = tutor.HasNewBie || isNewBie
+		tutor.HasBalanceNegative = tutor.HasBalanceNegative || isBalanceNegative
+		tutor.HasOnlyTrial = tutor.HasOnlyTrial || isOnlyTrialFinished
+
+		tutorsMap[student.TutorID] = tutor
+	}
+
+	val := lo.Values(tutorsMap)
+	slices.SortFunc(val, func(a, b dto.Tutor) int {
+		return cmp.Compare(a.ID, b.ID)
+	})
+
+	return val, nil
+}

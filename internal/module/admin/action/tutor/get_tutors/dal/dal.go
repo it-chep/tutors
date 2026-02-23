@@ -22,17 +22,20 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 
 func (r *Repository) GetTutorsByAdmin(ctx context.Context, adminID int64) ([]dto.Tutor, error) {
 	sql := `
-		select 
+		select
             t.cost_per_hour,
             t.subject_id,
             t.admin_id,
+            t.is_archive,
+            t.tg_admin_username,
             u.full_name as full_name,
             u.tutor_id as id,
             u.tg,
-            u.phone
-		from tutors t 
-		    join users u on t.id = u.tutor_id 
-		where t.admin_id = $1
+            u.phone,
+            u.created_at
+		from tutors t
+		    join users u on t.id = u.tutor_id
+		where t.admin_id = $1 and t.is_archive is false
 		order by t.id
 	`
 	var tutors dao.TutorsDao
@@ -45,16 +48,20 @@ func (r *Repository) GetTutorsByAdmin(ctx context.Context, adminID int64) ([]dto
 
 func (r *Repository) GetTutors(ctx context.Context) ([]dto.Tutor, error) {
 	sql := `
-		select 
+		select
             t.cost_per_hour,
             t.subject_id,
             t.admin_id,
+            t.is_archive,
+            t.tg_admin_username,
             u.full_name as full_name,
             u.tutor_id as id,
             u.tg,
-            u.phone
-		from tutors t 
-		    join users u on t.id = u.tutor_id 
+            u.phone,
+            u.created_at
+		from tutors t
+		    join users u on t.id = u.tutor_id
+		where t.is_archive is false
 		order by t.id
 	`
 	var tutors dao.TutorsDao
@@ -95,40 +102,38 @@ func (r *Repository) GetTutorsStudents(ctx context.Context, tutorIDs []int64) ([
 
 func (r *Repository) GetTutorsAvailableToAssistance(ctx context.Context, assistantID int64) ([]dto.Tutor, error) {
 	sql := `
-		WITH assistant_available_tgs AS (SELECT available_tgs
-										 FROM assistant_tgs where user_id = $1
-										 )
-		SELECT DISTINCT t.cost_per_hour,
-						t.subject_id,
-						t.admin_id,
-						u.full_name as full_name,
-						u.tutor_id  as id,
-						u.tg,
-						u.phone
+		SELECT DISTINCT
+			t.cost_per_hour,
+			t.subject_id,
+			t.admin_id,
+			t.is_archive,
+			t.tg_admin_username,
+			u.full_name as full_name,
+			u.tutor_id  as id,
+			u.tg,
+			u.phone,
+			u.created_at
 		FROM tutors t
-				 JOIN users u ON t.id = u.tutor_id
-				 LEFT JOIN students s ON t.id = s.tutor_id
-				 cross JOIN assistant_available_tgs aat
-		WHERE
-			t.admin_id = $2   AND (
-			-- Случай 1: У ассистента нет ограничений по TG (пустой массив)
-			array_length(aat.available_tgs, 1) IS NULL
-				OR array_length(aat.available_tgs, 1) = 0
-		
-				-- Случай 2: У репетитора нет студентов вообще
-				OR NOT EXISTS (
-				SELECT 1 FROM students s2
-				WHERE s2.tutor_id = t.id
+			JOIN users u ON t.id = u.tutor_id
+		WHERE t.admin_id = $2
+		  AND (
+			-- Случай 1: У ассистента нет ограничений по TG (пустой массив или нет записи)
+			NOT EXISTS (
+				SELECT 1 FROM assistant_tgs at
+				WHERE at.user_id = $1
+				  AND at.available_tgs IS NOT NULL
+				  AND array_length(at.available_tgs, 1) > 0
 			)
-		
-				-- Случай 3: У репетитора есть студент с разрешенным TG
-				OR EXISTS (
-				SELECT 1 FROM students s3
-				WHERE s3.tutor_id = t.id
-				  AND s3.tg_admin_username = ANY (aat.available_tgs)
-			))
-		
-		ORDER BY id
+			-- Случай 2: tg_admin_username репетитора входит в список разрешённых TG ассистента
+			OR t.tg_admin_username IN (
+				SELECT unnest(at.available_tgs)
+				FROM assistant_tgs at
+				WHERE at.user_id = $1
+				  AND at.available_tgs IS NOT NULL
+			)
+		  )
+		 and t.is_archive is false
+		ORDER BY t.id
 	`
 	var tutors dao.TutorsDao
 	if err := pgxscan.Select(ctx, r.pool, &tutors, sql, assistantID, userCtx.AdminIDFromContext(ctx)); err != nil {

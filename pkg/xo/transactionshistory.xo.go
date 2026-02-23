@@ -23,6 +23,7 @@ type TransactionsHistory struct {
 	Amount      pgtype.Numeric `db:"amount" json:"amount"`             // amount numeric
 	StudentID   int64          `db:"student_id" json:"student_id"`     // student_id bigint
 	PaymentID   sql.NullInt64  `db:"payment_id" json:"payment_id"`     // payment_id bigint
+	IsManual    bool           `db:"is_manual" json:"is_manual"`       // is_manual bool
 }
 
 // zeroTransactionsHistory zero value of dto
@@ -40,6 +41,7 @@ const (
 	Field_TransactionsHistory_Amount      = "amount"
 	Field_TransactionsHistory_StudentID   = "student_id"
 	Field_TransactionsHistory_PaymentID   = "payment_id"
+	Field_TransactionsHistory_IsManual    = "is_manual"
 )
 
 func (t TransactionsHistory) SelectColumnsWithCoalesce() []string {
@@ -51,6 +53,7 @@ func (t TransactionsHistory) SelectColumnsWithCoalesce() []string {
 		fmt.Sprintf("COALESCE(th.amount, %v) as amount", zeroTransactionsHistory.Amount),
 		fmt.Sprintf("COALESCE(th.student_id, %v) as student_id", zeroTransactionsHistory.StudentID),
 		"th.payment_id",
+		fmt.Sprintf("COALESCE(th.is_manual, %v) as is_manual", zeroTransactionsHistory.IsManual),
 	}
 }
 
@@ -63,11 +66,12 @@ func (t TransactionsHistory) SelectColumns() []string {
 		"th.amount",
 		"th.student_id",
 		"th.payment_id",
+		"th.is_manual",
 	}
 }
 
 func (t TransactionsHistory) Columns(without ...string) []string {
-	var str = "id, order_id, created_at, confirmed_at, amount, student_id, payment_id"
+	var str = "id, order_id, created_at, confirmed_at, amount, student_id, payment_id, is_manual"
 	for _, exc := range without {
 		str = strings.Replace(str+", ", exc+", ", "", 1)
 	}
@@ -95,6 +99,7 @@ func (t *TransactionsHistory) ToMap() map[string]interface{} {
 		"amount":       t.Amount,
 		"student_id":   t.StudentID,
 		"payment_id":   t.PaymentID,
+		"is_manual":    t.IsManual,
 	}
 }
 

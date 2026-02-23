@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/it-chep/tutors.git/internal/module/admin"
@@ -50,12 +51,16 @@ func (h *Handler) Handle() http.HandlerFunc {
 func (h *Handler) prepareResponse(tutor dto.Tutor) Response {
 	return Response{
 		Tutor: Tutor{
-			ID:          tutor.ID,
-			FullName:    tutor.FullName,
-			Phone:       tutor.Phone,
-			Tg:          tutor.Tg,
-			CostPerHour: tutor.CostPerHour,
-			SubjectName: tutor.SubjectName,
+			ID:              tutor.ID,
+			FullName:        tutor.FullName,
+			Phone:           tutor.Phone,
+			Tg:              tutor.Tg,
+			CostPerHour:     tutor.CostPerHour,
+			SubjectName:     tutor.SubjectName,
+			SubjectID:       tutor.SubjectID,
+			CreatedAt:       tutor.CreatedAt.Format(time.DateTime),
+			TgAdminUsername: tutor.TgAdminUsername,
+			IsArchive:       tutor.IsArchive,
 		},
 	}
 }

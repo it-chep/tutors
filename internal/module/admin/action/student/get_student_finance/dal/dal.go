@@ -47,10 +47,34 @@ func (r *Repository) GetFinanceInfo(ctx context.Context, studentID int64, from, 
 	salary := tutorCostPerHour.Mul(minutesDecimal).Div(sixty)
 
 	amount := allMoney.Add(salary.Mul(decimal.NewFromInt(-1)))
+
+	confirmedAmount := r.confirmedTransactionsAmount(ctx, studentID, from, to)
+
 	return dto.StudentFinance{
-		Count:  int64(len(lessons)),
-		Amount: amount,
+		Count:                int64(len(lessons)),
+		Amount:               amount,
+		TotalConfirmedAmount: confirmedAmount,
 	}, nil
+}
+
+func (r *Repository) confirmedTransactionsAmount(ctx context.Context, studentID int64, from, to time.Time) decimal.Decimal {
+	sql := `
+		SELECT COALESCE(SUM(amount), 0)
+		FROM transactions_history
+		WHERE student_id = $1
+		  AND confirmed_at IS NOT NULL
+		  AND created_at BETWEEN $2 AND $3
+	`
+	var result string
+	err := pgxscan.Get(ctx, r.pool, &result, sql, studentID, from, to)
+	if err != nil {
+		return decimal.Zero
+	}
+	d, err := decimal.NewFromString(result)
+	if err != nil {
+		return decimal.Zero
+	}
+	return d
 }
 
 func (r *Repository) perHours(ctx context.Context, studentID int64) (money dao.StudentTutorMoney) {

@@ -1,5 +1,7 @@
 package dto
 
+import "time"
+
 type User struct {
 	ID int64
 
@@ -11,8 +13,9 @@ type User struct {
 
 	IsActive bool
 
-	Role    Role
-	AdminID int64
+	Role      Role
+	AdminID   int64
+	CreatedAt time.Time
 }
 
 type UserInfo struct {

@@ -6,6 +6,7 @@ type Assistant struct {
 	Tg           string   `json:"tg"`
 	Phone        string   `json:"phone"`
 	AvailableTgs []string `json:"tg_admins_usernames"`
+	CreatedAt    string   `json:"created_at"`
 }
 
 type Response struct {

@@ -6,6 +6,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/pkg/payment_hash"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/it-chep/tutors.git/internal/module/admin"
@@ -87,6 +88,7 @@ func (h *Handler) prepareResponse(student dto.Student) Response {
 			PaymentName: student.Payment.String(),
 			PaymentID:   student.Payment.ID,
 			PaymentURL:  paymentURL,
+			CreatedAt:   student.CreatedAt.Format(time.DateTime),
 		},
 	}
 }

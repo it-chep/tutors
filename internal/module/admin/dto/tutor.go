@@ -1,6 +1,10 @@
 package dto
 
-import "github.com/shopspring/decimal"
+import (
+	"time"
+
+	"github.com/shopspring/decimal"
+)
 
 type Tutor struct {
 	ID          int64
@@ -15,6 +19,10 @@ type Tutor struct {
 	HasBalanceNegative bool
 	HasOnlyTrial       bool
 	HasNewBie          bool
+
+	CreatedAt       time.Time
+	TgAdminUsername string
+	IsArchive       bool
 }
 
 type TutorFinance struct {

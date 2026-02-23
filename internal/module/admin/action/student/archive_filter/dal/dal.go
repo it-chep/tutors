@@ -65,6 +65,16 @@ func stmtBuilder(ctx context.Context, adminID int64, filter dto.FilterRequest) (
 		)
 	}
 
+	if len(filter.PaymentIDs) != 0 {
+		whereStmtBuilder.WriteString(
+			fmt.Sprintf(`
+				and s.payment_id = any($%d)
+			`, phCounter),
+		)
+		phValues = append(phValues, filter.PaymentIDs)
+		phCounter++
+	}
+
 	if indto.IsAssistantRole(ctx) {
 		assistantID := userCtx.UserIDFromContext(ctx)
 

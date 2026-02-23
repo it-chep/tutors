@@ -12,4 +12,5 @@ type Lesson struct {
 type Response struct {
 	Lessons      []Lesson `json:"lessons"`
 	LessonsCount int64    `json:"lessons_count"`
+	TotalHours   float64  `json:"total_hours"`
 }

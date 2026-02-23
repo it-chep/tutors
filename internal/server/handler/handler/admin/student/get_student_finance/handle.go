@@ -61,8 +61,9 @@ func (h *Handler) Handle() http.HandlerFunc {
 func (h *Handler) prepareResponse(financeInfo dto.StudentFinance) Response {
 	return Response{
 		StudentFinance: StudentFinance{
-			Count:  financeInfo.Count,
-			Amount: financeInfo.Amount.String(),
+			Count:                financeInfo.Count,
+			Amount:               financeInfo.Amount.String(),
+			TotalConfirmedAmount: financeInfo.TotalConfirmedAmount.String(),
 		},
 	}
 }

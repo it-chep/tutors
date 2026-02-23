@@ -62,6 +62,7 @@ func (h *Handler) prepareResponse(tutors []dto.Tutor) Response {
 				HasBalanceNegative: item.HasBalanceNegative,
 				HasOnlyTrial:       item.HasOnlyTrial,
 				HasNewBie:          item.HasNewBie,
+				TgAdminUsername:    item.TgAdminUsername,
 			}
 		}),
 		TutorsCount: int64(len(tutors)),
