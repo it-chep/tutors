@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/it-chep/tutors.git/internal/config"
 	"github.com/samber/lo"
@@ -46,7 +47,8 @@ type InitRequest struct {
 }
 
 type Receipt struct {
-	Phone string `json:"Phone"` // обязательное
+	Phone *string `json:"Phone,omitempty"` // обязательное
+	Email *string `json:"Email,omitempty"` // обязательное
 
 	Taxation string        `json:"Taxation"` // обязательное
 	Items    []ReceiptItem `json:"Items"`    // обязательное
@@ -67,7 +69,7 @@ func (r *InitRequest) PaymentID() int64 {
 func NewInitRequest(paymentID int64, orderID string, amount int64, phone string) *InitRequest {
 	amount = amount * 100
 
-	return &InitRequest{
+	req := &InitRequest{
 		Amount:  amount,
 		OrderID: orderID,
 
@@ -78,7 +80,6 @@ func NewInitRequest(paymentID int64, orderID string, amount int64, phone string)
 		NotificationURL: "https://100rep.ru/callback/tbank",
 		Description:     "Оплата консультаций репетитора",
 		Receipt: Receipt{
-			Phone:    phone,
 			Taxation: "usn_income",
 			Items: []ReceiptItem{
 				{
@@ -93,6 +94,12 @@ func NewInitRequest(paymentID int64, orderID string, amount int64, phone string)
 
 		paymentID: paymentID,
 	}
+	if strings.Contains(phone, "@") {
+		req.Receipt.Email = lo.ToPtr(phone)
+	} else {
+		req.Receipt.Phone = lo.ToPtr(phone)
+	}
+	return req
 }
 
 func (r *InitRequest) GenerateToken(password string) {
