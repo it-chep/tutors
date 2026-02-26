@@ -123,5 +123,8 @@ func (r *GetOrderResponse) IsPaid() bool {
 }
 
 func (r *GetOrderResponse) Expired() bool {
+	if r == nil {
+		return false
+	}
 	return r.Status == "EXPIRED"
 }
