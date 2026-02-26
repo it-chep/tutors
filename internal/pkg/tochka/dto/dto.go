@@ -116,6 +116,9 @@ type GetOrderResponseHTTP struct {
 }
 
 func (r *GetOrderResponse) IsPaid() bool {
+	if r == nil {
+		return false
+	}
 	return r.Status == "APPROVED"
 }
 
