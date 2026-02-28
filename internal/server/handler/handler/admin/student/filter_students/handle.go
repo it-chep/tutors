@@ -57,7 +57,9 @@ func (h *Handler) Handle() http.HandlerFunc {
 
 		if req.IsArchived {
 			archiveReq := req.ToArchiveFilterRequest()
-			archiveReq.TgUsernameIDs = tgUsernameIDs
+			if len(archiveReq.TgUsernameIDs) == 0 && len(req.AdminsUsernames) > 0 {
+				archiveReq.TgUsernameIDs = tgUsernameIDs
+			}
 			students, err = h.adminModule.Actions.ArchiveFilter.Do(ctx, archiveReq)
 			if err != nil {
 				http.Error(w, "failed to get user data: "+err.Error(), http.StatusInternalServerError)
@@ -65,7 +67,9 @@ func (h *Handler) Handle() http.HandlerFunc {
 			}
 		} else {
 			filterReq := req.ToFilterRequest()
-			filterReq.TgUsernameIDs = tgUsernameIDs
+			if len(filterReq.TgUsernameIDs) == 0 && len(req.AdminsUsernames) > 0 {
+				filterReq.TgUsernameIDs = tgUsernameIDs
+			}
 			students, err = h.adminModule.Actions.FilterStudents.Do(ctx, filterReq)
 			if err != nil {
 				http.Error(w, "failed to get user data: "+err.Error(), http.StatusInternalServerError)

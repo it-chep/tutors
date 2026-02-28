@@ -21,7 +21,7 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 
 func (r *Repository) GetAllStudentsForAdmin(ctx context.Context, adminID int64) ([]dto.Student, error) {
 	sql := `
-		select s.*, tau.name as tg_admin_username
+		select s.*
 		from students s
 		    join tutors t on s.tutor_id = t.id
 		    left join tg_admins_usernames tau on s.tg_admin_username_id = tau.id
@@ -40,7 +40,7 @@ func (r *Repository) GetAllStudentsForAdmin(ctx context.Context, adminID int64) 
 
 func (r *Repository) GetAllStudentsForSuperAdmin(ctx context.Context) ([]dto.Student, error) {
 	sql := `
-		select s.*, tau.name as tg_admin_username
+		select s.*
 		from students s
 		    left join tg_admins_usernames tau on s.tg_admin_username_id = tau.id
 	`
@@ -55,7 +55,7 @@ func (r *Repository) GetAllStudentsForSuperAdmin(ctx context.Context) ([]dto.Stu
 
 func (r *Repository) GetTutorStudentsForAdmin(ctx context.Context, adminID, tutorID int64) ([]dto.Student, error) {
 	sql := `
-		select s.*, tau.name as tg_admin_username
+		select s.*
 		from students s
 		    join tutors t on s.tutor_id = t.id
 		    left join tg_admins_usernames tau on s.tg_admin_username_id = tau.id
@@ -72,7 +72,7 @@ func (r *Repository) GetTutorStudentsForAdmin(ctx context.Context, adminID, tuto
 
 func (r *Repository) GetTutorStudents(ctx context.Context, tutorID int64) ([]dto.Student, error) {
 	sql := `
-		select s.*, tau.name as tg_admin_username
+		select s.*
 		from students s
 		    left join tg_admins_usernames tau on s.tg_admin_username_id = tau.id
 		where s.tutor_id = $1 and s.is_archive is true
@@ -151,7 +151,7 @@ func (r *Repository) GetStudentsAvailableToAssistant(ctx context.Context, assist
             from assistant_tgs
             where user_id = $1
         )
-        select s.*, tau.name as tg_admin_username
+        select s.*
         from students s
 			join tutors t on s.tutor_id = t.id
 			left join tg_admins_usernames tau on s.tg_admin_username_id = tau.id

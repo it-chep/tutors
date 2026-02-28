@@ -1,45 +1,41 @@
-package get_tutors
+package archive_filter
 
 import (
 	"cmp"
 	"context"
-	userCtx "github.com/it-chep/tutors.git/pkg/context"
 	"slices"
 
-	"github.com/samber/lo"
-
-	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/get_tutors/dal"
-	"github.com/it-chep/tutors.git/internal/module/admin/dto"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/archive_filter/dal"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/archive_filter/dto"
+	adminDal "github.com/it-chep/tutors.git/internal/module/admin/dal"
+	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/samber/lo"
 )
 
 type Action struct {
-	dal *dal.Repository
+	dal       *dal.Repository
+	commonDal *adminDal.Repository
 }
 
 func New(pool *pgxpool.Pool) *Action {
 	return &Action{
-		dal: dal.NewRepository(pool),
+		dal:       dal.NewRepository(pool),
+		commonDal: adminDal.NewRepository(pool),
 	}
 }
 
-func (a *Action) Do(ctx context.Context, adminID int64) (tutors []dto.Tutor, err error) {
-	if dto.IsSuperAdminRole(ctx) && adminID == 0 {
-		tutors, err = a.dal.GetTutors(ctx)
-	}
-	if adminID != 0 {
-		tutors, err = a.dal.GetTutorsByAdmin(ctx, adminID)
-	}
-	if dto.IsAssistantRole(ctx) {
-		tutors, err = a.dal.GetTutorsAvailableToAssistance(ctx, userCtx.UserIDFromContext(ctx))
-	}
+func (a *Action) Do(ctx context.Context, filter dto.FilterRequest) ([]indto.Tutor, error) {
+	adminID := userCtx.AdminIDFromContext(ctx)
 
+	tutors, err := a.dal.FilterTutors(ctx, adminID, filter)
 	if err != nil {
 		return nil, err
 	}
 
 	tutorsIDs := make([]int64, 0, len(tutors))
-	tutorsMap := make(map[int64]dto.Tutor, len(tutors))
+	tutorsMap := make(map[int64]indto.Tutor, len(tutors))
 	for _, tutor := range tutors {
 		tutorsIDs = append(tutorsIDs, tutor.ID)
 		tutorsMap[tutor.ID] = tutor
@@ -57,16 +53,17 @@ func (a *Action) Do(ctx context.Context, adminID int64) (tutors []dto.Tutor, err
 
 		tutor := tutorsMap[student.TutorID]
 
-		// Тут либо у него это уже true либо мы ставим true
 		tutor.HasNewBie = tutor.HasNewBie || isNewBie
 		tutor.HasBalanceNegative = tutor.HasBalanceNegative || isBalanceNegative
 		tutor.HasOnlyTrial = tutor.HasOnlyTrial || isOnlyTrialFinished
 
 		tutorsMap[student.TutorID] = tutor
 	}
+
 	val := lo.Values(tutorsMap)
-	slices.SortFunc(val, func(a, b dto.Tutor) int {
+	slices.SortFunc(val, func(a, b indto.Tutor) int {
 		return cmp.Compare(a.ID, b.ID)
 	})
-	return val, err
+
+	return val, nil
 }

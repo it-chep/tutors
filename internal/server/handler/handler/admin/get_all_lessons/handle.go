@@ -55,18 +55,24 @@ func (h *Handler) Handle() http.HandlerFunc {
 }
 
 func (h *Handler) prepareResponse(lessons []dto.Lesson) Response {
+	var totalMinutes int64
+
+	mappedLessons := lo.Map(lessons, func(l dto.Lesson, _ int) Lesson {
+		minutes := int64(l.Duration.Minutes())
+		totalMinutes += minutes
+		return Lesson{
+			ID:                l.ID,
+			CreatedAt:         l.Date.Format(time.DateTime),
+			StudentName:       l.StudentFullName,
+			StudentID:         l.StudentID,
+			TutorName:         l.TutorFullName,
+			TutorID:           l.TutorID,
+			DurationInMinutes: l.Duration.Minutes(),
+		}
+	})
 	return Response{
-		Lessons: lo.Map(lessons, func(l dto.Lesson, _ int) Lesson {
-			return Lesson{
-				ID:                l.ID,
-				CreatedAt:         l.Date.Format(time.DateTime),
-				StudentName:       l.StudentFullName,
-				StudentID:         l.StudentID,
-				TutorName:         l.TutorFullName,
-				TutorID:           l.TutorID,
-				DurationInMinutes: l.Duration.Minutes(),
-			}
-		}),
+		Lessons:      mappedLessons,
 		LessonsCount: int64(len(lessons)),
+		TotalHours:   float64(totalMinutes) / 60.0,
 	}
 }

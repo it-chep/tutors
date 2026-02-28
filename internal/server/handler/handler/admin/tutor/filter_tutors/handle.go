@@ -23,17 +23,30 @@ func (h *Handler) Handle() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		var req Request
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		var (
+			req    Request
+			tutors []dto.Tutor
+			err    error
+		)
+		if err = json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, "failed to decode request: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		filterReq := req.ToFilterRequest()
-		tutors, err := h.adminModule.Actions.FilterTutors.Do(ctx, filterReq)
-		if err != nil {
-			http.Error(w, "failed to get tutors data: "+err.Error(), http.StatusInternalServerError)
-			return
+		if req.IsArchived {
+			archiveReq := req.ToArchiveFilterRequest()
+			tutors, err = h.adminModule.Actions.TutorArchiveFilter.Do(ctx, archiveReq)
+			if err != nil {
+				http.Error(w, "failed to get tutors data: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else {
+			filterReq := req.ToFilterRequest()
+			tutors, err = h.adminModule.Actions.FilterTutors.Do(ctx, filterReq)
+			if err != nil {
+				http.Error(w, "failed to get tutors data: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
 		}
 
 		response := h.prepareResponse(tutors)

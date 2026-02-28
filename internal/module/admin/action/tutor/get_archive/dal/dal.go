@@ -84,7 +84,6 @@ func (r *Repository) GetTutorsAvailableToAssistant(ctx context.Context, assistan
 			t.admin_id,
 			t.is_archive,
 			t.tg_admin_username_id,
-			tau.name as tg_admin_username,
 			u.full_name as full_name,
 			u.tutor_id  as id,
 			u.tg,
@@ -92,7 +91,6 @@ func (r *Repository) GetTutorsAvailableToAssistant(ctx context.Context, assistan
 			u.created_at
 		from tutors t
 			join users u ON t.id = u.tutor_id
-			left join tg_admins_usernames tau ON t.tg_admin_username_id = tau.id
 		WHERE t.admin_id = $2
 		  AND t.is_archive is true
 		  AND (
@@ -109,7 +107,7 @@ func (r *Repository) GetTutorsAvailableToAssistant(ctx context.Context, assistan
 				  AND at.available_tg_ids IS NOT NULL
 			)
 		  )
-		ORDER BY t.id
+		ORDER BY u.tutor_id
 	`
 	var tutors dao.TutorsDao
 	if err := pgxscan.Select(ctx, r.pool, &tutors, sql, assistantID, userCtx.AdminIDFromContext(ctx)); err != nil {

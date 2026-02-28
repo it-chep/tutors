@@ -26,7 +26,11 @@ values (126, 2, 46),
 insert into roles_permissions (id, role_id, permission_id)
 values (131, 4, 46),
        (134, 4, 51),
-       (135, 4, 52);
+       (135, 4, 52),
+       (136, 4, 47),
+       (137, 4, 48),
+       (138, 4, 49),
+       (139, 4, 50);
 
 -- +goose StatementEnd
 

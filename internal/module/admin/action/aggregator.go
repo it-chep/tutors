@@ -44,6 +44,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/update_student"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/update_wallet"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/archivate_tutor"
+	tutor_archive_filter "github.com/it-chep/tutors.git/internal/module/admin/action/tutor/archive_filter"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/conduct_lesson"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/conduct_trial"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/create_tutor"
@@ -64,20 +65,21 @@ import (
 
 type Aggregator struct {
 	// Репетитор
-	CreateTutor      *create_tutor.Action
-	DeleteTutor      *delete_tutor.Action
-	GetTutorFinance  *get_tutor_finance.Action
-	GetTutors        *get_tutors.Action
-	SearchTutor      *search_tutor.Action
-	GetTutorByID     *tutor_by_id.Action
-	ConductTrial     *conduct_trial.Action
-	ConductLesson    *conduct_lesson.Action
-	GetTutorLessons  *get_tutor_lessons.Action
-	ArchivateTutor   *archivate_tutor.Action
-	UnArchivateTutor *unarchivate_tutor.Action
-	UpdateTutor      *update_tutor.Action
-	FilterTutors     *filter_tutors.Action
-	GetTutorArchive  *tutor_get_archive.Action
+	CreateTutor        *create_tutor.Action
+	DeleteTutor        *delete_tutor.Action
+	GetTutorFinance    *get_tutor_finance.Action
+	GetTutors          *get_tutors.Action
+	SearchTutor        *search_tutor.Action
+	GetTutorByID       *tutor_by_id.Action
+	ConductTrial       *conduct_trial.Action
+	ConductLesson      *conduct_lesson.Action
+	GetTutorLessons    *get_tutor_lessons.Action
+	ArchivateTutor     *archivate_tutor.Action
+	UnArchivateTutor   *unarchivate_tutor.Action
+	UpdateTutor        *update_tutor.Action
+	FilterTutors       *filter_tutors.Action
+	TutorArchiveFilter *tutor_archive_filter.Action
+	GetTutorArchive    *tutor_get_archive.Action
 
 	CreateStudent            *create_student.Action
 	DeleteStudent            *delete_student.Action
@@ -145,20 +147,21 @@ type Aggregator struct {
 func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtConfig, bot *tg_bot.Bot) *Aggregator {
 	return &Aggregator{
 		// Репетитор
-		CreateTutor:      create_tutor.New(pool),
-		DeleteTutor:      delete_tutor.New(pool),
-		GetTutorFinance:  get_tutor_finance.New(pool),
-		GetTutors:        get_tutors.New(pool),
-		SearchTutor:      search_tutor.New(pool),
-		GetTutorByID:     tutor_by_id.New(pool),
-		ConductTrial:     conduct_trial.New(pool),
-		ConductLesson:    conduct_lesson.New(pool, bot),
-		GetTutorLessons:  get_tutor_lessons.New(pool),
-		ArchivateTutor:   archivate_tutor.New(pool),
-		UnArchivateTutor: unarchivate_tutor.New(pool),
-		UpdateTutor:      update_tutor.New(pool),
-		FilterTutors:     filter_tutors.New(pool),
-		GetTutorArchive:  tutor_get_archive.New(pool),
+		CreateTutor:        create_tutor.New(pool),
+		DeleteTutor:        delete_tutor.New(pool),
+		GetTutorFinance:    get_tutor_finance.New(pool),
+		GetTutors:          get_tutors.New(pool),
+		SearchTutor:        search_tutor.New(pool),
+		GetTutorByID:       tutor_by_id.New(pool),
+		ConductTrial:       conduct_trial.New(pool),
+		ConductLesson:      conduct_lesson.New(pool, bot),
+		GetTutorLessons:    get_tutor_lessons.New(pool),
+		ArchivateTutor:     archivate_tutor.New(pool),
+		UnArchivateTutor:   unarchivate_tutor.New(pool),
+		UpdateTutor:        update_tutor.New(pool),
+		FilterTutors:       filter_tutors.New(pool),
+		TutorArchiveFilter: tutor_archive_filter.New(pool),
+		GetTutorArchive:    tutor_get_archive.New(pool),
 
 		CreateStudent:            create_student.New(pool),
 		DeleteStudent:            delete_student.New(pool),

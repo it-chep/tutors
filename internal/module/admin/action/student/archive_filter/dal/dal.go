@@ -37,7 +37,7 @@ func (r *Repository) FilterStudents(ctx context.Context, adminID int64, filter d
 
 func stmtBuilder(ctx context.Context, adminID int64, filter dto.FilterRequest) (_ string, phValues []any) {
 	defaultSql := `
-		select s.*, tau.name as tg_admin_username
+		select s.*
 		from students s
 		    join tutors t on s.tutor_id = t.id
 		    join wallet w on s.id = w.student_id

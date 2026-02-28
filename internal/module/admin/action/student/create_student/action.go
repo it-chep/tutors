@@ -64,6 +64,7 @@ func (a *Action) Do(ctx context.Context, adminID int64, createDTO dto.CreateRequ
 		return err
 	}
 
+	// todo сделать проверку если у ассистента пустые значения в списке тг, то не добавлять ему туда ничего
 	if indto.IsAssistantRole(ctx) && createDTO.TgAdminUsernameID != 0 {
 		return a.dal.AddTgToAssistant(ctx, userCtx.UserIDFromContext(ctx), createDTO.TgAdminUsernameID)
 	}
