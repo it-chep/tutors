@@ -31,12 +31,12 @@ func (h *Handler) Handle() http.HandlerFunc {
 		}
 
 		err := h.adminModule.Actions.CreateAdmin.Do(ctx, dto.CreateRequest{
-			FullName:     req.FullName,
-			Tg:           req.Tg,
-			Phone:        req.Phone,
-			Email:        req.Email,
-			Role:         dto2.AssistantRole,
-			AvailableTGs: req.AvailableTgs,
+			FullName:       req.FullName,
+			Tg:             req.Tg,
+			Phone:          req.Phone,
+			Email:          req.Email,
+			Role:           dto2.AssistantRole,
+			AvailableTgIDs: req.AvailableTgs,
 		})
 		if err != nil {
 			http.Error(w, "failed to create assistant data: "+err.Error(), http.StatusInternalServerError)

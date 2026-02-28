@@ -7,7 +7,6 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/generate_payment_url"
 	"github.com/it-chep/tutors.git/internal/module/admin/alpha"
 	adminDal "github.com/it-chep/tutors.git/internal/module/admin/dal"
-	"gi
 	"github.com/it-chep/tutors.git/internal/module/admin/job/order_checker"
 	job_dal "github.com/it-chep/tutors.git/internal/module/admin/job/order_checker/dal"
 	tbankCallback "github.com/it-chep/tutors.git/internal/module/admin/tbank"
