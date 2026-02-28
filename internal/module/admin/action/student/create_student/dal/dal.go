@@ -28,8 +28,8 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 // CreateStudent создание студента
 func (r *Repository) CreateStudent(ctx context.Context, createDTO dto.CreateRequest) (int64, error) {
 	sql := `
-		insert into students (first_name, last_name, middle_name, phone, tg, cost_per_hour, subject_id, tutor_id, is_finished_trial, parent_full_name, parent_phone, parent_tg, tg_admin_username, payment_id) 
-		values ($1, $2, $3, $4, $5, $6, $7, $8, false, $9, $10, $11, $12, $13)
+		insert into students (first_name, last_name, middle_name, phone, tg, cost_per_hour, subject_id, tutor_id, is_finished_trial, parent_full_name, parent_phone, parent_tg, tg_admin_username_id, payment_id)
+		values ($1, $2, $3, $4, $5, $6, $7, $8, false, $9, $10, $11, nullif($12, 0), $13)
 		returning id
 	`
 	args := []interface{}{
@@ -44,7 +44,7 @@ func (r *Repository) CreateStudent(ctx context.Context, createDTO dto.CreateRequ
 		strings.TrimSpace(createDTO.ParentFullName),
 		createDTO.ParentPhone,
 		createDTO.ParentTg,
-		strings.TrimSpace(createDTO.TgAdminUsername),
+		createDTO.TgAdminUsernameID,
 		createDTO.PaymentID,
 	}
 
@@ -85,17 +85,17 @@ func (r *Repository) GetDefaultAdminPaymentID(ctx context.Context, adminID int64
 }
 
 // AddTgToAssistant добавление тг ассистенту
-func (r *Repository) AddTgToAssistant(ctx context.Context, assistantID int64, tgAdminUsername string) error {
+func (r *Repository) AddTgToAssistant(ctx context.Context, assistantID int64, tgAdminUsernameID int64) error {
 	sql := `
 		update assistant_tgs
-		set available_tgs = array(
-			select distinct unnest(array_append(available_tgs, $2))
+		set available_tg_ids = array(
+			select distinct unnest(array_append(available_tg_ids, $2))
 		)
 		where user_id = $1
 	`
 	args := []interface{}{
 		assistantID,
-		tgAdminUsername,
+		tgAdminUsernameID,
 	}
 
 	_, err := r.pool.Exec(ctx, sql, args...)

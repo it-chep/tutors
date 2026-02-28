@@ -7,6 +7,7 @@ import (
 
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/filter_tutors/dal"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/filter_tutors/dto"
+	adminDal "github.com/it-chep/tutors.git/internal/module/admin/dal"
 	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
 	userCtx "github.com/it-chep/tutors.git/pkg/context"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -14,12 +15,14 @@ import (
 )
 
 type Action struct {
-	dal *dal.Repository
+	dal       *dal.Repository
+	commonDal *adminDal.Repository
 }
 
 func New(pool *pgxpool.Pool) *Action {
 	return &Action{
-		dal: dal.NewRepository(pool),
+		dal:       dal.NewRepository(pool),
+		commonDal: adminDal.NewRepository(pool),
 	}
 }
 

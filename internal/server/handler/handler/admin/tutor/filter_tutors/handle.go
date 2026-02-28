@@ -29,7 +29,8 @@ func (h *Handler) Handle() http.HandlerFunc {
 			return
 		}
 
-		tutors, err := h.adminModule.Actions.FilterTutors.Do(ctx, req.ToFilterRequest())
+		filterReq := req.ToFilterRequest()
+		tutors, err := h.adminModule.Actions.FilterTutors.Do(ctx, filterReq)
 		if err != nil {
 			http.Error(w, "failed to get tutors data: "+err.Error(), http.StatusInternalServerError)
 			return

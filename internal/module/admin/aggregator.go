@@ -6,6 +6,8 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/generate_payment_url"
 	"github.com/it-chep/tutors.git/internal/module/admin/alpha"
+	adminDal "github.com/it-chep/tutors.git/internal/module/admin/dal"
+	"gi
 	"github.com/it-chep/tutors.git/internal/module/admin/job/order_checker"
 	job_dal "github.com/it-chep/tutors.git/internal/module/admin/job/order_checker/dal"
 	tbankCallback "github.com/it-chep/tutors.git/internal/module/admin/tbank"
@@ -16,7 +18,8 @@ import (
 
 // Module модуль отвечающий за работу админки
 type Module struct {
-	Actions *action.Aggregator
+	Actions   *action.Aggregator
+	CommonDal *adminDal.Repository
 
 	AlphaHook     *alpha.WebHookAlpha
 	TbankCallback *tbankCallback.CallbackTbank
@@ -32,7 +35,8 @@ func New(
 	actions := action.NewAggregator(pool, smtp, config.JwtConfig, bot)
 	checker := order_checker.NewTransactionChecker(job_dal.NewRepository(pool), gateways, config.PaymentConfig.PaymentsByAdmin)
 	return &Module{
-		Actions: actions,
+		Actions:   actions,
+		CommonDal: adminDal.NewRepository(pool),
 
 		// TODO: уточнить секрет, точно ли альфа может передавать статичный Bearer?
 		AlphaHook:     alpha.NewWebHookAlpha(checker, ""),

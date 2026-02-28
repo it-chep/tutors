@@ -13,5 +13,6 @@ type UpdateRequest struct {
 	ParentPhone    string
 	ParentTg       string
 
-	TgAdminUsername string
+	TgAdminUsername   string
+	TgAdminUsernameID int64
 }

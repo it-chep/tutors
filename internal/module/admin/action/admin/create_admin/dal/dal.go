@@ -49,11 +49,11 @@ func (r *Repository) CreateAdmin(ctx context.Context, createDTO dto.CreateReques
 // AddAvailableTGs добавления тг доступных ассистенту
 func (r *Repository) AddAvailableTGs(ctx context.Context, assistantID int64, createDTO dto.CreateRequest) error {
 	sql := `
-		insert into assistant_tgs (user_id, available_tgs) values ($1, $2) returning id
+		insert into assistant_tgs (user_id, available_tg_ids) values ($1, $2) returning id
 	`
 	args := []interface{}{
 		assistantID,
-		createDTO.AvailableTGs,
+		createDTO.AvailableTgIDs,
 	}
 
 	_, err := r.pool.Exec(ctx, sql, args...)

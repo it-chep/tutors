@@ -13,12 +13,13 @@ import (
 
 // Tutor represents a row from 'public.tutors'.
 type Tutor struct {
-	ID              int64          `db:"id" json:"id"`                               // id bigint
-	CostPerHour     pgtype.Numeric `db:"cost_per_hour" json:"cost_per_hour"`         // cost_per_hour numeric
-	SubjectID       int64          `db:"subject_id" json:"subject_id"`               // subject_id bigint
-	AdminID         int64          `db:"admin_id" json:"admin_id"`                   // admin_id bigint
-	IsArchive       sql.NullBool   `db:"is_archive" json:"is_archive"`               // is_archive bool
-	TgAdminUsername sql.NullString `db:"tg_admin_username" json:"tg_admin_username"` // tg_admin_username text
+	ID                int64          `db:"id" json:"id"`                                     // id bigint
+	CostPerHour       pgtype.Numeric `db:"cost_per_hour" json:"cost_per_hour"`               // cost_per_hour numeric
+	SubjectID         int64          `db:"subject_id" json:"subject_id"`                     // subject_id bigint
+	AdminID           int64          `db:"admin_id" json:"admin_id"`                         // admin_id bigint
+	IsArchive         sql.NullBool   `db:"is_archive" json:"is_archive"`                     // is_archive boolean
+	TgAdminUsername   sql.NullString `db:"tg_admin_username" json:"tg_admin_username"`       // tg_admin_username text
+	TgAdminUsernameID sql.NullInt64  `db:"tg_admin_username_id" json:"tg_admin_username_id"` // tg_admin_username_id bigint
 }
 
 // zeroTutor zero value of dto
@@ -26,15 +27,16 @@ var zeroTutor = Tutor{}
 
 // Constants that should be used when building where statements
 const (
-	Alias_Tutor                 = "t"
-	Table_Tutor_With_Alias      = "tutors AS t"
-	Table_Tutor                 = "tutors"
-	Field_Tutor_ID              = "id"
-	Field_Tutor_CostPerHour     = "cost_per_hour"
-	Field_Tutor_SubjectID       = "subject_id"
-	Field_Tutor_AdminID         = "admin_id"
-	Field_Tutor_IsArchive       = "is_archive"
-	Field_Tutor_TgAdminUsername = "tg_admin_username"
+	Alias_Tutor                   = "t"
+	Table_Tutor_With_Alias        = "tutors AS t"
+	Table_Tutor                   = "tutors"
+	Field_Tutor_ID                = "id"
+	Field_Tutor_CostPerHour       = "cost_per_hour"
+	Field_Tutor_SubjectID         = "subject_id"
+	Field_Tutor_AdminID           = "admin_id"
+	Field_Tutor_IsArchive         = "is_archive"
+	Field_Tutor_TgAdminUsername   = "tg_admin_username"
+	Field_Tutor_TgAdminUsernameID = "tg_admin_username_id"
 )
 
 func (t Tutor) SelectColumnsWithCoalesce() []string {
@@ -43,8 +45,9 @@ func (t Tutor) SelectColumnsWithCoalesce() []string {
 		fmt.Sprintf("COALESCE(t.cost_per_hour, %v) as cost_per_hour", zeroTutor.CostPerHour),
 		fmt.Sprintf("COALESCE(t.subject_id, %v) as subject_id", zeroTutor.SubjectID),
 		fmt.Sprintf("COALESCE(t.admin_id, %v) as admin_id", zeroTutor.AdminID),
-		"t.is_archive",
+		fmt.Sprintf("COALESCE(t.is_archive, %v) as is_archive", zeroTutor.IsArchive),
 		"t.tg_admin_username",
+		"t.tg_admin_username_id",
 	}
 }
 
@@ -56,11 +59,12 @@ func (t Tutor) SelectColumns() []string {
 		"t.admin_id",
 		"t.is_archive",
 		"t.tg_admin_username",
+		"t.tg_admin_username_id",
 	}
 }
 
 func (t Tutor) Columns(without ...string) []string {
-	var str = "id, cost_per_hour, subject_id, admin_id, is_archive, tg_admin_username"
+	var str = "id, cost_per_hour, subject_id, admin_id, is_archive, tg_admin_username, tg_admin_username_id"
 	for _, exc := range without {
 		str = strings.Replace(str+", ", exc+", ", "", 1)
 	}
@@ -81,12 +85,13 @@ func (t Tutor) Join(rightColumnTable string, leftColumnTable string) string {
 
 func (t *Tutor) ToMap() map[string]interface{} {
 	return map[string]interface{}{
-		"id":                t.ID,
-		"cost_per_hour":     t.CostPerHour,
-		"subject_id":        t.SubjectID,
-		"admin_id":          t.AdminID,
-		"is_archive":        t.IsArchive,
-		"tg_admin_username": t.TgAdminUsername,
+		"id":                   t.ID,
+		"cost_per_hour":        t.CostPerHour,
+		"subject_id":           t.SubjectID,
+		"admin_id":             t.AdminID,
+		"is_archive":           t.IsArchive,
+		"tg_admin_username":    t.TgAdminUsername,
+		"tg_admin_username_id": t.TgAdminUsernameID,
 	}
 }
 

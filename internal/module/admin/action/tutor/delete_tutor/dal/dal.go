@@ -17,6 +17,14 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 	}
 }
 
+// GetTutorTgID получение tg_admin_username_id репетитора
+func (r *Repository) GetTutorTgID(ctx context.Context, tutorID int64) (int64, error) {
+	sql := `select coalesce(tg_admin_username_id, 0) from tutors where id = $1`
+	var tgID int64
+	err := r.pool.QueryRow(ctx, sql, tutorID).Scan(&tgID)
+	return tgID, err
+}
+
 // DeleteTutor удаление репетитора
 func (r *Repository) DeleteTutor(ctx context.Context, tutorID int64) (err error) {
 	sql := `

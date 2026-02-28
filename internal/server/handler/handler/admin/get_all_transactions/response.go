@@ -5,6 +5,7 @@ type Transaction struct {
 	CreatedAt   string `json:"created_at"`
 	IsConfirmed bool   `json:"is_confirmed"`
 	Amount      string `json:"amount"`
+	IsManual    bool   `json:"is_manual"`
 
 	StudentID   int64  `json:"student_id"`
 	StudentName string `json:"student_name"`

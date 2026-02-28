@@ -70,6 +70,7 @@ func (h *Handler) prepareResponse(transactions []dto.TransactionHistory) Respons
 				IsConfirmed: t.IsConfirmed,
 				StudentName: t.StudentName,
 				StudentID:   t.StudentID,
+				IsManual:    t.IsManual,
 			}
 		}),
 		TransactionsCount: int64(len(transactions)),

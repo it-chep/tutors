@@ -15,16 +15,16 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 	}
 }
 
-// DeleteAvailableTg удаляет пользователю тгшку
-func (r *Repository) DeleteAvailableTg(ctx context.Context, assistantID int64, tgAdminUsername string) error {
+// DeleteAvailableTg удаляет пользователю тгшку по ID
+func (r *Repository) DeleteAvailableTg(ctx context.Context, assistantID int64, tgAdminUsernameID int64) error {
 	sql := `
 		update assistant_tgs
-			set available_tgs = array_remove(available_tgs, $2)
+			set available_tg_ids = array_remove(available_tg_ids, $2)
 		where user_id = $1
 	`
 	args := []interface{}{
 		assistantID,
-		tgAdminUsername,
+		tgAdminUsernameID,
 	}
 
 	_, err := r.pool.Exec(ctx, sql, args...)

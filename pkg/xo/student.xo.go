@@ -15,25 +15,26 @@ import (
 
 // Student represents a row from 'public.students'.
 type Student struct {
-	ID              int64          `db:"id" json:"id"`                               // id bigint
-	FirstName       string         `db:"first_name" json:"first_name"`               // first_name text
-	LastName        string         `db:"last_name" json:"last_name"`                 // last_name text
-	MiddleName      string         `db:"middle_name" json:"middle_name"`             // middle_name text
-	Phone           string         `db:"phone" json:"phone"`                         // phone text
-	Tg              string         `db:"tg" json:"tg"`                               // tg text
-	CostPerHour     pgtype.Numeric `db:"cost_per_hour" json:"cost_per_hour"`         // cost_per_hour numeric
-	SubjectID       int64          `db:"subject_id" json:"subject_id"`               // subject_id bigint
-	TutorID         int64          `db:"tutor_id" json:"tutor_id"`                   // tutor_id bigint
-	IsFinishedTrial bool           `db:"is_finished_trial" json:"is_finished_trial"` // is_finished_trial boolean
-	ParentFullName  string         `db:"parent_full_name" json:"parent_full_name"`   // parent_full_name text
-	ParentPhone     string         `db:"parent_phone" json:"parent_phone"`           // parent_phone text
-	ParentTg        string         `db:"parent_tg" json:"parent_tg"`                 // parent_tg text
-	ParentTgID      sql.NullInt64  `db:"parent_tg_id" json:"parent_tg_id"`           // parent_tg_id bigint
-	CreatedAt       pq.NullTime    `db:"created_at" json:"created_at"`               // created_at timestamp without time zone
-	TgAdminUsername sql.NullString `db:"tg_admin_username" json:"tg_admin_username"` // tg_admin_username text
-	IsArchive       sql.NullBool   `db:"is_archive" json:"is_archive"`               // is_archive boolean
-	PaymentID       sql.NullInt64  `db:"payment_id" json:"payment_id"`               // payment_id bigint
-	PaymentUUID     *uuid.UUID     `db:"payment_uuid" json:"payment_uuid"`           // payment_uuid uuid
+	ID                int64          `db:"id" json:"id"`                                     // id bigint
+	FirstName         string         `db:"first_name" json:"first_name"`                     // first_name text
+	LastName          string         `db:"last_name" json:"last_name"`                       // last_name text
+	MiddleName        string         `db:"middle_name" json:"middle_name"`                   // middle_name text
+	Phone             string         `db:"phone" json:"phone"`                               // phone text
+	Tg                string         `db:"tg" json:"tg"`                                     // tg text
+	CostPerHour       pgtype.Numeric `db:"cost_per_hour" json:"cost_per_hour"`               // cost_per_hour numeric
+	SubjectID         int64          `db:"subject_id" json:"subject_id"`                     // subject_id bigint
+	TutorID           int64          `db:"tutor_id" json:"tutor_id"`                         // tutor_id bigint
+	IsFinishedTrial   bool           `db:"is_finished_trial" json:"is_finished_trial"`       // is_finished_trial boolean
+	ParentFullName    string         `db:"parent_full_name" json:"parent_full_name"`         // parent_full_name text
+	ParentPhone       string         `db:"parent_phone" json:"parent_phone"`                 // parent_phone text
+	ParentTg          string         `db:"parent_tg" json:"parent_tg"`                       // parent_tg text
+	ParentTgID        sql.NullInt64  `db:"parent_tg_id" json:"parent_tg_id"`                 // parent_tg_id bigint
+	CreatedAt         pq.NullTime    `db:"created_at" json:"created_at"`                     // created_at timestamp without time zone
+	TgAdminUsername   sql.NullString `db:"tg_admin_username" json:"tg_admin_username"`       // tg_admin_username text
+	IsArchive         sql.NullBool   `db:"is_archive" json:"is_archive"`                     // is_archive boolean
+	PaymentID         sql.NullInt64  `db:"payment_id" json:"payment_id"`                     // payment_id bigint
+	PaymentUUID       *uuid.UUID     `db:"payment_uuid" json:"payment_uuid"`                 // payment_uuid uuid
+	TgAdminUsernameID sql.NullInt64  `db:"tg_admin_username_id" json:"tg_admin_username_id"` // tg_admin_username_id bigint
 }
 
 // zeroStudent zero value of dto
@@ -41,28 +42,29 @@ var zeroStudent = Student{}
 
 // Constants that should be used when building where statements
 const (
-	Alias_Student                 = "s"
-	Table_Student_With_Alias      = "students AS s"
-	Table_Student                 = "students"
-	Field_Student_ID              = "id"
-	Field_Student_FirstName       = "first_name"
-	Field_Student_LastName        = "last_name"
-	Field_Student_MiddleName      = "middle_name"
-	Field_Student_Phone           = "phone"
-	Field_Student_Tg              = "tg"
-	Field_Student_CostPerHour     = "cost_per_hour"
-	Field_Student_SubjectID       = "subject_id"
-	Field_Student_TutorID         = "tutor_id"
-	Field_Student_IsFinishedTrial = "is_finished_trial"
-	Field_Student_ParentFullName  = "parent_full_name"
-	Field_Student_ParentPhone     = "parent_phone"
-	Field_Student_ParentTg        = "parent_tg"
-	Field_Student_ParentTgID      = "parent_tg_id"
-	Field_Student_CreatedAt       = "created_at"
-	Field_Student_TgAdminUsername = "tg_admin_username"
-	Field_Student_IsArchive       = "is_archive"
-	Field_Student_PaymentID       = "payment_id"
-	Field_Student_PaymentUUID     = "payment_uuid"
+	Alias_Student                   = "s"
+	Table_Student_With_Alias        = "students AS s"
+	Table_Student                   = "students"
+	Field_Student_ID                = "id"
+	Field_Student_FirstName         = "first_name"
+	Field_Student_LastName          = "last_name"
+	Field_Student_MiddleName        = "middle_name"
+	Field_Student_Phone             = "phone"
+	Field_Student_Tg                = "tg"
+	Field_Student_CostPerHour       = "cost_per_hour"
+	Field_Student_SubjectID         = "subject_id"
+	Field_Student_TutorID           = "tutor_id"
+	Field_Student_IsFinishedTrial   = "is_finished_trial"
+	Field_Student_ParentFullName    = "parent_full_name"
+	Field_Student_ParentPhone       = "parent_phone"
+	Field_Student_ParentTg          = "parent_tg"
+	Field_Student_ParentTgID        = "parent_tg_id"
+	Field_Student_CreatedAt         = "created_at"
+	Field_Student_TgAdminUsername   = "tg_admin_username"
+	Field_Student_IsArchive         = "is_archive"
+	Field_Student_PaymentID         = "payment_id"
+	Field_Student_PaymentUUID       = "payment_uuid"
+	Field_Student_TgAdminUsernameID = "tg_admin_username_id"
 )
 
 func (t Student) SelectColumnsWithCoalesce() []string {
@@ -86,6 +88,7 @@ func (t Student) SelectColumnsWithCoalesce() []string {
 		fmt.Sprintf("COALESCE(s.is_archive, %v) as is_archive", zeroStudent.IsArchive),
 		"s.payment_id",
 		fmt.Sprintf("COALESCE(s.payment_uuid, %v) as payment_uuid", zeroStudent.PaymentUUID),
+		"s.tg_admin_username_id",
 	}
 }
 
@@ -110,11 +113,12 @@ func (t Student) SelectColumns() []string {
 		"s.is_archive",
 		"s.payment_id",
 		"s.payment_uuid",
+		"s.tg_admin_username_id",
 	}
 }
 
 func (t Student) Columns(without ...string) []string {
-	var str = "id, first_name, last_name, middle_name, phone, tg, cost_per_hour, subject_id, tutor_id, is_finished_trial, parent_full_name, parent_phone, parent_tg, parent_tg_id, created_at, tg_admin_username, is_archive, payment_id, payment_uuid"
+	var str = "id, first_name, last_name, middle_name, phone, tg, cost_per_hour, subject_id, tutor_id, is_finished_trial, parent_full_name, parent_phone, parent_tg, parent_tg_id, created_at, tg_admin_username, is_archive, payment_id, payment_uuid, tg_admin_username_id"
 	for _, exc := range without {
 		str = strings.Replace(str+", ", exc+", ", "", 1)
 	}
@@ -135,25 +139,26 @@ func (t Student) Join(rightColumnTable string, leftColumnTable string) string {
 
 func (t *Student) ToMap() map[string]interface{} {
 	return map[string]interface{}{
-		"id":                t.ID,
-		"first_name":        t.FirstName,
-		"last_name":         t.LastName,
-		"middle_name":       t.MiddleName,
-		"phone":             t.Phone,
-		"tg":                t.Tg,
-		"cost_per_hour":     t.CostPerHour,
-		"subject_id":        t.SubjectID,
-		"tutor_id":          t.TutorID,
-		"is_finished_trial": t.IsFinishedTrial,
-		"parent_full_name":  t.ParentFullName,
-		"parent_phone":      t.ParentPhone,
-		"parent_tg":         t.ParentTg,
-		"parent_tg_id":      t.ParentTgID,
-		"created_at":        t.CreatedAt,
-		"tg_admin_username": t.TgAdminUsername,
-		"is_archive":        t.IsArchive,
-		"payment_id":        t.PaymentID,
-		"payment_uuid":      t.PaymentUUID,
+		"id":                   t.ID,
+		"first_name":           t.FirstName,
+		"last_name":            t.LastName,
+		"middle_name":          t.MiddleName,
+		"phone":                t.Phone,
+		"tg":                   t.Tg,
+		"cost_per_hour":        t.CostPerHour,
+		"subject_id":           t.SubjectID,
+		"tutor_id":             t.TutorID,
+		"is_finished_trial":    t.IsFinishedTrial,
+		"parent_full_name":     t.ParentFullName,
+		"parent_phone":         t.ParentPhone,
+		"parent_tg":            t.ParentTg,
+		"parent_tg_id":         t.ParentTgID,
+		"created_at":           t.CreatedAt,
+		"tg_admin_username":    t.TgAdminUsername,
+		"is_archive":           t.IsArchive,
+		"payment_id":           t.PaymentID,
+		"payment_uuid":         t.PaymentUUID,
+		"tg_admin_username_id": t.TgAdminUsernameID,
 	}
 }
 

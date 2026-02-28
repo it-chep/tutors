@@ -28,7 +28,8 @@ func (r *Repository) GetTutor(ctx context.Context, tutorID int64) (dto.Tutor, er
             t.subject_id,
             t.admin_id,
             t.is_archive,
-            t.tg_admin_username,
+            t.tg_admin_username_id,
+            tau.name as tg_admin_username,
             u.full_name as full_name,
             u.tutor_id as id,
             u.tg,
@@ -38,6 +39,7 @@ func (r *Repository) GetTutor(ctx context.Context, tutorID int64) (dto.Tutor, er
 		from tutors t
 		    join subjects s on t.subject_id = s.id
 			join users u on t.id = u.tutor_id
+			left join tg_admins_usernames tau on t.tg_admin_username_id = tau.id
 		where t.id = $1
 	`
 

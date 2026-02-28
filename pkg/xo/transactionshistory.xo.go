@@ -23,7 +23,7 @@ type TransactionsHistory struct {
 	Amount      pgtype.Numeric `db:"amount" json:"amount"`             // amount numeric
 	StudentID   int64          `db:"student_id" json:"student_id"`     // student_id bigint
 	PaymentID   sql.NullInt64  `db:"payment_id" json:"payment_id"`     // payment_id bigint
-	IsManual    bool           `db:"is_manual" json:"is_manual"`       // is_manual bool
+	IsManual    bool           `db:"is_manual" json:"is_manual"`       // is_manual boolean
 }
 
 // zeroTransactionsHistory zero value of dto

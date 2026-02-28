@@ -2,20 +2,23 @@ package create_admin
 
 import (
 	"context"
-	dto2 "github.com/it-chep/tutors.git/internal/module/admin/dto"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/create_admin/dal"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/create_admin/dto"
+	adminDal "github.com/it-chep/tutors.git/internal/module/admin/dal"
+	dto2 "github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Action struct {
-	dal *dal.Repository
+	dal       *dal.Repository
+	commonDal *adminDal.Repository
 }
 
 func New(pool *pgxpool.Pool) *Action {
 	return &Action{
-		dal: dal.NewRepository(pool),
+		dal:       dal.NewRepository(pool),
+		commonDal: adminDal.NewRepository(pool),
 	}
 }
 

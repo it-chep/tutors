@@ -11,9 +11,10 @@ import (
 
 // AssistantTg represents a row from 'public.assistant_tgs'.
 type AssistantTg struct {
-	ID           int64            `db:"id" json:"id"`                       // id bigint
-	UserID       sql.NullInt64    `db:"user_id" json:"user_id"`             // user_id bigint
-	AvailableTgs []sql.NullString `db:"available_tgs" json:"available_tgs"` // available_tgs text[]
+	ID             int64            `db:"id" json:"id"`                             // id bigint
+	UserID         sql.NullInt64    `db:"user_id" json:"user_id"`                   // user_id bigint
+	AvailableTgs   []sql.NullString `db:"available_tgs" json:"available_tgs"`       // available_tgs text[]
+	AvailableTgIds []sql.NullInt64  `db:"available_tg_ids" json:"available_tg_ids"` // available_tg_ids bigint[]
 }
 
 // zeroAssistantTg zero value of dto
@@ -21,12 +22,13 @@ var zeroAssistantTg = AssistantTg{}
 
 // Constants that should be used when building where statements
 const (
-	Alias_AssistantTg              = "at"
-	Table_AssistantTg_With_Alias   = "assistant_tgs AS at"
-	Table_AssistantTg              = "assistant_tgs"
-	Field_AssistantTg_ID           = "id"
-	Field_AssistantTg_UserID       = "user_id"
-	Field_AssistantTg_AvailableTgs = "available_tgs"
+	Alias_AssistantTg                = "at"
+	Table_AssistantTg_With_Alias     = "assistant_tgs AS at"
+	Table_AssistantTg                = "assistant_tgs"
+	Field_AssistantTg_ID             = "id"
+	Field_AssistantTg_UserID         = "user_id"
+	Field_AssistantTg_AvailableTgs   = "available_tgs"
+	Field_AssistantTg_AvailableTgIds = "available_tg_ids"
 )
 
 func (t AssistantTg) SelectColumnsWithCoalesce() []string {
@@ -34,6 +36,7 @@ func (t AssistantTg) SelectColumnsWithCoalesce() []string {
 		fmt.Sprintf("COALESCE(at.id, %v) as id", zeroAssistantTg.ID),
 		"at.user_id",
 		fmt.Sprintf("COALESCE(at.available_tgs, %v) as available_tgs", zeroAssistantTg.AvailableTgs),
+		fmt.Sprintf("COALESCE(at.available_tg_ids, %v) as available_tg_ids", zeroAssistantTg.AvailableTgIds),
 	}
 }
 
@@ -42,11 +45,12 @@ func (t AssistantTg) SelectColumns() []string {
 		"at.id",
 		"at.user_id",
 		"at.available_tgs",
+		"at.available_tg_ids",
 	}
 }
 
 func (t AssistantTg) Columns(without ...string) []string {
-	var str = "id, user_id, available_tgs"
+	var str = "id, user_id, available_tgs, available_tg_ids"
 	for _, exc := range without {
 		str = strings.Replace(str+", ", exc+", ", "", 1)
 	}
@@ -67,9 +71,10 @@ func (t AssistantTg) Join(rightColumnTable string, leftColumnTable string) strin
 
 func (t *AssistantTg) ToMap() map[string]interface{} {
 	return map[string]interface{}{
-		"id":            t.ID,
-		"user_id":       t.UserID,
-		"available_tgs": t.AvailableTgs,
+		"id":               t.ID,
+		"user_id":          t.UserID,
+		"available_tgs":    t.AvailableTgs,
+		"available_tg_ids": t.AvailableTgIds,
 	}
 }
 

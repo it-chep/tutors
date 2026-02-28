@@ -35,7 +35,7 @@ func (h *Handler) Handle() http.HandlerFunc {
 			return
 		}
 
-		err = h.adminModule.Actions.AddAvailableTg.Do(ctx, assistantID, req.AvailableTg)
+		err = h.adminModule.Actions.AddAvailableTg.Do(ctx, assistantID, req.AvailableTg, req.TgAdminID)
 		if err != nil {
 			http.Error(w, "failed to get assistant data: "+err.Error(), http.StatusInternalServerError)
 			return

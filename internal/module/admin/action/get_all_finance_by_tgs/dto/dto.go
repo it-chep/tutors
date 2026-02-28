@@ -12,9 +12,9 @@ type GetAllFinanceDto struct {
 }
 
 type Request struct {
-	To, From    time.Time
-	AdminID     int64
-	TgUsernames []string
+	To, From      time.Time
+	AdminID       int64
+	TgUsernameIDs []int64
 }
 
 type TutorsInfo struct {

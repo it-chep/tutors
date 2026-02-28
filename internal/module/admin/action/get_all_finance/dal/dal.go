@@ -209,17 +209,17 @@ func (r *Repository) conductedNotTrialLessons(ctx context.Context, adminID int64
 				and cl.is_trial = false
 				and (
                     not exists (
-                        select 1 
+                        select 1
                         from assistant_tgs at
                         where at.user_id = $4
-                          and at.available_tgs is not null
-                          and array_length(at.available_tgs, 1) > 0
+                          and at.available_tg_ids is not null
+                          and array_length(at.available_tg_ids, 1) > 0
                     )
-                    or s.tg_admin_username in (
-                        select unnest(at.available_tgs)
+                    or s.tg_admin_username_id in (
+                        select unnest(at.available_tg_ids)
                         from assistant_tgs at
                         where at.user_id = $4
-                          and at.available_tgs is not null
+                          and at.available_tg_ids is not null
                     )
                 )
 		`

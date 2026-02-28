@@ -8,7 +8,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/create_tutor"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/delete_tutor"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/filter_tutors"
-	tutor_get_archive "github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tuto
+	tutor_get_archive "github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/get_archive"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/get_lessons"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/get_tutor_finance"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/get_tutors"

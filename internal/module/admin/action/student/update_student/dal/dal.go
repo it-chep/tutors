@@ -17,20 +17,32 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 	}
 }
 
-// UpdateStudent создание студента
+// GetStudentTgInfo получение текущего tg_admin_username_id студента и admin_id
+func (r *Repository) GetStudentTgInfo(ctx context.Context, studentID int64) (adminID int64, tgID int64, err error) {
+	sql := `
+		select t.admin_id, coalesce(s.tg_admin_username_id, 0) 
+		from students s 
+			join tutors t on s.tutor_id = t.id 
+		where s.id = $1
+	`
+	err = r.pool.QueryRow(ctx, sql, studentID).Scan(&adminID, &tgID)
+	return
+}
+
+// UpdateStudent обновление студента
 func (r *Repository) UpdateStudent(ctx context.Context, studentID int64, update dto.UpdateRequest) error {
 	sql := `
 		update students set
-			first_name = $2, 
+			first_name = $2,
 			last_name = $3,
-			middle_name = $4, 
-			phone = $5, 
-			tg = $6, 
-			cost_per_hour = $7, 
-			parent_full_name = $8, 
-			parent_phone = $9, 
+			middle_name = $4,
+			phone = $5,
+			tg = $6,
+			cost_per_hour = $7,
+			parent_full_name = $8,
+			parent_phone = $9,
 			parent_tg = $10,
-			tg_admin_username = $11
+			tg_admin_username_id = nullif($11, 0)
 		where id = $1
 	`
 	args := []interface{}{
@@ -44,7 +56,7 @@ func (r *Repository) UpdateStudent(ctx context.Context, studentID int64, update 
 		strings.TrimSpace(update.ParentFullName),
 		update.ParentPhone,
 		update.ParentTg,
-		strings.TrimSpace(update.TgAdminUsername),
+		update.TgAdminUsernameID,
 	}
 
 	_, err := r.pool.Exec(ctx, sql, args...)

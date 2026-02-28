@@ -42,7 +42,8 @@ func stmtBuilder(ctx context.Context, adminID int64, filter dto.FilterRequest) (
 			t.subject_id,
 			t.admin_id,
 			t.is_archive,
-			t.tg_admin_username,
+			t.tg_admin_username_id,
+			tau.name as tg_admin_username,
 			u.full_name as full_name,
 			u.tutor_id as id,
 			u.tg,
@@ -50,6 +51,7 @@ func stmtBuilder(ctx context.Context, adminID int64, filter dto.FilterRequest) (
 			u.created_at
 		from tutors t
 		    join users u on t.id = u.tutor_id
+		    	left join tg_admins_usernames tau on t.tg_admin_username_id = tau.id
 		where t.admin_id = $1 and t.is_archive is not true
 	`
 
@@ -58,13 +60,13 @@ func stmtBuilder(ctx context.Context, adminID int64, filter dto.FilterRequest) (
 	whereStmtBuilder := strings.Builder{}
 	phCounter := 2
 
-	if len(filter.TgUsernames) != 0 {
+	if len(filter.TgUsernameIDs) != 0 {
 		whereStmtBuilder.WriteString(
 			fmt.Sprintf(`
-				and t.tg_admin_username = any($%d)
+				and t.tg_admin_username_id = any($%d)
 			`, phCounter),
 		)
-		phValues = append(phValues, filter.TgUsernames)
+		phValues = append(phValues, filter.TgUsernameIDs)
 		phCounter++
 	}
 
@@ -78,14 +80,14 @@ func stmtBuilder(ctx context.Context, adminID int64, filter dto.FilterRequest) (
                         select 1
                         from assistant_tgs at
                         where at.user_id = $%d
-                          and at.available_tgs is not null
-                          and array_length(at.available_tgs, 1) > 0
+                          and at.available_tg_ids is not null
+                          and array_length(at.available_tg_ids, 1) > 0
                     )
-                    or t.tg_admin_username in (
-                        select unnest(at.available_tgs)
+                    or t.tg_admin_username_id in (
+                        select unnest(at.available_tg_ids)
                         from assistant_tgs at
                         where at.user_id = $%d
-                          and at.available_tgs is not null
+                          and at.available_tg_ids is not null
                     )
                 )
             `, phCounter, phCounter),

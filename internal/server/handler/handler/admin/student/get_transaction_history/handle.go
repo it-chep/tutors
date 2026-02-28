@@ -76,6 +76,7 @@ func (h *Handler) prepareResponse(transactions []dto.TransactionHistory) Respons
 				CreatedAt:   t.CreatedAt.Format(time.DateTime),
 				Amount:      t.Amount.String(),
 				IsConfirmed: t.IsConfirmed,
+				IsManual:    t.IsManual,
 			}
 		}),
 		TransactionsCount:    int64(len(transactions)),

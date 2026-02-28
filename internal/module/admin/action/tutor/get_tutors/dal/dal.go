@@ -27,7 +27,8 @@ func (r *Repository) GetTutorsByAdmin(ctx context.Context, adminID int64) ([]dto
             t.subject_id,
             t.admin_id,
             t.is_archive,
-            t.tg_admin_username,
+            t.tg_admin_username_id,
+            tau.name as tg_admin_username,
             u.full_name as full_name,
             u.tutor_id as id,
             u.tg,
@@ -35,6 +36,7 @@ func (r *Repository) GetTutorsByAdmin(ctx context.Context, adminID int64) ([]dto
             u.created_at
 		from tutors t
 		    join users u on t.id = u.tutor_id
+		    left join tg_admins_usernames tau on t.tg_admin_username_id = tau.id
 		where t.admin_id = $1 and t.is_archive is false
 		order by t.id
 	`
@@ -53,7 +55,8 @@ func (r *Repository) GetTutors(ctx context.Context) ([]dto.Tutor, error) {
             t.subject_id,
             t.admin_id,
             t.is_archive,
-            t.tg_admin_username,
+            t.tg_admin_username_id,
+            tau.name as tg_admin_username,
             u.full_name as full_name,
             u.tutor_id as id,
             u.tg,
@@ -61,6 +64,7 @@ func (r *Repository) GetTutors(ctx context.Context) ([]dto.Tutor, error) {
             u.created_at
 		from tutors t
 		    join users u on t.id = u.tutor_id
+		    left join tg_admins_usernames tau on t.tg_admin_username_id = tau.id
 		where t.is_archive is false
 		order by t.id
 	`
@@ -107,7 +111,8 @@ func (r *Repository) GetTutorsAvailableToAssistance(ctx context.Context, assista
 			t.subject_id,
 			t.admin_id,
 			t.is_archive,
-			t.tg_admin_username,
+			t.tg_admin_username_id,
+			tau.name as tg_admin_username,
 			u.full_name as full_name,
 			u.tutor_id  as id,
 			u.tg,
@@ -115,21 +120,20 @@ func (r *Repository) GetTutorsAvailableToAssistance(ctx context.Context, assista
 			u.created_at
 		FROM tutors t
 			JOIN users u ON t.id = u.tutor_id
+			LEFT JOIN tg_admins_usernames tau ON t.tg_admin_username_id = tau.id
 		WHERE t.admin_id = $2
 		  AND (
-			-- Случай 1: У ассистента нет ограничений по TG (пустой массив или нет записи)
 			NOT EXISTS (
 				SELECT 1 FROM assistant_tgs at
 				WHERE at.user_id = $1
-				  AND at.available_tgs IS NOT NULL
-				  AND array_length(at.available_tgs, 1) > 0
+				  AND at.available_tg_ids IS NOT NULL
+				  AND array_length(at.available_tg_ids, 1) > 0
 			)
-			-- Случай 2: tg_admin_username репетитора входит в список разрешённых TG ассистента
-			OR t.tg_admin_username IN (
-				SELECT unnest(at.available_tgs)
+			OR t.tg_admin_username_id IN (
+				SELECT unnest(at.available_tg_ids)
 				FROM assistant_tgs at
 				WHERE at.user_id = $1
-				  AND at.available_tgs IS NOT NULL
+				  AND at.available_tg_ids IS NOT NULL
 			)
 		  )
 		 and t.is_archive is false

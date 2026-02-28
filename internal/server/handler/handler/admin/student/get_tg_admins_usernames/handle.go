@@ -32,7 +32,12 @@ func (h *Handler) Handle() http.HandlerFunc {
 
 		usernames, err := h.adminModule.Actions.GetTgAdminsUsernames.Do(ctx, adminID)
 		response := Response{
-			Usernames: lo.Ternary(len(usernames) > 0, usernames, []string{}),
+			Usernames: lo.Map(usernames, func(item dto.TgAdminUsername, index int) TgAdminUsername {
+				return TgAdminUsername{
+					ID:   item.ID,
+					Name: item.Name,
+				}
+			}),
 		}
 
 		w.Header().Set("Content-Type", "application/json")

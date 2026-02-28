@@ -20,9 +20,10 @@ type Tutor struct {
 	HasOnlyTrial       bool
 	HasNewBie          bool
 
-	CreatedAt       time.Time
-	TgAdminUsername string
-	IsArchive       bool
+	CreatedAt         time.Time
+	TgAdminUsernameID int64
+	TgAdminUsername   string
+	IsArchive         bool
 }
 
 type TutorFinance struct {

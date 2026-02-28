@@ -4,7 +4,6 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/add_manual_transaction"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/archive_student"
-	"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/change_all_payment"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/change_student_payment"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/create_student"
@@ -49,7 +48,7 @@ type HandlerGroup struct {
 	ChangeStudentPayment   *change_student_payment.Handler
 	ChangeAllPayment       *change_all_payment.Handler
 	AddManualTransaction   *add_manual_transaction.Handler
-	AddManualTransaction  *add_manual_transaction.Handler
+	PushAllDebitors        *push_all_debitors.Handler
 
 	GetArchive         *get_archive.Handler
 	ArchiveStudent     *archive_student.Handler
@@ -79,7 +78,7 @@ func NewGroup(adminModule *admin.Module) *HandlerGroup {
 		ChangeStudentPayment:   change_student_payment.NewHandler(adminModule),
 		ChangeAllPayment:       change_all_payment.NewHandler(adminModule),
 		AddManualTransaction:   add_manual_transaction.NewHandler(adminModule),
-		AddManualTransaction:  add_manual_transaction.NewHandler(adminModule),
+		PushAllDebitors:        push_all_debitors.NewHandler(adminModule),
 
 		GetArchive:         get_archive.NewHandler(adminModule),
 		ArchiveStudent:     archive_student.NewHandler(adminModule),

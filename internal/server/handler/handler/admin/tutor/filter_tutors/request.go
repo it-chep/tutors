@@ -5,11 +5,13 @@ import (
 )
 
 type Request struct {
-	AdminsUsernames []string `json:"tg_admins_usernames"`
+	AdminsUsernamesIDs []int64 `json:"tg_admins_usernames_ids"`
+	IsArchived         bool    `json:"is_archive"`
 }
 
 func (r Request) ToFilterRequest() dto.FilterRequest {
 	return dto.FilterRequest{
-		TgUsernames: r.AdminsUsernames,
+		TgUsernameIDs: r.AdminsUsernamesIDs,
+		IsArchive:     r.IsArchived,
 	}
 }

@@ -13,6 +13,7 @@ type TransactionHistory struct {
 	CreatedAt   time.Time
 	IsConfirmed bool
 	Amount      decimal.Decimal
+	IsManual    bool
 
 	StudentID   int64
 	StudentName string

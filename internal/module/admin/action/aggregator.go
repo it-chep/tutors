@@ -17,9 +17,10 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_lessons"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_subjects"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_transactions"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/get_tg_admins_usernames"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/lessons/delete_lesson"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/lessons/update_lesson"
-	"github.com/it-chep/tutors.git/internal/module/admin/action/student/add_manual_transac
+	"github.com/it-chep/tutors.git/internal/module/admin/action/student/add_manual_transaction"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/archivate_student"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/archive_filter"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/change_all_students_payment"
@@ -27,7 +28,6 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/filter_students"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_archive"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_notification_history"
-	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_tg_admins_usernames"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_transaction_history"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/push_all_debitors"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/push_notification"
@@ -48,9 +48,8 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/conduct_trial"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/create_tutor"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/delete_tutor"
-tor"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/filter_tutors"
-	tutor_get_archive "github.com/it-chep/tutors.git/internal/module/admin/action/tutor
+	tutor_get_archive "github.com/it-chep/tutors.git/internal/module/admin/action/tutor/get_archive"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/get_tutor_finance"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/get_tutor_lessons"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/get_tutors"
@@ -97,7 +96,6 @@ type Aggregator struct {
 	ChangeStudentPayment     *change_student_payment.Action
 	ChangeAllStudentsPayment *change_all_students_payment.Action
 	AddManualTransaction     *add_manual_transaction.Action
-	AddManualTransaction      *add_manual_transaction.Action
 
 	// пуши
 	PushNotification *push_notification.Action
@@ -176,7 +174,6 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 		GetTgAdminsUsernames:     get_tg_admins_usernames.New(pool),
 		GetTransactionHistory:    get_transaction_history.New(pool),
 		GetNotificationHistory:   get_notification_history.New(pool),
-		GetNotificationHistory: get_notification_history.New(pool),
 		ChangeStudentPayment:     change_student_payment.New(pool),
 		ChangeAllStudentsPayment: change_all_students_payment.New(pool),
 		AddManualTransaction:     add_manual_transaction.New(pool),

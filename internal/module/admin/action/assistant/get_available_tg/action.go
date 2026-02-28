@@ -3,6 +3,7 @@ package get_available_tg
 import (
 	"context"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/assistant/get_available_tg/dal"
+	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -16,6 +17,6 @@ func New(pool *pgxpool.Pool) *Action {
 	}
 }
 
-func (a *Action) Do(ctx context.Context, assistantID int64) ([]string, error) {
+func (a *Action) Do(ctx context.Context, assistantID int64) (dto.TgAdminUsernames, error) {
 	return a.dal.GetAssistantUsernames(ctx, assistantID)
 }

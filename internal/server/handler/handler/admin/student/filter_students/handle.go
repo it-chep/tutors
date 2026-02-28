@@ -2,10 +2,12 @@ package filter_students
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
+	userCtx "github.com/it-chep/tutors.git/pkg/context"
 	"github.com/samber/lo"
-	"net/http"
 )
 
 type Handler struct {
@@ -42,14 +44,29 @@ func (h *Handler) Handle() http.HandlerFunc {
 			return
 		}
 
+		var tgUsernameIDs []int64
+		if len(req.AdminsUsernames) > 0 {
+			adminID := userCtx.AdminIDFromContext(ctx)
+			tgUsernames, tgErr := h.adminModule.CommonDal.GetTgAdminUsernameIDs(ctx, adminID, req.AdminsUsernames)
+			if tgErr != nil {
+				http.Error(w, "Пожалуйста обновите страницу "+tgErr.Error(), http.StatusInternalServerError)
+				return
+			}
+			tgUsernameIDs = tgUsernames.IDs()
+		}
+
 		if req.IsArchived {
-			students, err = h.adminModule.Actions.ArchiveFilter.Do(ctx, req.ToArchiveFilterRequest())
+			archiveReq := req.ToArchiveFilterRequest()
+			archiveReq.TgUsernameIDs = tgUsernameIDs
+			students, err = h.adminModule.Actions.ArchiveFilter.Do(ctx, archiveReq)
 			if err != nil {
 				http.Error(w, "failed to get user data: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
 		} else {
-			students, err = h.adminModule.Actions.FilterStudents.Do(ctx, req.ToFilterRequest())
+			filterReq := req.ToFilterRequest()
+			filterReq.TgUsernameIDs = tgUsernameIDs
+			students, err = h.adminModule.Actions.FilterStudents.Do(ctx, filterReq)
 			if err != nil {
 				http.Error(w, "failed to get user data: "+err.Error(), http.StatusInternalServerError)
 				return

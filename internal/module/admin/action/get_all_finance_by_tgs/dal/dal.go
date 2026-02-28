@@ -181,14 +181,14 @@ func (r *Repository) GetLessonsInfo(ctx context.Context, req dto.Request) (dao.C
 		where t.admin_id = $1
 		 	and cl.created_at between $2 and $3
 			and cl.is_trial = false
-			and s.tg_admin_username = any($4)
+			and s.tg_admin_username_id = any($4)
 	`
 
 	args := []interface{}{
 		req.AdminID,
 		req.From,
 		req.To,
-		req.TgUsernames,
+		req.TgUsernameIDs,
 	}
 
 	var lessons dao.ConductedLessonDAOs
@@ -208,12 +208,12 @@ func (r *Repository) GetDebt(ctx context.Context, req dto.Request) (decimal.Deci
 			join tutors t on s.tutor_id = t.id
 		where t.admin_id = $1 
 		  and balance < 0 
-		  and s.tg_admin_username = any($2)
+		  and s.tg_admin_username_id = any($2)
 	`
 
 	args := []interface{}{
 		req.AdminID,
-		req.TgUsernames,
+		req.TgUsernameIDs,
 	}
 
 	var debt pgtype.Numeric

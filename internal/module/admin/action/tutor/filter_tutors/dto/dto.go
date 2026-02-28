@@ -1,5 +1,6 @@
 package dto
 
 type FilterRequest struct {
-	TgUsernames []string
+	TgUsernameIDs []int64
+	IsArchive     bool
 }

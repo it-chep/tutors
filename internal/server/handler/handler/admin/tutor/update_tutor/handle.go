@@ -8,7 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/update_tutor/dto"
-	
+	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
 )
 
 type Handler struct {

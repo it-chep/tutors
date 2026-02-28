@@ -8,6 +8,6 @@ type CreateRequest struct {
 	Tg       string
 	Phone    string
 
-	Role         dto.Role
-	AvailableTGs []string
+	Role           dto.Role
+	AvailableTgIDs []int64
 }

@@ -2,10 +2,11 @@ package dal
 
 import (
 	"context"
+	"github.com/it-chep/tutors.git/internal/module/admin/dal/dao"
+	"github.com/it-chep/tutors.git/internal/module/admin/dto"
+
 	"github.com/georgysavva/scany/v2/pgxscan"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/pkg/errors"
 )
 
 type Repository struct {
@@ -19,21 +20,22 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 }
 
 // GetAssistantUsernames возвращает доступные тгшки ассистенту
-func (r *Repository) GetAssistantUsernames(ctx context.Context, assistantID int64) ([]string, error) {
+func (r *Repository) GetAssistantUsernames(ctx context.Context, assistantID int64) (dto.TgAdminUsernames, error) {
 	sql := `
-        SELECT available_tgs 
-        FROM assistant_tgs 
-        WHERE user_id = $1
-    `
+		SELECT tau.id, tau.name
+		FROM assistant_tgs at2
+		    CROSS JOIN LATERAL unnest(at2.available_tg_ids) AS tg_id
+		    JOIN tg_admins_usernames tau ON tau.id = tg_id
+		WHERE at2.user_id = $1
+		  AND at2.available_tg_ids IS NOT NULL
+		ORDER BY tau.name
+	`
 
-	var availableTgs []string
-	err := pgxscan.Get(ctx, r.pool, &availableTgs, sql, assistantID)
+	var availableTgs dao.TgAdminUsernames
+	err := pgxscan.Select(ctx, r.pool, &availableTgs, sql, assistantID)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return []string{}, nil
-		}
 		return nil, err
 	}
 
-	return availableTgs, nil
+	return availableTgs.ToDomain(), nil
 }

@@ -27,7 +27,8 @@ func (r *Repository) GetAllTutorsForAdmin(ctx context.Context, adminID int64) ([
 			t.subject_id,
 			t.admin_id,
 			t.is_archive,
-			t.tg_admin_username,
+			t.tg_admin_username_id,
+			tau.name as tg_admin_username,
 			u.full_name as full_name,
 			u.tutor_id as id,
 			u.tg,
@@ -35,6 +36,7 @@ func (r *Repository) GetAllTutorsForAdmin(ctx context.Context, adminID int64) ([
 			u.created_at
 		from tutors t
 		    join users u on t.id = u.tutor_id
+		    left join tg_admins_usernames tau on t.tg_admin_username_id = tau.id
 		where t.admin_id = $1 and t.is_archive is true
 		order by t.id
 	`
@@ -53,7 +55,8 @@ func (r *Repository) GetAllTutorsForSuperAdmin(ctx context.Context) ([]dto.Tutor
 			t.subject_id,
 			t.admin_id,
 			t.is_archive,
-			t.tg_admin_username,
+			t.tg_admin_username_id,
+			tau.name as tg_admin_username,
 			u.full_name as full_name,
 			u.tutor_id as id,
 			u.tg,
@@ -61,6 +64,7 @@ func (r *Repository) GetAllTutorsForSuperAdmin(ctx context.Context) ([]dto.Tutor
 			u.created_at
 		from tutors t
 		    join users u on t.id = u.tutor_id
+		    left join tg_admins_usernames tau on t.tg_admin_username_id = tau.id
 		where t.is_archive is true
 		order by t.id
 	`
@@ -74,33 +78,35 @@ func (r *Repository) GetAllTutorsForSuperAdmin(ctx context.Context) ([]dto.Tutor
 
 func (r *Repository) GetTutorsAvailableToAssistant(ctx context.Context, assistantID int64) ([]dto.Tutor, error) {
 	sql := `
-		SELECT DISTINCT
+		select distinct 
 			t.cost_per_hour,
 			t.subject_id,
 			t.admin_id,
 			t.is_archive,
-			t.tg_admin_username,
+			t.tg_admin_username_id,
+			tau.name as tg_admin_username,
 			u.full_name as full_name,
 			u.tutor_id  as id,
 			u.tg,
 			u.phone,
 			u.created_at
-		FROM tutors t
-			JOIN users u ON t.id = u.tutor_id
+		from tutors t
+			join users u ON t.id = u.tutor_id
+			left join tg_admins_usernames tau ON t.tg_admin_username_id = tau.id
 		WHERE t.admin_id = $2
 		  AND t.is_archive is true
 		  AND (
 			NOT EXISTS (
 				SELECT 1 FROM assistant_tgs at
 				WHERE at.user_id = $1
-				  AND at.available_tgs IS NOT NULL
-				  AND array_length(at.available_tgs, 1) > 0
+				  AND at.available_tg_ids IS NOT NULL
+				  AND array_length(at.available_tg_ids, 1) > 0
 			)
-			OR t.tg_admin_username IN (
-				SELECT unnest(at.available_tgs)
+			OR t.tg_admin_username_id IN (
+				SELECT unnest(at.available_tg_ids)
 				FROM assistant_tgs at
 				WHERE at.user_id = $1
-				  AND at.available_tgs IS NOT NULL
+				  AND at.available_tg_ids IS NOT NULL
 			)
 		  )
 		ORDER BY t.id

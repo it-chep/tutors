@@ -18,19 +18,26 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 	}
 }
 
+// GetTutorTgInfo получение текущего tg_admin_username_id и admin_id репетитора
+func (r *Repository) GetTutorTgInfo(ctx context.Context, tutorID int64) (adminID int64, tgID int64, err error) {
+	sql := `select admin_id, coalesce(tg_admin_username_id, 0) from tutors where id = $1`
+	err = r.pool.QueryRow(ctx, sql, tutorID).Scan(&adminID, &tgID)
+	return
+}
+
 // UpdateTutor обновление данных репетитора
 func (r *Repository) UpdateTutor(ctx context.Context, tutorID int64, upd dto.UpdateRequest) error {
 	tutorSQL := `
 		update tutors set
 			cost_per_hour = $2,
 			subject_id = $3,
-			tg_admin_username = $4
+			tg_admin_username_id = nullif($4, 0)
 		where id = $1
 	`
 	_, err := r.pool.Exec(ctx, tutorSQL, tutorID,
 		upd.CostPerHour,
 		upd.SubjectID,
-		strings.TrimSpace(upd.TgAdminUsername),
+		upd.TgAdminUsernameID,
 	)
 	if err != nil {
 		return err

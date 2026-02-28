@@ -10,16 +10,17 @@ import (
 )
 
 type TutorDAO struct {
-	TutorID         sql.NullInt64  `db:"id"`
-	CostPerHour     string         `db:"cost_per_hour" json:"cost_per_hour"`
-	SubjectID       int64          `db:"subject_id"`
-	AdminID         int64          `db:"admin_id"`
-	FullName        string         `db:"full_name"`
-	Tg              string         `db:"tg"`
-	Phone           string         `db:"phone"`
-	CreatedAt       pq.NullTime    `db:"created_at"`
-	TgAdminUsername sql.NullString `db:"tg_admin_username"`
-	IsArchive       sql.NullBool   `db:"is_archive"`
+	TutorID           sql.NullInt64  `db:"id"`
+	CostPerHour       string         `db:"cost_per_hour" json:"cost_per_hour"`
+	SubjectID         int64          `db:"subject_id"`
+	AdminID           int64          `db:"admin_id"`
+	FullName          string         `db:"full_name"`
+	Tg                string         `db:"tg"`
+	Phone             string         `db:"phone"`
+	CreatedAt         pq.NullTime    `db:"created_at"`
+	TgAdminUsernameID sql.NullInt64  `db:"tg_admin_username_id"`
+	TgAdminUsername   sql.NullString `db:"tg_admin_username"`
+	IsArchive         sql.NullBool   `db:"is_archive"`
 }
 
 type TutorWithSubjectName struct {
@@ -33,16 +34,17 @@ func (t TutorDAO) ToDomain() dto.Tutor {
 		createdAt = t.CreatedAt.Time
 	}
 	return dto.Tutor{
-		ID:              t.TutorID.Int64,
-		FullName:        t.FullName,
-		Phone:           t.Phone,
-		Tg:              TgLink(t.Tg),
-		CostPerHour:     t.CostPerHour,
-		SubjectID:       t.SubjectID,
-		AdminID:         t.AdminID,
-		CreatedAt:       createdAt,
-		TgAdminUsername: t.TgAdminUsername.String,
-		IsArchive:       t.IsArchive.Bool,
+		ID:                t.TutorID.Int64,
+		FullName:          t.FullName,
+		Phone:             t.Phone,
+		Tg:                TgLink(t.Tg),
+		CostPerHour:       t.CostPerHour,
+		SubjectID:         t.SubjectID,
+		AdminID:           t.AdminID,
+		CreatedAt:         createdAt,
+		TgAdminUsernameID: t.TgAdminUsernameID.Int64,
+		TgAdminUsername:   t.TgAdminUsername.String,
+		IsArchive:         t.IsArchive.Bool,
 	}
 }
 

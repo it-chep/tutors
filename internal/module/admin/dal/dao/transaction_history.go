@@ -20,6 +20,7 @@ func (th *TransactionHistoryDAO) ToDomain() dto.TransactionHistory {
 		IsConfirmed: th.ConfirmedAt.Valid,
 		Amount:      convert.NumericToDecimal(th.Amount),
 		StudentID:   th.StudentID,
+		IsManual:    th.IsManual,
 	}
 }
 

@@ -5,6 +5,7 @@ type Transaction struct {
 	CreatedAt   string `json:"created_at"`
 	IsConfirmed bool   `json:"is_confirmed"`
 	Amount      string `json:"amount"`
+	IsManual    bool   `json:"is_manual"`
 }
 
 type Response struct {

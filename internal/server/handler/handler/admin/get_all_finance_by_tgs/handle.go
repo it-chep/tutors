@@ -49,12 +49,23 @@ func (h *Handler) Handle() http.HandlerFunc {
 			adminID = userCtx.AdminIDFromContext(ctx)
 		}
 
-		finance, err := h.adminModule.Actions.GetAllFinanceByTGs.Do(ctx, dto.Request{
-			AdminID:     adminID,
-			TgUsernames: req.TgUsernames,
-			From:        from,
-			To:          to,
-		})
+		actionReq := dto.Request{
+			AdminID: adminID,
+			From:    from,
+			To:      to,
+		}
+
+		if len(req.TgUsernames) > 0 {
+			tgUsernames, err := h.adminModule.CommonDal.GetTgAdminUsernameIDs(ctx, adminID, req.TgUsernames)
+			if err != nil {
+				http.Error(w, "failed to resolve tg usernames: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+			actionReq.TgUsernameIDs = tgUsernames.IDs()
+		}
+
+		finance, err := h.adminModule.Actions.GetAllFinanceByTGs.Do(ctx, actionReq)
+
 		if err != nil {
 			http.Error(w, "failed to get user data: "+err.Error(), http.StatusInternalServerError)
 			return

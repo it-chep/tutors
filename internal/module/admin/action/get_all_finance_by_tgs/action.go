@@ -2,21 +2,25 @@ package get_all_finance_by_tgs
 
 import (
 	"context"
+	"sync"
+
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance_by_tgs/dal"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance_by_tgs/dto"
+	adminDal "github.com/it-chep/tutors.git/internal/module/admin/dal"
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/shopspring/decimal"
-	"sync"
 )
 
 type Action struct {
-	dal *dal.Repository
+	dal       *dal.Repository
+	commonDal *adminDal.Repository
 }
 
 func New(pool *pgxpool.Pool) *Action {
 	return &Action{
-		dal: dal.NewRepository(pool),
+		dal:       dal.NewRepository(pool),
+		commonDal: adminDal.NewRepository(pool),
 	}
 }
 

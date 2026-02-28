@@ -2,9 +2,10 @@ package filter_students
 
 import (
 	"context"
+
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/filter_students/dal"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/filter_students/dto"
-	commondal "github.com/it-chep/tutors.git/internal/module/admin/dal"
+	adminDal "github.com/it-chep/tutors.git/internal/module/admin/dal"
 	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	userCtx "github.com/it-chep/tutors.git/pkg/context"
@@ -14,19 +15,19 @@ import (
 
 type Action struct {
 	dal       *dal.Repository
-	commonDal *commondal.Repository
+	commonDal *adminDal.Repository
 }
 
 func New(pool *pgxpool.Pool) *Action {
 	return &Action{
 		dal:       dal.NewRepository(pool),
-		commonDal: commondal.NewRepository(pool),
+		commonDal: adminDal.NewRepository(pool),
 	}
 }
 
 func (a *Action) Do(ctx context.Context, filter dto.FilterRequest) ([]indto.Student, error) {
-
 	adminID := userCtx.AdminIDFromContext(ctx)
+
 	students, err := a.dal.FilterStudents(ctx, adminID, filter)
 	if err != nil {
 		return nil, err

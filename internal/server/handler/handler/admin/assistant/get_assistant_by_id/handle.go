@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
+	"github.com/samber/lo"
 	"net/http"
 	"strconv"
 	"time"
@@ -52,15 +53,20 @@ func (h *Handler) Handle() http.HandlerFunc {
 	}
 }
 
-func (h *Handler) prepareResponse(admin dto.User, tgs []string) Response {
+func (h *Handler) prepareResponse(admin dto.User, tgs dto.TgAdminUsernames) Response {
 	return Response{
 		Assistant: Assistant{
-			ID:           admin.ID,
-			FullName:     admin.FullName,
-			Tg:           admin.Tg,
-			Phone:        admin.Phone,
-			AvailableTgs: tgs,
-			CreatedAt:    admin.CreatedAt.Format(time.DateTime),
+			ID:       admin.ID,
+			FullName: admin.FullName,
+			Tg:       admin.Tg,
+			Phone:    admin.Phone,
+			AvailableTgs: lo.Map(tgs, func(item dto.TgAdminUsername, _ int) TgAdminUsername {
+				return TgAdminUsername{
+					ID:   item.ID,
+					Name: item.Name,
+				}
+			}),
+			CreatedAt: admin.CreatedAt.Format(time.DateTime),
 		},
 	}
 }
