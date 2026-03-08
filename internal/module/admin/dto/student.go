@@ -34,11 +34,12 @@ type Student struct {
 	IsBalanceNegative   bool
 	IsNewbie            bool
 
-	ParentTgID  int64
-	IsArchived  bool
-	PaymentID   int64
-	PaymentUUID string
-	CreatedAt   time.Time
+	ParentTgID    int64
+	IsArchived    bool
+	PaymentID     int64
+	PaymentUUID   string
+	CreatedAt     time.Time
+	CommentsCount int64
 
 	Payment Payment
 }

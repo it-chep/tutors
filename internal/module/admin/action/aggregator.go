@@ -25,8 +25,11 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/archive_filter"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/change_all_students_payment"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/change_student_payment"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/student/create_comment"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/student/delete_comment"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/filter_students"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_archive"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_comments"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_notification_history"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/get_transaction_history"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/push_all_debitors"
@@ -98,6 +101,9 @@ type Aggregator struct {
 	ChangeStudentPayment     *change_student_payment.Action
 	ChangeAllStudentsPayment *change_all_students_payment.Action
 	AddManualTransaction     *add_manual_transaction.Action
+	CreateComment            *create_comment.Action
+	GetComments              *get_comments.Action
+	DeleteComment            *delete_comment.Action
 
 	// пуши
 	PushNotification *push_notification.Action
@@ -180,6 +186,9 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 		ChangeStudentPayment:     change_student_payment.New(pool),
 		ChangeAllStudentsPayment: change_all_students_payment.New(pool),
 		AddManualTransaction:     add_manual_transaction.New(pool),
+		CreateComment:            create_comment.New(pool),
+		GetComments:              get_comments.New(pool),
+		DeleteComment:            delete_comment.New(pool),
 
 		// пуши
 		PushNotification: push_notification.New(pool, bot),

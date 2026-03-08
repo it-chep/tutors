@@ -6,10 +6,13 @@ import (
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/archive_student"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/change_all_payment"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/change_student_payment"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/create_comment"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/create_student"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/delete_comment"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/delete_student"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/filter_students"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/get_archive"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/get_comments"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/get_lessons"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/get_notification_history"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/student/get_student_finance"
@@ -49,6 +52,9 @@ type HandlerGroup struct {
 	ChangeAllPayment       *change_all_payment.Handler
 	AddManualTransaction   *add_manual_transaction.Handler
 	PushAllDebitors        *push_all_debitors.Handler
+	CreateComment          *create_comment.Handler
+	GetComments            *get_comments.Handler
+	DeleteComment          *delete_comment.Handler
 
 	GetArchive         *get_archive.Handler
 	ArchiveStudent     *archive_student.Handler
@@ -79,6 +85,9 @@ func NewGroup(adminModule *admin.Module) *HandlerGroup {
 		ChangeAllPayment:       change_all_payment.NewHandler(adminModule),
 		AddManualTransaction:   add_manual_transaction.NewHandler(adminModule),
 		PushAllDebitors:        push_all_debitors.NewHandler(adminModule),
+		CreateComment:          create_comment.NewHandler(adminModule),
+		GetComments:            get_comments.NewHandler(adminModule),
+		DeleteComment:          delete_comment.NewHandler(adminModule),
 
 		GetArchive:         get_archive.NewHandler(adminModule),
 		ArchiveStudent:     archive_student.NewHandler(adminModule),

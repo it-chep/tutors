@@ -102,6 +102,7 @@ func (h *Handler) prepareResponse(students []dto.Student) Response {
 				IsNewbie:            item.IsNewbie,
 				Balance:             item.Balance.String(),
 				PaymentName:         item.Payment.String(),
+				CommentsCount:       item.CommentsCount,
 			}
 		}),
 		StudentsCount: int64(len(students)),

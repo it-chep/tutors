@@ -141,6 +141,10 @@ func (a *Action) enrichStudents(ctx context.Context, students dto.Students) {
 	if err != nil {
 		logger.Error(ctx, "Ошибка при получении информации о платежках студентов", err)
 	}
+	commentsCount, err := a.dal.GetStudentsCommentsCount(ctx, studentIDs)
+	if err != nil {
+		logger.Error(ctx, "Ошибка при получении комментариев студентов", err)
+	}
 
 	for i, _ := range students {
 		// Задолженности
@@ -158,9 +162,11 @@ func (a *Action) enrichStudents(ctx context.Context, students dto.Students) {
 		if ok {
 			students[i].IsNewbie = false
 			students[i].IsOnlyTrialFinished = false
-			continue
+		} else {
+			students[i].IsNewbie = !hasPayments && !students[i].IsFinishedTrial
+			students[i].IsOnlyTrialFinished = !hasPayments
 		}
-		students[i].IsNewbie = !hasPayments && !students[i].IsFinishedTrial
-		students[i].IsOnlyTrialFinished = !hasPayments
+
+		students[i].CommentsCount = commentsCount[students[i].ID]
 	}
 }

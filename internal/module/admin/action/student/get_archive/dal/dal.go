@@ -178,3 +178,32 @@ func (r *Repository) GetStudentsAvailableToAssistant(ctx context.Context, assist
 
 	return students.ToDomain(), nil
 }
+
+func (r *Repository) GetStudentsCommentsCount(ctx context.Context, studentIDs []int64) (map[int64]int64, error) {
+	sql := `
+		select c.student_id, count(*) as comments_count
+		from comments c
+		where c.student_id = any($1)
+		group by c.student_id
+	`
+
+	type row struct {
+		StudentID     int64 `db:"student_id"`
+		CommentsCount int64 `db:"comments_count"`
+	}
+
+	var rows []row
+	if err := pgxscan.Select(ctx, r.pool, &rows, sql, studentIDs); err != nil {
+		return nil, err
+	}
+
+	result := make(map[int64]int64, len(studentIDs))
+	for _, studentID := range studentIDs {
+		result[studentID] = 0
+	}
+	for _, item := range rows {
+		result[item.StudentID] = item.CommentsCount
+	}
+
+	return result, nil
+}

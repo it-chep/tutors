@@ -49,6 +49,10 @@ func (a *Action) Do(ctx context.Context, filter dto.FilterRequest) ([]indto.Stud
 	if err != nil {
 		logger.Error(ctx, "Ошибка при получении информации о платежках студентов", err)
 	}
+	commentsCount, err := a.dal.GetStudentsCommentsCount(ctx, studentIDs)
+	if err != nil {
+		logger.Error(ctx, "Ошибка при получении комментариев студентов", err)
+	}
 
 	for i, _ := range students {
 		// Задолженности
@@ -66,12 +70,13 @@ func (a *Action) Do(ctx context.Context, filter dto.FilterRequest) ([]indto.Stud
 		if ok {
 			students[i].IsNewbie = false
 			students[i].IsOnlyTrialFinished = false
-			continue
+		} else {
+			students[i].IsNewbie = !hasPayments && !students[i].IsFinishedTrial
+			students[i].IsOnlyTrialFinished = !hasPayments
 		}
-		students[i].IsNewbie = !hasPayments && !students[i].IsFinishedTrial
-		students[i].IsOnlyTrialFinished = !hasPayments
 
 		students[i].Balance = wallet.Balance
+		students[i].CommentsCount = commentsCount[students[i].ID]
 	}
 
 	return students, nil

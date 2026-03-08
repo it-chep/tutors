@@ -13,6 +13,7 @@ type Student struct {
 	Balance             string `json:"balance"`
 	IsArchived          bool   `json:"is_archive"`
 	PaymentName         string `json:"payment_name"`
+	CommentsCount       int64  `json:"comments_count"`
 }
 
 type Response struct {

@@ -145,6 +145,9 @@ func (h *Handler) setupRoutes(cfg Config) {
 			r.Post("/{student_id}/transactions/manual", h.adminAgg.Students.AddManualTransaction.Handle()) // POST /admin/students/{id}/transactions/manual
 			r.Post("/{student_id}/notifications", h.adminAgg.Students.GetNotificationHistory.Handle())     // POST /admin/students/{id}/notifications
 			r.Post("/{student_id}/notifications/push", h.adminAgg.Students.PushNotification.Handle())      // POST /admin/students/{id}/notifications/push
+			r.Post("/{student_id}/comments", h.adminAgg.Students.CreateComment.Handle())                   // POST /admin/students/{id}/comments
+			r.Get("/{student_id}/comments", h.adminAgg.Students.GetComments.Handle())                      // GET /admin/students/{id}/comments
+			r.Delete("/{student_id}/comments/{comment_id}", h.adminAgg.Students.DeleteComment.Handle())    // DELETE /admin/students/{id}/comments/{comment_id}
 			r.Post("/{student_id}/archive", h.adminAgg.Students.ArchiveStudent.Handle())                   // POST /admin/students/{id}/archive
 			r.Post("/{student_id}/unarchive", h.adminAgg.Students.UnArchivateStudent.Handle())             // POST /admin/students/{id}/unarchive
 		})
