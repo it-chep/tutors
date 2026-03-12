@@ -102,8 +102,11 @@ func (h *Handler) setupRoutes(cfg Config) {
 			r.Post("/", h.adminAgg.Assistant.CreateAssistant.Handle())                                     // POST /admin/assistant
 			r.Get("/{assistant_id}", h.adminAgg.Assistant.GetAssistantByID.Handle())                       // GET /admin/assistant/{id}
 			r.Delete("/{assistant_id}", h.adminAgg.Assistant.DeleteAssistant.Handle())                     // DELETE /admin/assistant/{id}
+			r.Post("/{assistant_id}/permissions", h.adminAgg.Assistant.Permissions.Handle())               // POST /admin/assistant/{id}/permissions
 			r.Post("/{assistant_id}/add_available_tg", h.adminAgg.Assistant.AddAvailableTG.Handle())       // POST /admin/assistant/{id}/add_available_tg
 			r.Post("/{assistant_id}/delete_available_tg", h.adminAgg.Assistant.DeleteAvailableTG.Handle()) // POST /admin/assistant/{id}/delete_available_tg
+			r.Post("/{assistant_id}/penalties-bonuses", h.adminAgg.Assistant.PenaltiesBonuses.Handle())    // POST /admin/assistant/{id}/penalties-bonuses
+			r.Post("/{assistant_id}/accruals", h.adminAgg.Assistant.GetAccruals.Handle())                  // POST /admin/assistant/{id}/accruals
 		})
 
 		// Репетиторы
@@ -111,10 +114,15 @@ func (h *Handler) setupRoutes(cfg Config) {
 			r.Get("/", h.adminAgg.Tutors.GetTutors.Handle())                             // GET /admin/tutors
 			r.Get("/search", h.adminAgg.Tutors.SearchTutor.Handle())                     // GET /admin/tutors/search
 			r.Get("/archive", h.adminAgg.Tutors.GetArchive.Handle())                     // GET /admin/tutors/archive
+			r.Get("/contracts/download_all", h.adminAgg.Tutors.Contract.DownloadAll())   // GET /admin/tutors/contracts/download_all
+			r.Post("/receipts/download_all", h.adminAgg.Tutors.Receipts.DownloadAll())   // POST /admin/tutors/receipts/download_all
 			r.Post("/filter", h.adminAgg.Tutors.FilterTutors.Handle())                   // POST /admin/tutors/filter
 			r.Get("/{tutor_id}", h.adminAgg.Tutors.GetTutorByID.Handle())                // GET /admin/tutors/{id}
 			r.Post("/", h.adminAgg.Tutors.CreateTutor.Handle())                          // POST /admin/tutors
 			r.Delete("/{tutor_id}", h.adminAgg.Tutors.DeleteTutor.Handle())              // DELETE /admin/tutors/{id}
+			r.Post("/{tutor_id}/contract", h.adminAgg.Tutors.Contract.Upload())          // POST /admin/tutors/{id}/contract
+			r.Get("/{tutor_id}/contract", h.adminAgg.Tutors.Contract.Download())         // GET /admin/tutors/{id}/contract
+			r.Delete("/{tutor_id}/contract", h.adminAgg.Tutors.Contract.Delete())        // DELETE /admin/tutors/{id}/contract
 			r.Post("/{tutor_id}/finance", h.adminAgg.Tutors.GetTutorFinance.Handle())    // POST /admin/tutors/{id}/finance
 			r.Post("/trial_lesson", h.adminAgg.Tutors.ConductTrial.Handle())             // POST /admin/tutors/trial_lesson
 			r.Post("/conduct_lesson", h.adminAgg.Tutors.ConductLesson.Handle())          // POST /admin/tutors/conduct_lesson
@@ -122,6 +130,10 @@ func (h *Handler) setupRoutes(cfg Config) {
 			r.Post("/{tutor_id}/archive", h.adminAgg.Tutors.ArchivateTutor.Handle())     // POST /admin/tutors/{id}/archive
 			r.Post("/{tutor_id}/unarchive", h.adminAgg.Tutors.UnArchivateTutor.Handle()) // POST /admin/tutors/{id}/unarchive
 			r.Post("/{tutor_id}/update", h.adminAgg.Tutors.UpdateTutor.Handle())         // POST /admin/tutors/{id}/update
+			r.Post("/{tutor_id}/penalties-bonuses", h.adminAgg.Tutors.PenaltiesBonuses.Handle())
+			r.Post("/{tutor_id}/accruals", h.adminAgg.Tutors.GetAccruals.Handle())
+			r.Post("/{tutor_id}/payouts", h.adminAgg.Tutors.Payouts.Handle())
+			r.Post("/{tutor_id}/receipts", h.adminAgg.Tutors.Receipts.Handle())
 		})
 
 		// Студенты
@@ -165,6 +177,11 @@ func (h *Handler) setupRoutes(cfg Config) {
 		r.Post("/finance_by_tgs", h.adminAgg.GetAllFinanceByTGs.Handle()) // POST /admin/finance_by_tgs
 		r.Post("/transactions", h.adminAgg.GetAllTransactions.Handle())   // POST /admin/transactions
 		r.Get("/payments", h.adminAgg.GetAdminPayments.Handle())          // POST /admin/payments
+	})
+
+	h.router.Route("/tutors", func(r chi.Router) {
+		r.Use(h.adminAgg.Auth.CheckPathPermission.AuthMiddleware())
+		r.Post("/save_receipt", h.adminAgg.Tutors.SaveReceipt.Handle()) // POST /tutors/save_receipt
 	})
 
 	h.router.Post("/webhook/alpha", h.adminAgg.AlphaHook.Handle())      // POST /alpha/hook

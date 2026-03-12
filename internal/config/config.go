@@ -14,6 +14,7 @@ type Config struct {
 	PaymentConfig PaymentConfig
 	JwtConfig     JwtConfig
 	SMTPConfig    SMTPConfig
+	S3Config      S3Config
 }
 
 type BotConfig struct {
@@ -31,6 +32,15 @@ type JwtConfig struct {
 type SMTPConfig struct {
 	Address string
 	PassKey string
+}
+
+type S3Config struct {
+	Endpoint        string
+	Region          string
+	AccessKey       string
+	SecretKey       string
+	ContractsBucket string
+	ReceiptsBucket  string
 }
 
 func (c *Config) PgConn() string {
@@ -79,6 +89,14 @@ func NewConfig() *Config {
 		SMTPConfig: SMTPConfig{
 			Address: os.Getenv("ADMIN_EMAIL"),
 			PassKey: os.Getenv("PASS_KEY"),
+		},
+		S3Config: S3Config{
+			Endpoint:        os.Getenv("S3_ENDPOINT"),
+			Region:          os.Getenv("S3_REGION"),
+			AccessKey:       os.Getenv("S3_ACCESS_KEY"),
+			SecretKey:       os.Getenv("S3_SECRET_KEY"),
+			ContractsBucket: os.Getenv("S3_CONTRACTS_BUCKET"),
+			ReceiptsBucket:  os.Getenv("S3_RECEIPTS_BUCKET"),
 		},
 	}
 }

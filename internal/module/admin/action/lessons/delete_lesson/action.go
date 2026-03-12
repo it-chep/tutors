@@ -5,20 +5,26 @@ import (
 	"fmt"
 	"strconv"
 
+	accrualdal "github.com/it-chep/tutors.git/internal/module/admin/action/accrual/dal"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/lessons/delete_lesson/dal"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
+	"github.com/it-chep/tutors.git/internal/pkg/transaction"
+	"github.com/it-chep/tutors.git/internal/pkg/transaction/wrapper"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/shopspring/decimal"
 )
 
 // Action провести обычное занятие
 type Action struct {
-	dal *dal.Repository
+	dal        *dal.Repository
+	accrualDal *accrualdal.Repository
 }
 
 func New(pool *pgxpool.Pool) *Action {
+	db := wrapper.NewDatabase(pool)
 	return &Action{
-		dal: dal.NewRepository(pool),
+		dal:        dal.NewRepository(db),
+		accrualDal: accrualdal.NewRepository(db),
 	}
 }
 
@@ -47,13 +53,17 @@ func (a *Action) Do(ctx context.Context, lessonID int64) error {
 		return err
 	}
 
-	// Устанавливаем новое значение
-	if err = a.dal.UpdateStudentWallet(ctx, student.ID, remain); err != nil {
-		return err
-	}
+	return transaction.Exec(ctx, func(ctx context.Context) error {
+		if err = a.dal.UpdateStudentWallet(ctx, student.ID, remain); err != nil {
+			return err
+		}
 
-	// Удаляем урок
-	return a.dal.DeleteLesson(ctx, lessonID)
+		if err = a.dal.DeleteLesson(ctx, lessonID); err != nil {
+			return err
+		}
+
+		return a.accrualDal.DeleteLessonAccrual(ctx, lessonID)
+	})
 }
 
 func (a *Action) getRemainBalance(student dto.Student, userWallet dto.Wallet, durationInMinutes float64) (decimal.Decimal, error) {

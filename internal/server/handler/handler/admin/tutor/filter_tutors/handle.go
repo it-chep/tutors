@@ -69,6 +69,7 @@ func (h *Handler) prepareResponse(tutors []dto.Tutor) Response {
 				HasBalanceNegative: item.HasBalanceNegative,
 				HasOnlyTrial:       item.HasOnlyTrial,
 				HasNewBie:          item.HasNewBie,
+				IsFailer:           item.IsFailer,
 				TgAdminUsername:    item.TgAdminUsername,
 			}
 		}),

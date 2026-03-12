@@ -70,6 +70,19 @@ func stmtBuilder(ctx context.Context, adminID int64, filter dto.FilterRequest) (
 		phCounter++
 	}
 
+	if filter.WithoutReceipt {
+		whereStmtBuilder.WriteString(`
+			and exists (
+				select 1
+				from accrual_payouts ap
+				where ap.target_user_id = t.id
+				  and ap.target_role_id = 3
+				  and ap.receipt_key is null
+				  and ap.created_at < now() - interval '2 days'
+			)
+		`)
+	}
+
 	if indto.IsAssistantRole(ctx) {
 		assistantID := userCtx.UserIDFromContext(ctx)
 
@@ -105,6 +118,10 @@ func stmtBuilder(ctx context.Context, adminID int64, filter dto.FilterRequest) (
 }
 
 func (r *Repository) GetTutorsStudents(ctx context.Context, tutorIDs []int64) ([]indto.StudentWithTransactions, error) {
+	if len(tutorIDs) == 0 {
+		return nil, nil
+	}
+
 	sql := `
 		select
             s.id as student_id,
@@ -130,4 +147,26 @@ func (r *Repository) GetTutorsStudents(ctx context.Context, tutorIDs []int64) ([
 	}
 
 	return students.ToDomain(), nil
+}
+
+func (r *Repository) GetFailerTutorIDs(ctx context.Context, tutorIDs []int64) ([]int64, error) {
+	if len(tutorIDs) == 0 {
+		return nil, nil
+	}
+
+	sql := `
+		select distinct ap.target_user_id
+		from accrual_payouts ap
+		where ap.target_role_id = 3
+		  and ap.target_user_id = any($1)
+		  and ap.receipt_key is null
+		  and ap.created_at < now() - interval '2 days'
+	`
+
+	var ids []int64
+	if err := pgxscan.Select(ctx, r.pool, &ids, sql, tutorIDs); err != nil {
+		return nil, err
+	}
+
+	return ids, nil
 }

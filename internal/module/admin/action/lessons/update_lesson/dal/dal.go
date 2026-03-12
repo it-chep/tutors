@@ -2,21 +2,22 @@ package dal
 
 import (
 	"context"
+
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/lessons/update_lesson/dto"
 	"github.com/it-chep/tutors.git/internal/module/admin/dal/dao"
 	indto "github.com/it-chep/tutors.git/internal/module/admin/dto"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/it-chep/tutors.git/internal/pkg/transaction/wrapper"
 	"github.com/shopspring/decimal"
 )
 
 type Repository struct {
-	pool *pgxpool.Pool
+	db wrapper.Database
 }
 
-func NewRepository(pool *pgxpool.Pool) *Repository {
+func NewRepository(db wrapper.Database) *Repository {
 	return &Repository{
-		pool: pool,
+		db: db,
 	}
 }
 
@@ -24,7 +25,7 @@ func (r *Repository) GetLessonByID(ctx context.Context, lessonID int64) (indto.L
 	sql := `select * from conducted_lessons where id = $1`
 
 	var lesson dao.LessonDefaultDAO
-	err := pgxscan.Get(ctx, r.pool, &lesson, sql, lessonID)
+	err := pgxscan.Get(ctx, r.db.Pool(ctx), &lesson, sql, lessonID)
 	if err != nil {
 		return indto.Lesson{}, err
 	}
@@ -36,7 +37,7 @@ func (r *Repository) GetStudentWallet(ctx context.Context, studentID int64) (ind
 	sql := `select * from wallet where student_id = $1`
 
 	var wallet dao.Wallet
-	err := pgxscan.Get(ctx, r.pool, &wallet, sql, studentID)
+	err := pgxscan.Get(ctx, r.db.Pool(ctx), &wallet, sql, studentID)
 	if err != nil {
 		return indto.Wallet{}, err
 	}
@@ -48,11 +49,35 @@ func (r *Repository) GetStudentInfo(ctx context.Context, studentID int64) (indto
 	sql := `select * from students where id = $1`
 
 	var student dao.StudentDAO
-	err := pgxscan.Get(ctx, r.pool, &student, sql, studentID)
+	err := pgxscan.Get(ctx, r.db.Pool(ctx), &student, sql, studentID)
 	if err != nil {
 		return indto.Student{}, err
 	}
 	return student.ToDomain(), nil
+}
+
+func (r *Repository) GetTutorInfo(ctx context.Context, tutorID int64) (indto.Tutor, error) {
+	sql := `
+		select
+		    t.id,
+			t.cost_per_hour,
+			t.subject_id,
+			t.admin_id,
+			u.full_name,
+			u.tg,
+			u.phone
+		from tutors t
+		join users u on t.id = u.tutor_id
+		where t.id = $1
+	`
+
+	var tutor dao.TutorDAO
+	err := pgxscan.Get(ctx, r.db.Pool(ctx), &tutor, sql, tutorID)
+	if err != nil {
+		return indto.Tutor{}, err
+	}
+
+	return tutor.ToDomain(), nil
 }
 
 func (r *Repository) UpdateLesson(ctx context.Context, lessonID int64, upd dto.UpdateLesson) error {
@@ -67,7 +92,7 @@ func (r *Repository) UpdateLesson(ctx context.Context, lessonID int64, upd dto.U
 		upd.Date.UTC(),
 	}
 
-	_, err := r.pool.Exec(ctx, sql, args...)
+	_, err := r.db.Pool(ctx).Exec(ctx, sql, args...)
 	return err
 }
 
@@ -82,6 +107,6 @@ func (r *Repository) UpdateStudentBalance(ctx context.Context, studentID int64, 
 		balance,
 	}
 
-	_, err := r.pool.Exec(ctx, sql, args...)
+	_, err := r.db.Pool(ctx).Exec(ctx, sql, args...)
 	return err
 }
