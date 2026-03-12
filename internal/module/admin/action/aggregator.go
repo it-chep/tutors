@@ -10,6 +10,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/assistant/delete_available_tg"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/assistant/get_assistance"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/assistant/get_available_tg"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/audit"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/auth"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_admin_available_payments"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance"
@@ -130,6 +131,9 @@ type Aggregator struct {
 	// AUTH
 	Auth *auth.Aggregator
 
+	// Audit
+	Audit *audit.Action
+
 	// Платежки
 	GetAdminAvailablePayments *get_admin_available_payments.Action
 
@@ -214,6 +218,9 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 
 		// AUTH
 		Auth: auth.NewAggregator(pool, smtp, config),
+
+		// Audit
+		Audit: audit.New(pool),
 
 		// Платежки
 		GetAdminAvailablePayments: get_admin_available_payments.New(pool),

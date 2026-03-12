@@ -84,6 +84,7 @@ func (h *Handler) setupRoutes(cfg Config) {
 
 	h.router.Route("/admin", func(r chi.Router) {
 		r.Use(h.adminAgg.Auth.CheckPathPermission.AuthMiddleware())
+		r.Use(h.adminAgg.Audit.Middleware())
 
 		r.Get("/user", h.adminAgg.Auth.GetUserInfo.Handle()) // GET /admin/user
 
