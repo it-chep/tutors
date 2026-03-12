@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -22,10 +23,11 @@ type routeKey struct {
 }
 
 type meta struct {
-	Description string
-	Action      string
-	EntityName  string
-	EntityParam string
+	Description  string
+	Action       string
+	EntityName   string
+	EntityParam  string
+	CaptureState bool
 }
 
 type Entry struct {
@@ -39,6 +41,7 @@ type Entry struct {
 
 type creator interface {
 	Create(ctx context.Context, entry Entry) error
+	Snapshot(ctx context.Context, entityName string, entityID int64) (map[string]any, error)
 }
 
 type Action struct {
@@ -70,6 +73,15 @@ func (a *Action) Middleware() func(http.Handler) http.Handler {
 				return
 			}
 
+			entityID := extractEntityID(r, meta.EntityParam)
+			var before map[string]any
+			if meta.CaptureState && entityID != nil {
+				before, err = a.repo.Snapshot(r.Context(), meta.EntityName, *entityID)
+				if err != nil {
+					logger.Error(r.Context(), "failed to fetch audit snapshot before request", err)
+				}
+			}
+
 			rec := &statusRecorder{ResponseWriter: w}
 			next.ServeHTTP(rec, r)
 
@@ -85,11 +97,20 @@ func (a *Action) Middleware() func(http.Handler) http.Handler {
 			entry := Entry{
 				UserID:      userID,
 				Description: meta.Description,
-				Body:        normalizeBody(body),
 				Action:      meta.Action,
 				EntityName:  meta.EntityName,
-				EntityID:    extractEntityID(r, meta.EntityParam),
+				EntityID:    entityID,
 			}
+
+			var after map[string]any
+			if meta.CaptureState && entry.EntityID != nil {
+				after, err = a.repo.Snapshot(r.Context(), entry.EntityName, *entry.EntityID)
+				if err != nil {
+					logger.Error(r.Context(), "failed to fetch audit snapshot after request", err)
+				}
+			}
+
+			entry.Body = buildBody(body, before, after)
 
 			if err = a.repo.Create(r.Context(), entry); err != nil {
 				logger.Error(r.Context(), "failed to write audit log", err)
@@ -140,26 +161,85 @@ func readBody(r *http.Request) ([]byte, error) {
 	return body, nil
 }
 
-func normalizeBody(body []byte) *string {
+func buildBody(body []byte, before, after map[string]any) *string {
+	payload := map[string]any{}
+
+	if request := requestBodyValue(body); request != nil {
+		payload["request"] = request
+	}
+	if before != nil {
+		payload["before"] = before
+	}
+	if after != nil {
+		payload["after"] = after
+	}
+	if changes := buildChanges(before, after); len(changes) > 0 {
+		payload["changes"] = changes
+	}
+	if len(payload) == 0 {
+		return nil
+	}
+
+	raw, err := json.Marshal(payload)
+	if err != nil {
+		return nil
+	}
+
+	s := string(raw)
+	return &s
+}
+
+func requestBodyValue(body []byte) any {
 	trimmed := bytes.TrimSpace(body)
 	if len(trimmed) == 0 {
 		return nil
 	}
 
-	if json.Valid(trimmed) {
-		s := string(trimmed)
-		return &s
+	var value any
+	if err := json.Unmarshal(trimmed, &value); err == nil {
+		return value
 	}
 
-	payload, err := json.Marshal(map[string]string{
+	return map[string]string{
 		"raw_body": string(trimmed),
-	})
-	if err != nil {
+	}
+}
+
+func buildChanges(before, after map[string]any) map[string]map[string]any {
+	if before == nil && after == nil {
 		return nil
 	}
 
-	s := string(payload)
-	return &s
+	keys := map[string]struct{}{}
+	for key := range before {
+		keys[key] = struct{}{}
+	}
+	for key := range after {
+		keys[key] = struct{}{}
+	}
+
+	changes := make(map[string]map[string]any)
+	for key := range keys {
+		var beforeValue any
+		var afterValue any
+		if before != nil {
+			beforeValue = before[key]
+		}
+		if after != nil {
+			afterValue = after[key]
+		}
+
+		if reflect.DeepEqual(beforeValue, afterValue) {
+			continue
+		}
+
+		changes[key] = map[string]any{
+			"before": beforeValue,
+			"after":  afterValue,
+		}
+	}
+
+	return changes
 }
 
 func extractEntityID(r *http.Request, param string) *int64 {
@@ -168,11 +248,19 @@ func extractEntityID(r *http.Request, param string) *int64 {
 	}
 
 	raw := chi.URLParam(r, param)
-	if raw == "" {
+	if raw != "" {
+		id, err := strconv.ParseInt(raw, 10, 64)
+		if err == nil {
+			return &id
+		}
+	}
+
+	match := regexp.MustCompile(`/(\d+)`).FindStringSubmatch(r.URL.Path)
+	if len(match) != 2 {
 		return nil
 	}
 
-	id, err := strconv.ParseInt(raw, 10, 64)
+	id, err := strconv.ParseInt(match[1], 10, 64)
 	if err != nil {
 		return nil
 	}
@@ -198,10 +286,11 @@ var auditRoutes = map[routeKey]meta{
 		EntityName:  "admin",
 	},
 	{Method: http.MethodDelete, Path: "/admin/admins/{id}"}: {
-		Description: "Удаление администратора",
-		Action:      "Удаление администратора",
-		EntityName:  "admin",
-		EntityParam: "admin_id",
+		Description:  "Удаление администратора",
+		Action:       "Удаление администратора",
+		EntityName:   "admin",
+		EntityParam:  "admin_id",
+		CaptureState: true,
 	},
 	{Method: http.MethodPost, Path: "/admin/assistant"}: {
 		Description: "Создание ассистента",
@@ -209,22 +298,25 @@ var auditRoutes = map[routeKey]meta{
 		EntityName:  "assistant",
 	},
 	{Method: http.MethodDelete, Path: "/admin/assistant/{id}"}: {
-		Description: "Удаление ассистента",
-		Action:      "Удаление ассистента",
-		EntityName:  "assistant",
-		EntityParam: "assistant_id",
+		Description:  "Удаление ассистента",
+		Action:       "Удаление ассистента",
+		EntityName:   "assistant",
+		EntityParam:  "assistant_id",
+		CaptureState: true,
 	},
 	{Method: http.MethodPost, Path: "/admin/assistant/{id}/add_available_tg"}: {
-		Description: "Добавление доступных Telegram аккаунтов ассистенту",
-		Action:      "Добавление TG ассистенту",
-		EntityName:  "assistant",
-		EntityParam: "assistant_id",
+		Description:  "Добавление доступных Telegram аккаунтов ассистенту",
+		Action:       "Добавление TG ассистенту",
+		EntityName:   "assistant",
+		EntityParam:  "assistant_id",
+		CaptureState: true,
 	},
 	{Method: http.MethodPost, Path: "/admin/assistant/{id}/delete_available_tg"}: {
-		Description: "Удаление доступных Telegram аккаунтов ассистента",
-		Action:      "Удаление TG у ассистента",
-		EntityName:  "assistant",
-		EntityParam: "assistant_id",
+		Description:  "Удаление доступных Telegram аккаунтов ассистента",
+		Action:       "Удаление TG у ассистента",
+		EntityName:   "assistant",
+		EntityParam:  "assistant_id",
+		CaptureState: true,
 	},
 	{Method: http.MethodPost, Path: "/admin/tutors"}: {
 		Description: "Создание репетитора",
@@ -232,10 +324,11 @@ var auditRoutes = map[routeKey]meta{
 		EntityName:  "tutor",
 	},
 	{Method: http.MethodDelete, Path: "/admin/tutors/{id}"}: {
-		Description: "Удаление репетитора",
-		Action:      "Удаление репетитора",
-		EntityName:  "tutor",
-		EntityParam: "tutor_id",
+		Description:  "Удаление репетитора",
+		Action:       "Удаление репетитора",
+		EntityName:   "tutor",
+		EntityParam:  "tutor_id",
+		CaptureState: true,
 	},
 	{Method: http.MethodPost, Path: "/admin/tutors/trial_lesson"}: {
 		Description: "Проведение пробного занятия",
@@ -248,22 +341,25 @@ var auditRoutes = map[routeKey]meta{
 		EntityName:  "lesson",
 	},
 	{Method: http.MethodPost, Path: "/admin/tutors/{id}/archive"}: {
-		Description: "Архивация репетитора",
-		Action:      "Архивация репетитора",
-		EntityName:  "tutor",
-		EntityParam: "tutor_id",
+		Description:  "Архивация репетитора",
+		Action:       "Архивация репетитора",
+		EntityName:   "tutor",
+		EntityParam:  "tutor_id",
+		CaptureState: true,
 	},
 	{Method: http.MethodPost, Path: "/admin/tutors/{id}/unarchive"}: {
-		Description: "Разархивация репетитора",
-		Action:      "Разархивация репетитора",
-		EntityName:  "tutor",
-		EntityParam: "tutor_id",
+		Description:  "Разархивация репетитора",
+		Action:       "Разархивация репетитора",
+		EntityName:   "tutor",
+		EntityParam:  "tutor_id",
+		CaptureState: true,
 	},
 	{Method: http.MethodPost, Path: "/admin/tutors/{id}/update"}: {
-		Description: "Обновление репетитора",
-		Action:      "Обновление репетитора",
-		EntityName:  "tutor",
-		EntityParam: "tutor_id",
+		Description:  "Обновление репетитора",
+		Action:       "Обновление репетитора",
+		EntityName:   "tutor",
+		EntityParam:  "tutor_id",
+		CaptureState: true,
 	},
 	{Method: http.MethodPost, Path: "/admin/students/push_all_students"}: {
 		Description: "Массовая отправка уведомлений студентам",
@@ -286,34 +382,39 @@ var auditRoutes = map[routeKey]meta{
 		EntityName:  "student",
 	},
 	{Method: http.MethodDelete, Path: "/admin/students/{id}"}: {
-		Description: "Удаление студента",
-		Action:      "Удаление студента",
-		EntityName:  "student",
-		EntityParam: "student_id",
+		Description:  "Удаление студента",
+		Action:       "Удаление студента",
+		EntityName:   "student",
+		EntityParam:  "student_id",
+		CaptureState: true,
 	},
 	{Method: http.MethodPost, Path: "/admin/students/{id}"}: {
-		Description: "Обновление студента",
-		Action:      "Обновление студента",
-		EntityName:  "student",
-		EntityParam: "student_id",
+		Description:  "Обновление студента",
+		Action:       "Обновление студента",
+		EntityName:   "student",
+		EntityParam:  "student_id",
+		CaptureState: true,
 	},
 	{Method: http.MethodPost, Path: "/admin/students/{id}/wallet"}: {
-		Description: "Обновление кошелька студента",
-		Action:      "Обновление кошелька",
-		EntityName:  "wallet",
-		EntityParam: "student_id",
+		Description:  "Обновление кошелька студента",
+		Action:       "Обновление кошелька",
+		EntityName:   "wallet",
+		EntityParam:  "student_id",
+		CaptureState: true,
 	},
 	{Method: http.MethodPost, Path: "/admin/students/{id}/change_payment"}: {
-		Description: "Смена платёжной системы студента",
-		Action:      "Смена платёжной системы",
-		EntityName:  "student",
-		EntityParam: "student_id",
+		Description:  "Смена платёжной системы студента",
+		Action:       "Смена платёжной системы",
+		EntityName:   "student",
+		EntityParam:  "student_id",
+		CaptureState: true,
 	},
 	{Method: http.MethodPost, Path: "/admin/students/{id}/transactions/manual"}: {
-		Description: "Добавление ручной транзакции студенту",
-		Action:      "Добавление ручной транзакции",
-		EntityName:  "student",
-		EntityParam: "student_id",
+		Description:  "Добавление ручной транзакции студенту",
+		Action:       "Добавление ручной транзакции",
+		EntityName:   "student",
+		EntityParam:  "student_id",
+		CaptureState: true,
 	},
 	{Method: http.MethodPost, Path: "/admin/students/{id}/notifications/push"}: {
 		Description: "Отправка уведомления студенту",
@@ -322,28 +423,32 @@ var auditRoutes = map[routeKey]meta{
 		EntityParam: "student_id",
 	},
 	{Method: http.MethodPost, Path: "/admin/students/{id}/archive"}: {
-		Description: "Архивация студента",
-		Action:      "Архивация студента",
-		EntityName:  "student",
-		EntityParam: "student_id",
+		Description:  "Архивация студента",
+		Action:       "Архивация студента",
+		EntityName:   "student",
+		EntityParam:  "student_id",
+		CaptureState: true,
 	},
 	{Method: http.MethodPost, Path: "/admin/students/{id}/unarchive"}: {
-		Description: "Разархивация студента",
-		Action:      "Разархивация студента",
-		EntityName:  "student",
-		EntityParam: "student_id",
+		Description:  "Разархивация студента",
+		Action:       "Разархивация студента",
+		EntityName:   "student",
+		EntityParam:  "student_id",
+		CaptureState: true,
 	},
 	{Method: http.MethodDelete, Path: "/admin/lessons/{id}"}: {
-		Description: "Удаление урока",
-		Action:      "Удаление урока",
-		EntityName:  "lesson",
-		EntityParam: "lesson_id",
+		Description:  "Удаление урока",
+		Action:       "Удаление урока",
+		EntityName:   "lesson",
+		EntityParam:  "lesson_id",
+		CaptureState: true,
 	},
 	{Method: http.MethodPost, Path: "/admin/lessons/{id}"}: {
-		Description: "Обновление урока",
-		Action:      "Обновление урока",
-		EntityName:  "lesson",
-		EntityParam: "lesson_id",
+		Description:  "Обновление урока",
+		Action:       "Обновление урока",
+		EntityName:   "lesson",
+		EntityParam:  "lesson_id",
+		CaptureState: true,
 	},
 	{Method: http.MethodPost, Path: "/admin/students/{id}/comments"}: {
 		Description: "Создание комментария к студенту",

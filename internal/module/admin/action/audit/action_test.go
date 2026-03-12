@@ -2,6 +2,7 @@ package audit
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
@@ -14,8 +15,9 @@ import (
 )
 
 type spyRepo struct {
-	entries []Entry
-	err     error
+	entries   []Entry
+	err       error
+	snapshots map[string]map[int64]map[string]any
 }
 
 func (s *spyRepo) Create(_ context.Context, entry Entry) error {
@@ -23,8 +25,28 @@ func (s *spyRepo) Create(_ context.Context, entry Entry) error {
 	return s.err
 }
 
+func (s *spyRepo) Snapshot(_ context.Context, entityName string, entityID int64) (map[string]any, error) {
+	if s.snapshots == nil {
+		return nil, nil
+	}
+	entitySnapshots := s.snapshots[entityName]
+	if entitySnapshots == nil {
+		return nil, nil
+	}
+	return entitySnapshots[entityID], nil
+}
+
 func TestMiddleware_LogsSuccessfulMappedRequest(t *testing.T) {
-	repo := &spyRepo{}
+	repo := &spyRepo{
+		snapshots: map[string]map[int64]map[string]any{
+			"student": {
+				42: {
+					"id":         float64(42),
+					"is_archive": false,
+				},
+			},
+		},
+	}
 	action := &Action{repo: repo}
 
 	var handlerBody string
@@ -37,6 +59,10 @@ func TestMiddleware_LogsSuccessfulMappedRequest(t *testing.T) {
 			t.Fatalf("read body in handler: %v", err)
 		}
 		handlerBody = string(body)
+		repo.snapshots["student"][42] = map[string]any{
+			"id":         float64(42),
+			"is_archive": true,
+		}
 		w.WriteHeader(http.StatusNoContent)
 	})
 
@@ -72,8 +98,33 @@ func TestMiddleware_LogsSuccessfulMappedRequest(t *testing.T) {
 	if entry.EntityID == nil || *entry.EntityID != 42 {
 		t.Fatalf("unexpected entity id: %#v", entry.EntityID)
 	}
-	if entry.Body == nil || *entry.Body != `{"source":"ui"}` {
-		t.Fatalf("unexpected body: %#v", entry.Body)
+	if entry.Body == nil {
+		t.Fatalf("expected audit body")
+	}
+
+	var bodyPayload map[string]any
+	if err := json.Unmarshal([]byte(*entry.Body), &bodyPayload); err != nil {
+		t.Fatalf("unmarshal body: %v", err)
+	}
+	if _, ok := bodyPayload["request"]; !ok {
+		t.Fatalf("expected request in body: %#v", bodyPayload)
+	}
+	if _, ok := bodyPayload["before"]; !ok {
+		t.Fatalf("expected before in body: %#v", bodyPayload)
+	}
+	if _, ok := bodyPayload["after"]; !ok {
+		t.Fatalf("expected after in body: %#v", bodyPayload)
+	}
+	changes, ok := bodyPayload["changes"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected changes in body: %#v", bodyPayload)
+	}
+	isArchiveChange, ok := changes["is_archive"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected is_archive change: %#v", changes)
+	}
+	if isArchiveChange["before"] != false || isArchiveChange["after"] != true {
+		t.Fatalf("unexpected change payload: %#v", isArchiveChange)
 	}
 }
 
