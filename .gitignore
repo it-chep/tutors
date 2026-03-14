@@ -4,3 +4,6 @@
 /.idea
 *.sh
 *.md
+/scripts
+/dumps
+*.md

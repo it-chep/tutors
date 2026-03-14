@@ -130,3 +130,150 @@ Content-Type: application/json
 
 ###
 # Админы
+
+###
+# Новые эндпоинты из коммита 042c945
+@host = http://localhost:8080
+@accessToken = put-access-token-here
+@assistantId = 1
+@tutorId = 1
+@contractPath = /tmp/contract.pdf
+@receiptPath = /tmp/receipt.pdf
+
+### Обновить permissions ассистента
+POST {{host}}/admin/assistant/{{assistantId}}/permissions
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "can_view_contracts": true,
+  "can_penalize_assistants": [1, 2]
+}
+
+### Получить штрафы и премии ассистента
+POST {{host}}/admin/assistant/{{assistantId}}/penalties-bonuses
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "from": "2026-03-01",
+  "to": "2026-03-31"
+}
+
+### Создать штраф или премию ассистенту
+POST {{host}}/admin/assistant/{{assistantId}}/penalties-bonuses
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "type": "bonus",
+  "amount": 1500,
+  "comment": "Премия за закрытие месяца"
+}
+
+### Получить начисления ассистента
+POST {{host}}/admin/assistant/{{assistantId}}/accruals
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "from": "2026-03-01",
+  "to": "2026-03-31"
+}
+
+### Скачать все договоры репетиторов
+GET {{host}}/admin/tutors/contracts/download_all
+Authorization: Bearer {{accessToken}}
+
+### Загрузить договор репетитора
+POST {{host}}/admin/tutors/{{tutorId}}/contract
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+Authorization: Bearer {{accessToken}}
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="contract.pdf"
+Content-Type: application/pdf
+
+< {{contractPath}}
+--WebAppBoundary--
+
+### Скачать договор репетитора
+GET {{host}}/admin/tutors/{{tutorId}}/contract
+Authorization: Bearer {{accessToken}}
+
+### Удалить договор репетитора
+DELETE {{host}}/admin/tutors/{{tutorId}}/contract
+Authorization: Bearer {{accessToken}}
+
+### Получить штрафы и премии репетитора
+POST {{host}}/admin/tutors/{{tutorId}}/penalties-bonuses
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "from": "2026-03-01",
+  "to": "2026-03-31"
+}
+
+### Создать штраф или премию репетитору
+POST {{host}}/admin/tutors/{{tutorId}}/penalties-bonuses
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "type": "penalty",
+  "amount": 1000,
+  "comment": "Штраф за перенос занятий"
+}
+
+### Получить начисления репетитора
+POST {{host}}/admin/tutors/{{tutorId}}/accruals
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "from": "2026-03-01",
+  "to": "2026-03-31"
+}
+
+### Создать выплату репетитору
+POST {{host}}/admin/tutors/{{tutorId}}/payouts
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "amount": 25000,
+  "comment": "Выплата за март"
+}
+
+### Получить список чеков репетитора
+POST {{host}}/admin/tutors/{{tutorId}}/receipts
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "from": "2026-03-01",
+  "to": "2026-03-31"
+}
+
+### Скачать все чеки репетиторов за период
+POST {{host}}/admin/tutors/receipts/download_all
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "from": "2026-03-01",
+  "to": "2026-03-31"
+}
+
+### Загрузить чек со стороны репетитора
+POST {{host}}/tutors/save_receipt
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+Authorization: Bearer {{accessToken}}
+
+--WebAppBoundary
+Content-Disposition: form-data; name="receipt"; filename="receipt.pdf"
+Content-Type: application/pdf
+
+< {{receiptPath}}
+--WebAppBoundary--
