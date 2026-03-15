@@ -3,3 +3,6 @@
 /bin
 /.idea
 *.sh
+*.md
+/scripts
+/dumps

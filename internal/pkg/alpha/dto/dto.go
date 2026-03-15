@@ -39,7 +39,7 @@ func NewOrderRequest(paymentID int64, orderNumber string, amount int) *OrderRequ
 		orderNumber: orderNumber,
 		amount:      amount,
 		currency:    rub,
-		returnURL:   fmt.Sprintf("https://t.me/Payments_A_bot"),
+		returnURL:   fmt.Sprintf("https://100rep.ru/spasibo"),
 		description: "Оплата консультаций репетитора",
 		language:    ru,
 		paymentID:   paymentID,

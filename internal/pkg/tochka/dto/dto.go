@@ -35,7 +35,7 @@ func NewInitRequest(paymentID int64, amount int64) *InitRequest {
 			Amount:      amount,
 			Purpose:     "Оплата консультаций репетитора",
 			PaymentMode: []string{"card", "sbp", "tinkoff"},
-			RedirectURL: "https://t.me/Payments_A_bot",
+			RedirectURL: "https://100rep.ru/spasibo",
 			SaveCard:    true,
 			Ttl:         20,
 			paymentID:   paymentID,
