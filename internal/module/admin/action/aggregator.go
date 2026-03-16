@@ -2,6 +2,7 @@ package action
 
 import (
 	"github.com/it-chep/tutors.git/internal/config"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/accrual"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/create_admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/delete_admin"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/admin/get_admin_by_id"
@@ -10,8 +11,10 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/assistant/delete_available_tg"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/assistant/get_assistance"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/assistant/get_available_tg"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/assistant/permissions"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/audit"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/auth"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/contract"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_admin_available_payments"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_all_finance_by_tgs"
@@ -21,6 +24,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/get_tg_admins_usernames"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/lessons/delete_lesson"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/lessons/update_lesson"
+	"github.com/it-chep/tutors.git/internal/module/admin/action/payout"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/add_manual_transaction"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/archivate_student"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/archive_filter"
@@ -62,6 +66,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/tutor_by_id"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/unarchivate_tutor"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/update_tutor"
+	"github.com/it-chep/tutors.git/internal/pkg/storage"
 	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
 	"github.com/it-chep/tutors.git/pkg/smtp"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -152,9 +157,21 @@ type Aggregator struct {
 	DeleteAvailableTg        *delete_available_tg.Action
 	GetAssistantAvailableTGs *get_available_tg.Action
 	GetAssistance            *get_assistance.Action
+	AssistantPermissions     *permissions.Action
+
+	// Начисления и документы
+	Accruals  *accrual.Action
+	Contracts *contract.Action
+	Payouts   *payout.Action
 }
 
-func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtConfig, bot *tg_bot.Bot) *Aggregator {
+func NewAggregator(
+	pool *pgxpool.Pool,
+	smtp *smtp.ClientSmtp,
+	jwtCfg config.JwtConfig,
+	bot *tg_bot.Bot,
+	objectStorage storage.Storage,
+) *Aggregator {
 	return &Aggregator{
 		// Репетитор
 		CreateTutor:        create_tutor.New(pool),
@@ -217,7 +234,7 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 		GetAllLessons: get_all_lessons.New(pool),
 
 		// AUTH
-		Auth: auth.NewAggregator(pool, smtp, config),
+		Auth: auth.NewAggregator(pool, smtp, jwtCfg),
 
 		// Audit
 		Audit: audit.New(pool),
@@ -240,5 +257,10 @@ func NewAggregator(pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config config.JwtC
 		DeleteAvailableTg:        delete_available_tg.New(pool),
 		GetAssistantAvailableTGs: get_available_tg.New(pool),
 		GetAssistance:            get_assistance.New(pool),
+		AssistantPermissions:     permissions.New(pool),
+
+		Accruals:  accrual.New(pool),
+		Contracts: contract.New(pool, objectStorage),
+		Payouts:   payout.New(pool, objectStorage),
 	}
 }

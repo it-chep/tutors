@@ -91,6 +91,8 @@ var snapshotQueries = map[string]string{
 			'tg', u.tg,
 			'phone', u.phone,
 			'admin_id', u.admin_id,
+			'can_view_contracts', coalesce(at.can_view_contracts, false),
+			'can_penalize_assistant_ids', coalesce(at.can_penalize_assistant_ids, '{}'::bigint[]),
 			'available_tg_ids', at.available_tg_ids,
 			'available_tg_names', (
 				select array_agg(tau.name order by tau.name)

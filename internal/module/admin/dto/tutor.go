@@ -19,6 +19,7 @@ type Tutor struct {
 	HasBalanceNegative bool
 	HasOnlyTrial       bool
 	HasNewBie          bool
+	IsFailer           bool
 
 	CreatedAt         time.Time
 	TgAdminUsernameID int64

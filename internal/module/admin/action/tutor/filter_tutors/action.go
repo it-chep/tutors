@@ -46,6 +46,16 @@ func (a *Action) Do(ctx context.Context, filter dto.FilterRequest) ([]indto.Tuto
 		return nil, err
 	}
 
+	failerIDs, err := a.dal.GetFailerTutorIDs(ctx, tutorsIDs)
+	if err != nil {
+		return nil, err
+	}
+	for _, tutorID := range failerIDs {
+		tutor := tutorsMap[tutorID]
+		tutor.IsFailer = true
+		tutorsMap[tutorID] = tutor
+	}
+
 	for _, student := range students {
 		isNewBie := student.TransactionsCount == 0 && !student.IsFinishedTrial
 		isOnlyTrialFinished := student.IsFinishedTrial && student.TransactionsCount == 0

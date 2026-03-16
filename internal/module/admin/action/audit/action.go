@@ -311,12 +311,25 @@ var auditRoutes = map[routeKey]meta{
 		EntityParam:  "assistant_id",
 		CaptureState: true,
 	},
+	{Method: http.MethodPost, Path: "/admin/assistant/{id}/permissions"}: {
+		Description:  "Обновление прав ассистента",
+		Action:       "Обновление прав ассистента",
+		EntityName:   "assistant",
+		EntityParam:  "assistant_id",
+		CaptureState: true,
+	},
 	{Method: http.MethodPost, Path: "/admin/assistant/{id}/delete_available_tg"}: {
 		Description:  "Удаление доступных Telegram аккаунтов ассистента",
 		Action:       "Удаление TG у ассистента",
 		EntityName:   "assistant",
 		EntityParam:  "assistant_id",
 		CaptureState: true,
+	},
+	{Method: http.MethodPost, Path: "/admin/assistant/{id}/penalties-bonuses"}: {
+		Description: "Начисление штрафа или премии ассистенту",
+		Action:      "Начисление ассистенту",
+		EntityName:  "assistant",
+		EntityParam: "assistant_id",
 	},
 	{Method: http.MethodPost, Path: "/admin/tutors"}: {
 		Description: "Создание репетитора",
@@ -360,6 +373,30 @@ var auditRoutes = map[routeKey]meta{
 		EntityName:   "tutor",
 		EntityParam:  "tutor_id",
 		CaptureState: true,
+	},
+	{Method: http.MethodPost, Path: "/admin/tutors/{id}/contract"}: {
+		Description: "Загрузка договора репетитора",
+		Action:      "Загрузка договора",
+		EntityName:  "tutor",
+		EntityParam: "tutor_id",
+	},
+	{Method: http.MethodDelete, Path: "/admin/tutors/{id}/contract"}: {
+		Description: "Удаление договора репетитора",
+		Action:      "Удаление договора",
+		EntityName:  "tutor",
+		EntityParam: "tutor_id",
+	},
+	{Method: http.MethodPost, Path: "/admin/tutors/{id}/penalties-bonuses"}: {
+		Description: "Начисление штрафа или премии репетитору",
+		Action:      "Начисление репетитору",
+		EntityName:  "tutor",
+		EntityParam: "tutor_id",
+	},
+	{Method: http.MethodPost, Path: "/admin/tutors/{id}/payouts"}: {
+		Description: "Создание выплаты репетитору",
+		Action:      "Создание выплаты",
+		EntityName:  "tutor",
+		EntityParam: "tutor_id",
 	},
 	{Method: http.MethodPost, Path: "/admin/students/push_all_students"}: {
 		Description: "Массовая отправка уведомлений студентам",

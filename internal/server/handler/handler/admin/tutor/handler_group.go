@@ -2,9 +2,11 @@ package tutor
 
 import (
 	"github.com/it-chep/tutors.git/internal/module/admin"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/accruals"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/archive_tutor"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/conduct_lesson"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/conduct_trial"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/contract"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/create_tutor"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/delete_tutor"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/filter_tutors"
@@ -12,10 +14,14 @@ import (
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/get_lessons"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/get_tutor_finance"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/get_tutors"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/payouts"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/penalties_bonuses"
+	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/receipts"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/search_tutor"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/tutor_by_id"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/unarchivate_tutor"
 	"github.com/it-chep/tutors.git/internal/server/handler/handler/admin/tutor/update_tutor"
+	save_receipt "github.com/it-chep/tutors.git/internal/server/handler/handler/tutor/save_receipt"
 )
 
 type HandlerGroup struct {
@@ -37,6 +43,12 @@ type HandlerGroup struct {
 	UpdateTutor      *update_tutor.Handler
 	FilterTutors     *filter_tutors.Handler
 	GetArchive       *tutor_get_archive.Handler
+	GetAccruals      *accruals.Handler
+	PenaltiesBonuses *penalties_bonuses.Handler
+	Contract         *contract.Handler
+	Payouts          *payouts.Handler
+	Receipts         *receipts.Handler
+	SaveReceipt      *save_receipt.Handler
 }
 
 func NewGroup(adminModule *admin.Module) *HandlerGroup {
@@ -59,5 +71,11 @@ func NewGroup(adminModule *admin.Module) *HandlerGroup {
 		UpdateTutor:      update_tutor.NewHandler(adminModule),
 		FilterTutors:     filter_tutors.NewHandler(adminModule),
 		GetArchive:       tutor_get_archive.NewHandler(adminModule),
+		GetAccruals:      accruals.NewHandler(adminModule),
+		PenaltiesBonuses: penalties_bonuses.NewHandler(adminModule),
+		Contract:         contract.NewHandler(adminModule),
+		Payouts:          payouts.NewHandler(adminModule),
+		Receipts:         receipts.NewHandler(adminModule),
+		SaveReceipt:      save_receipt.NewHandler(adminModule),
 	}
 }

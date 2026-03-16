@@ -8,6 +8,7 @@ type Tutor struct {
 	HasBalanceNegative bool   `json:"has_balance_negative"`
 	HasOnlyTrial       bool   `json:"has_only_trial"`
 	HasNewBie          bool   `json:"has_newbie"`
+	IsFailer           bool   `json:"is_failer"`
 	TgAdminUsername    string `json:"tg_admin_username"`
 }
 

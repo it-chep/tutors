@@ -8,12 +8,14 @@ import (
 type Request struct {
 	AdminsUsernamesIDs []int64 `json:"tg_admins_usernames_ids"`
 	IsArchived         bool    `json:"is_archive"`
+	WithoutReceipt     bool    `json:"without_receipt"`
 }
 
 func (r Request) ToFilterRequest() dto.FilterRequest {
 	return dto.FilterRequest{
-		TgUsernameIDs: r.AdminsUsernamesIDs,
-		IsArchive:     r.IsArchived,
+		TgUsernameIDs:  r.AdminsUsernamesIDs,
+		IsArchive:      r.IsArchived,
+		WithoutReceipt: r.WithoutReceipt,
 	}
 }
 

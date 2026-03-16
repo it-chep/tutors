@@ -13,6 +13,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/module/bot/dal"
 	alfa "github.com/it-chep/tutors.git/internal/pkg/alpha"
 	"github.com/it-chep/tutors.git/internal/pkg/alpha/dto"
+	objectStorage "github.com/it-chep/tutors.git/internal/pkg/storage"
 	"github.com/it-chep/tutors.git/internal/pkg/tbank"
 	tbankDto "github.com/it-chep/tutors.git/internal/pkg/tbank/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
@@ -60,6 +61,16 @@ func (a *App) initSmtp(_ context.Context) *App {
 	return a
 }
 
+func (a *App) initStorage(_ context.Context) *App {
+	st, err := objectStorage.NewS3(a.config.S3Config)
+	if err != nil {
+		log.Fatalf("[FATAL] failed to init s3 storage: %s", err)
+	}
+
+	a.storage = st
+	return a
+}
+
 func (a *App) initPaymentGateways(_ context.Context) *App {
 	paymentGates := &dtoInternal.PaymentGateways{
 		Alfa: alfa.NewClient(dto.Credentials{
@@ -96,7 +107,7 @@ func (a *App) initTgBot(_ context.Context) *App {
 func (a *App) initModules(ctx context.Context) *App {
 	a.modules = Modules{
 		Bot:   bot.New(a.pool, a.config, a.bot, a.paymentGateways),
-		Admin: admin.New(a.pool, a.smtp, a.config, a.bot, a.paymentGateways),
+		Admin: admin.New(a.pool, a.smtp, a.config, a.bot, a.paymentGateways, a.storage),
 	}
 
 	a.workers = append(a.workers, worker.NewWorker(ctx, a.modules.Admin.Checker.Start, 1*time.Minute, 1))

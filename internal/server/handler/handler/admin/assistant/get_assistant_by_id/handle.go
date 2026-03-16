@@ -3,6 +3,7 @@ package get_assistant_by_id
 import (
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
+	permissions "github.com/it-chep/tutors.git/internal/module/admin/action/assistant/permissions"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/samber/lo"
 	"net/http"
@@ -43,7 +44,12 @@ func (h *Handler) Handle() http.HandlerFunc {
 			http.Error(w, "failed to get assistant data: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-		response := h.prepareResponse(baseData, tgs)
+		permissions, err := h.adminModule.Actions.AssistantPermissions.Get(ctx, assistantID)
+		if err != nil {
+			http.Error(w, "failed to get assistant permissions: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		response := h.prepareResponse(baseData, tgs, permissions)
 
 		w.Header().Set("Content-Type", "application/json")
 		if err = json.NewEncoder(w).Encode(response); err != nil {
@@ -53,7 +59,7 @@ func (h *Handler) Handle() http.HandlerFunc {
 	}
 }
 
-func (h *Handler) prepareResponse(admin dto.User, tgs dto.TgAdminUsernames) Response {
+func (h *Handler) prepareResponse(admin dto.User, tgs dto.TgAdminUsernames, permissions permissions.Permissions) Response {
 	return Response{
 		Assistant: Assistant{
 			ID:       admin.ID,
@@ -66,6 +72,10 @@ func (h *Handler) prepareResponse(admin dto.User, tgs dto.TgAdminUsernames) Resp
 					Name: item.Name,
 				}
 			}),
+			Permissions: Permissions{
+				CanViewContracts:      permissions.CanViewContracts,
+				CanPenalizeAssistants: permissions.CanPenalizeAssistants,
+			},
 			CreatedAt: admin.CreatedAt.Format(time.DateTime),
 		},
 	}
