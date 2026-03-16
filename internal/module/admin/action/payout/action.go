@@ -2,10 +2,7 @@ package payout
 
 import (
 	"context"
-	"fmt"
 	"io"
-	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -24,7 +21,6 @@ import (
 type Action struct {
 	dal     *dal.Repository
 	storage storage.Storage
-	bucket  string
 }
 
 type CreateRequest struct {
@@ -57,11 +53,10 @@ type DownloadedReceipt struct {
 	Body io.ReadCloser
 }
 
-func New(pool *pgxpool.Pool, objectStorage storage.Storage, bucket string) *Action {
+func New(pool *pgxpool.Pool, objectStorage storage.Storage) *Action {
 	return &Action{
 		dal:     dal.NewRepository(wrapper.NewDatabase(pool)),
 		storage: objectStorage,
-		bucket:  bucket,
 	}
 }
 
@@ -161,8 +156,10 @@ func (a *Action) SaveReceipt(ctx context.Context, req ReceiptUploadRequest) (uui
 		contentType = "application/octet-stream"
 	}
 
-	key := buildReceiptObjectKey(tutorID, payout.ID, req.FileName)
-	if err = a.storage.Upload(ctx, a.bucket, key, contentType, req.Body); err != nil {
+	adminID := userCtx.AdminIDFromContext(ctx)
+
+	key, err := a.storage.UploadReceipt(ctx, adminID, tutorID, req.FileName, contentType, req.Body)
+	if err != nil {
 		return uuid.Nil, err
 	}
 
@@ -185,7 +182,7 @@ func (a *Action) DownloadReceipt(ctx context.Context, payoutID uuid.UUID) (Downl
 		return DownloadedReceipt{}, err
 	}
 
-	downloaded, err := a.storage.Download(ctx, a.bucket, payout.ReceiptFileKey)
+	downloaded, err := a.storage.DownloadReceipt(ctx, payout.ReceiptFileKey)
 	if err != nil {
 		return DownloadedReceipt{}, err
 	}
@@ -257,16 +254,4 @@ func toDomain(item dal.Payout) Payout {
 		ReceiptContentType: item.ReceiptContentType,
 		ReceiptUploadedAt:  item.ReceiptUploadedAt,
 	}
-}
-
-func buildReceiptObjectKey(tutorID int64, payoutID uuid.UUID, fileName string) string {
-	safeName := strings.TrimSpace(filepath.Base(fileName))
-	if safeName == "." || safeName == "/" || safeName == "" {
-		safeName = "receipt"
-	}
-
-	replacer := strings.NewReplacer(" ", "_", "/", "_", "\\", "_", ":", "_")
-	safeName = replacer.Replace(safeName)
-
-	return fmt.Sprintf("receipts/%d/%s_%s", tutorID, payoutID.String(), safeName)
 }

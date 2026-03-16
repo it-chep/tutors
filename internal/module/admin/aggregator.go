@@ -32,7 +32,7 @@ func New(
 	pool *pgxpool.Pool, smtp *smtp.ClientSmtp, config *config.Config,
 	bot *tg_bot.Bot, gateways *dtoInternal.PaymentGateways, objectStorage storage.Storage,
 ) *Module {
-	actions := action.NewAggregator(pool, smtp, config.JwtConfig, bot, objectStorage, config.S3Config)
+	actions := action.NewAggregator(pool, smtp, config.JwtConfig, bot, objectStorage)
 	checker := order_checker.NewTransactionChecker(job_dal.NewRepository(pool), gateways, config.PaymentConfig.PaymentsByAdmin)
 	return &Module{
 		Actions:   actions,

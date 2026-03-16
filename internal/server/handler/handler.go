@@ -126,6 +126,7 @@ func (h *Handler) setupRoutes(cfg Config) {
 			r.Post("/{tutor_id}/finance", h.adminAgg.Tutors.GetTutorFinance.Handle())    // POST /admin/tutors/{id}/finance
 			r.Post("/trial_lesson", h.adminAgg.Tutors.ConductTrial.Handle())             // POST /admin/tutors/trial_lesson
 			r.Post("/conduct_lesson", h.adminAgg.Tutors.ConductLesson.Handle())          // POST /admin/tutors/conduct_lesson
+			r.Post("/save_receipt", h.adminAgg.Tutors.SaveReceipt.Handle())              // POST /tutors/save_receipt
 			r.Post("/{tutor_id}/lessons", h.adminAgg.Tutors.GetLessons.Handle())         // POST /admin/tutors/{id}/lessons
 			r.Post("/{tutor_id}/archive", h.adminAgg.Tutors.ArchivateTutor.Handle())     // POST /admin/tutors/{id}/archive
 			r.Post("/{tutor_id}/unarchive", h.adminAgg.Tutors.UnArchivateTutor.Handle()) // POST /admin/tutors/{id}/unarchive
@@ -177,11 +178,6 @@ func (h *Handler) setupRoutes(cfg Config) {
 		r.Post("/finance_by_tgs", h.adminAgg.GetAllFinanceByTGs.Handle()) // POST /admin/finance_by_tgs
 		r.Post("/transactions", h.adminAgg.GetAllTransactions.Handle())   // POST /admin/transactions
 		r.Get("/payments", h.adminAgg.GetAdminPayments.Handle())          // POST /admin/payments
-	})
-
-	h.router.Route("/tutors", func(r chi.Router) {
-		r.Use(h.adminAgg.Auth.CheckPathPermission.AuthMiddleware())
-		r.Post("/save_receipt", h.adminAgg.Tutors.SaveReceipt.Handle()) // POST /tutors/save_receipt
 	})
 
 	h.router.Post("/webhook/alpha", h.adminAgg.AlphaHook.Handle())      // POST /alpha/hook

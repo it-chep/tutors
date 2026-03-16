@@ -2,10 +2,7 @@ package contract
 
 import (
 	"context"
-	"fmt"
 	"io"
-	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/it-chep/tutors.git/internal/module/admin/action/contract/dal"
@@ -20,7 +17,6 @@ import (
 type Action struct {
 	dal     *dal.Repository
 	storage storage.Storage
-	bucket  string
 }
 
 type UploadRequest struct {
@@ -43,11 +39,10 @@ type DownloadedContract struct {
 	Body io.ReadCloser
 }
 
-func New(pool *pgxpool.Pool, objectStorage storage.Storage, bucket string) *Action {
+func New(pool *pgxpool.Pool, objectStorage storage.Storage) *Action {
 	return &Action{
 		dal:     dal.NewRepository(pool),
 		storage: objectStorage,
-		bucket:  bucket,
 	}
 }
 
@@ -67,8 +62,10 @@ func (a *Action) Upload(ctx context.Context, tutorID int64, req UploadRequest) (
 		contentType = "application/octet-stream"
 	}
 
-	key := buildObjectKey("contracts", tutorID, req.FileName)
-	if err := a.storage.Upload(ctx, a.bucket, key, contentType, req.Body); err != nil {
+	adminID := userCtx.AdminIDFromContext(ctx)
+
+	key, err := a.storage.UploadContract(ctx, adminID, tutorID, req.FileName, contentType, req.Body)
+	if err != nil {
 		return Contract{}, err
 	}
 
@@ -95,7 +92,7 @@ func (a *Action) Get(ctx context.Context, tutorID int64) (DownloadedContract, er
 		return DownloadedContract{}, err
 	}
 
-	downloaded, err := a.storage.Download(ctx, a.bucket, contract.FileKey)
+	downloaded, err := a.storage.DownloadContract(ctx, contract.FileKey)
 	if err != nil {
 		return DownloadedContract{}, err
 	}
@@ -125,7 +122,7 @@ func (a *Action) Delete(ctx context.Context, tutorID int64) error {
 		return err
 	}
 
-	if err = a.storage.Delete(ctx, a.bucket, contract.FileKey); err != nil {
+	if err = a.storage.DeleteContract(ctx, contract.FileKey); err != nil {
 		return err
 	}
 
@@ -147,7 +144,7 @@ func (a *Action) ListVisible(ctx context.Context) ([]Contract, error) {
 }
 
 func (a *Action) DownloadByKey(ctx context.Context, key string) (*storage.DownloadedObject, error) {
-	return a.storage.Download(ctx, a.bucket, key)
+	return a.storage.DownloadContract(ctx, key)
 }
 
 func (a *Action) ensureReadAccess(ctx context.Context, tutorID int64) error {
@@ -233,18 +230,6 @@ func toDomain(contract dal.Contract) Contract {
 		ContentType: contract.ContentType,
 		CreatedAt:   contract.CreatedAt,
 	}
-}
-
-func buildObjectKey(prefix string, targetID int64, fileName string) string {
-	safeName := strings.TrimSpace(filepath.Base(fileName))
-	if safeName == "." || safeName == "/" || safeName == "" {
-		safeName = "file"
-	}
-
-	replacer := strings.NewReplacer(" ", "_", "/", "_", "\\", "_", ":", "_")
-	safeName = replacer.Replace(safeName)
-
-	return fmt.Sprintf("%s/%d/%d_%s", prefix, targetID, time.Now().UTC().UnixNano(), safeName)
 }
 
 func IsNotFound(err error) bool {

@@ -171,7 +171,6 @@ func NewAggregator(
 	jwtCfg config.JwtConfig,
 	bot *tg_bot.Bot,
 	objectStorage storage.Storage,
-	s3Cfg config.S3Config,
 ) *Aggregator {
 	return &Aggregator{
 		// Репетитор
@@ -261,7 +260,7 @@ func NewAggregator(
 		AssistantPermissions:     permissions.New(pool),
 
 		Accruals:  accrual.New(pool),
-		Contracts: contract.New(pool, objectStorage, s3Cfg.ContractsBucket),
-		Payouts:   payout.New(pool, objectStorage, s3Cfg.ReceiptsBucket),
+		Contracts: contract.New(pool, objectStorage),
+		Payouts:   payout.New(pool, objectStorage),
 	}
 }

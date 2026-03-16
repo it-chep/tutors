@@ -4,18 +4,21 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/it-chep/tutors.git/internal/config"
 )
 
 type s3Storage struct {
-	client *s3.Client
+	client          *s3.Client
+	bucketContracts string
+	bucketReceipts  string
 }
 
 func NewS3(cfg config.S3Config) (Storage, error) {
@@ -45,21 +48,59 @@ func NewS3(cfg config.S3Config) (Storage, error) {
 		o.UsePathStyle = true
 	})
 
-	return &s3Storage{client: client}, nil
+	return &s3Storage{
+		client:          client,
+		bucketContracts: cfg.ContractsBucket,
+		bucketReceipts:  cfg.ReceiptsBucket,
+	}, nil
 }
 
-func (s *s3Storage) Upload(ctx context.Context, bucket, key, contentType string, body io.Reader) error {
+func (s *s3Storage) UploadContract(ctx context.Context, adminID, tutorID int64, fileName, contentType string, body io.Reader) (string, error) {
+	key := s.buildObjectKey(adminID, tutorID, fileName)
+	if err := s.upload(ctx, s.bucketContracts, key, contentType, body); err != nil {
+		return "", err
+	}
+
+	return key, nil
+}
+
+func (s *s3Storage) DownloadContract(ctx context.Context, key string) (*DownloadedObject, error) {
+	return s.download(ctx, s.bucketContracts, key)
+}
+
+func (s *s3Storage) DeleteContract(ctx context.Context, key string) error {
+	return s.delete(ctx, s.bucketContracts, key)
+}
+
+func (s *s3Storage) UploadReceipt(ctx context.Context, adminID, tutorID int64, fileName, contentType string, body io.Reader) (string, error) {
+	key := s.buildObjectKey(adminID, tutorID, fileName)
+	if err := s.upload(ctx, s.bucketReceipts, key, contentType, body); err != nil {
+		return "", err
+	}
+
+	return key, nil
+}
+
+func (s *s3Storage) DownloadReceipt(ctx context.Context, key string) (*DownloadedObject, error) {
+	return s.download(ctx, s.bucketReceipts, key)
+}
+
+func (s *s3Storage) upload(ctx context.Context, bucket, key, contentType string, body io.Reader) error {
 	_, err := s.client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:      aws.String(bucket),
 		Key:         aws.String(key),
 		Body:        body,
 		ContentType: aws.String(contentType),
-		ACL:         types.ObjectCannedACLPrivate,
+		Metadata: map[string]string{
+			"uploaded_at": time.Now().Format(time.RFC3339),
+			"origin_name": "",
+		},
 	})
+
 	return err
 }
 
-func (s *s3Storage) Download(ctx context.Context, bucket, key string) (*DownloadedObject, error) {
+func (s *s3Storage) download(ctx context.Context, bucket, key string) (*DownloadedObject, error) {
 	out, err := s.client.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
@@ -74,10 +115,22 @@ func (s *s3Storage) Download(ctx context.Context, bucket, key string) (*Download
 	}, nil
 }
 
-func (s *s3Storage) Delete(ctx context.Context, bucket, key string) error {
+func (s *s3Storage) delete(ctx context.Context, bucket, key string) error {
 	_, err := s.client.DeleteObject(ctx, &s3.DeleteObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 	})
 	return err
+}
+
+func (s *s3Storage) buildObjectKey(adminID, tutorID int64, fileName string) string {
+	safeName := strings.TrimSpace(filepath.Base(fileName))
+	if safeName == "." || safeName == "/" || safeName == "" {
+		safeName = "file"
+	}
+
+	replacer := strings.NewReplacer(" ", "_", "/", "_", "\\", "_", ":", "_")
+	safeName = replacer.Replace(safeName)
+
+	return fmt.Sprintf("admin_%d/tutor_%d/%s", adminID, tutorID, safeName)
 }

@@ -11,7 +11,9 @@ type DownloadedObject struct {
 }
 
 type Storage interface {
-	Upload(ctx context.Context, bucket, key, contentType string, body io.Reader) error
-	Download(ctx context.Context, bucket, key string) (*DownloadedObject, error)
-	Delete(ctx context.Context, bucket, key string) error
+	UploadContract(ctx context.Context, adminID, tutorID int64, fileName, contentType string, body io.Reader) (string, error)
+	DownloadContract(ctx context.Context, key string) (*DownloadedObject, error)
+	DeleteContract(ctx context.Context, key string) error
+	UploadReceipt(ctx context.Context, adminID, tutorID int64, fileName, contentType string, body io.Reader) (string, error)
+	DownloadReceipt(ctx context.Context, key string) (*DownloadedObject, error)
 }
