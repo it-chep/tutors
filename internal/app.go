@@ -13,6 +13,7 @@ import (
 	"github.com/it-chep/tutors.git/internal/server"
 	"github.com/it-chep/tutors.git/pkg/smtp"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"log"
 )
 
 type Workers []worker.Worker
@@ -59,9 +60,9 @@ func (a *App) Run(ctx context.Context) {
 	for _, w := range a.workers {
 		w.Start(ctx)
 	}
+	log.Fatal(a.server.ListenAndServe())
 
 	//if !a.config.BotIsActive() || (a.config.UseWebhook() && a.config.BotIsActive()) {
-	//	log.Fatal(a.server.ListenAndServe())
 	//} else {
 	//	go func() {
 	//		log.Fatal(a.server.ListenAndServe())
