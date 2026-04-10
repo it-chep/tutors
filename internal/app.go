@@ -46,7 +46,7 @@ func New(ctx context.Context) *App {
 		initPaymentCredConf(ctx).
 		initSmtp(ctx).
 		initPaymentGateways(ctx).
-		initTgBot(ctx).
+		//initTgBot(ctx).
 		initModules(ctx).
 		initServer(ctx)
 
