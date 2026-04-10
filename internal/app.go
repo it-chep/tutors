@@ -7,15 +7,12 @@ import (
 	dtoInternal "github.com/it-chep/tutors.git/internal/dto"
 	"github.com/it-chep/tutors.git/internal/module/admin"
 	"github.com/it-chep/tutors.git/internal/module/bot"
-	"github.com/it-chep/tutors.git/internal/module/bot/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
 	"github.com/it-chep/tutors.git/internal/pkg/worker"
 	"github.com/it-chep/tutors.git/internal/server"
 	"github.com/it-chep/tutors.git/pkg/smtp"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"log"
-	"strings"
 )
 
 type Workers []worker.Worker
@@ -63,44 +60,44 @@ func (a *App) Run(ctx context.Context) {
 		w.Start(ctx)
 	}
 
-	if !a.config.BotIsActive() || (a.config.UseWebhook() && a.config.BotIsActive()) {
-		log.Fatal(a.server.ListenAndServe())
-	} else {
-		go func() {
-			log.Fatal(a.server.ListenAndServe())
-		}()
-	}
-
-	if !a.config.UseWebhook() && a.config.BotIsActive() {
-		fmt.Println("Режим поллинга")
-		// Режим поллинга
-		for update := range a.bot.GetUpdates() {
-			go func() {
-				if update.SentFrom() == nil ||
-					update.FromChat() == nil {
-					return
-				}
-
-				txt := ""
-				if update.Message != nil {
-					txt = update.Message.Text
-					if strings.Contains(txt, "/start ") {
-						txt = txt[len("/start "):]
-					}
-				} else if update.CallbackQuery != nil {
-					txt = update.CallbackQuery.Data
-				}
-				msg := dto.Message{
-					User:   update.SentFrom().ID,
-					Text:   txt,
-					ChatID: update.FromChat().ID,
-				}
-				err := a.modules.Bot.Route(ctx, msg)
-
-				if err != nil {
-					logger.Error(ctx, "Ошибка при обработке ивента", err)
-				}
-			}()
-		}
-	}
+	//if !a.config.BotIsActive() || (a.config.UseWebhook() && a.config.BotIsActive()) {
+	//	log.Fatal(a.server.ListenAndServe())
+	//} else {
+	//	go func() {
+	//		log.Fatal(a.server.ListenAndServe())
+	//	}()
+	//}
+	//
+	//if !a.config.UseWebhook() && a.config.BotIsActive() {
+	//	fmt.Println("Режим поллинга")
+	//	// Режим поллинга
+	//	for update := range a.bot.GetUpdates() {
+	//		go func() {
+	//			if update.SentFrom() == nil ||
+	//				update.FromChat() == nil {
+	//				return
+	//			}
+	//
+	//			txt := ""
+	//			if update.Message != nil {
+	//				txt = update.Message.Text
+	//				if strings.Contains(txt, "/start ") {
+	//					txt = txt[len("/start "):]
+	//				}
+	//			} else if update.CallbackQuery != nil {
+	//				txt = update.CallbackQuery.Data
+	//			}
+	//			msg := dto.Message{
+	//				User:   update.SentFrom().ID,
+	//				Text:   txt,
+	//				ChatID: update.FromChat().ID,
+	//			}
+	//			err := a.modules.Bot.Route(ctx, msg)
+	//
+	//			if err != nil {
+	//				logger.Error(ctx, "Ошибка при обработке ивента", err)
+	//			}
+	//		}()
+	//	}
+	//}
 }
