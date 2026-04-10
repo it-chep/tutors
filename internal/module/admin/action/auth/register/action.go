@@ -40,11 +40,13 @@ func (a *Action) RegisterHandler() http.HandlerFunc {
 		ctx := r.Context()
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, "invalid request", http.StatusBadRequest)
+			logger.Error(r.Context(), "rega Ошибка при декоде", err)
 			return
 		}
 
 		if err := req.Validate(); err != nil {
 			http.Error(w, "invalid request", http.StatusBadRequest)
+			logger.Error(r.Context(), "Rega Ошибка при валидации", err)
 			return
 		}
 
@@ -56,12 +58,14 @@ func (a *Action) RegisterHandler() http.HandlerFunc {
 		}
 		if !exists {
 			http.Error(w, "Не смогли найти такого email", http.StatusBadRequest)
+			logger.Error(r.Context(), "Rega нет юзера", err)
 			return
 		}
 
 		passHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 		if err != nil {
 			http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusInternalServerError)
+			logger.Error(r.Context(), "Rega пароль ошибка", err)
 			return
 		}
 
@@ -95,6 +99,7 @@ func (a *Action) VerifyHandler() http.HandlerFunc {
 		var req register_dto.VerifyRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, "invalid request", http.StatusBadRequest)
+			logger.Error(r.Context(), "Ошибка при сохранении декоде", err)
 			return
 		}
 
@@ -102,17 +107,20 @@ func (a *Action) VerifyHandler() http.HandlerFunc {
 		defer a.codes.Remove(req.Email)
 		if !ok || code.Code != req.Code {
 			http.Error(w, "invalid code", http.StatusBadRequest)
+			logger.Error(r.Context(), "Ошибка при коде", nil)
 			return
 		}
 
 		if err := a.repo.SavePass(r.Context(), req.Email, code.Password); err != nil {
 			http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusInternalServerError)
+			logger.Error(r.Context(), "Ошибка при сохр пароля", err)
 			return
 		}
 
 		tokens, err := token.GenerateTokens(req.Email, a.jwt.JwtSecret, a.jwt.RefreshSecret)
 		if err != nil {
 			http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusInternalServerError)
+			logger.Error(r.Context(), "Ошибка при токене", err)
 			return
 		}
 

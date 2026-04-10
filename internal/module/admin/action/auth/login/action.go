@@ -40,17 +40,20 @@ func (a *Action) LoginHandler() http.HandlerFunc {
 
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, "invalid request", http.StatusBadRequest)
+			logger.Error(r.Context(), "LOGIN Ошибка при декоде", err)
 			return
 		}
 
 		user, err := a.repo.GetUser(r.Context(), req.Email)
 		if err != nil {
 			http.Error(w, "Не нашли такого пользователя", http.StatusBadRequest)
+			logger.Error(r.Context(), "LOGIN Ошибка при юзере", err)
 			return
 		}
 
 		if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 			http.Error(w, "неверный email или пароль", http.StatusBadRequest)
+			logger.Error(r.Context(), "LOGIN Ошибка при пароле", err)
 			return
 		}
 
@@ -64,7 +67,7 @@ func (a *Action) LoginHandler() http.HandlerFunc {
 			})
 			if err != nil {
 				http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusInternalServerError)
-				logger.Error(r.Context(), "Ошибка при отправке кода", err)
+				logger.Error(r.Context(), "LOGIN Ошибка при отправке кода", err)
 				return
 			}
 		}
@@ -72,7 +75,7 @@ func (a *Action) LoginHandler() http.HandlerFunc {
 		err = a.repo.SaveCode(r.Context(), req.Email, code)
 		if err != nil {
 			http.Error(w, "Пожалуйста, повторите попытку позже", http.StatusInternalServerError)
-			logger.Error(r.Context(), "Ошибка при сохранении кода", err)
+			logger.Error(r.Context(), "LOGIN Ошибка при сохранении кода", err)
 			return
 		}
 

@@ -2,6 +2,7 @@ package refresh
 
 import (
 	"encoding/json"
+	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	"net/http"
 
 	"github.com/it-chep/tutors.git/internal/config"
@@ -23,12 +24,14 @@ func (a *Action) RefreshHandler() http.HandlerFunc {
 		claims, err := tkn.RefreshClaimsFromRequest(r, a.jwt.RefreshSecret)
 		if err != nil {
 			http.Error(w, "Кажется, что вам нужно перезайти в лк", http.StatusUnauthorized)
+			logger.Error(r.Context(), "Refresh Ошибка при рефреше", err)
 			return
 		}
 
 		tokens, err := tkn.GenerateTokens(claims.Email, a.jwt.JwtSecret, a.jwt.RefreshSecret)
 		if err != nil {
 			http.Error(w, "server error", http.StatusInternalServerError)
+			logger.Error(r.Context(), "Refresh Ошибка при токене", err)
 			return
 		}
 

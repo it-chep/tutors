@@ -2,6 +2,7 @@ package get_user_info
 
 import (
 	"encoding/json"
+	"github.com/it-chep/tutors.git/internal/pkg/logger"
 	"net/http"
 
 	get_user_info_dal "github.com/it-chep/tutors.git/internal/module/admin/action/auth/get_user_info/dal"
@@ -37,12 +38,14 @@ func (a *Action) Handle() http.HandlerFunc {
 		user, err := a.dal.GetUser(ctx, userCtx.UserIDFromContext(ctx))
 		if err != nil {
 			http.Error(w, "Что-то пошло не так, попробуйте позже", http.StatusInternalServerError)
+			logger.Error(r.Context(), "get userinfo Ошибка при юзере", err)
 			return
 		}
 
 		paid, err := a.dal.GetPaidFunctions(ctx, user.AdminID)
 		if err != nil {
 			http.Error(w, "Ошибка из GetPaidFunctions", http.StatusInternalServerError)
+			logger.Error(r.Context(), "Ошибка при GetPaidFunctions", err)
 			return
 		}
 
