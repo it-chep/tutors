@@ -6,11 +6,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/conduct_lesson/dal"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/tg_bot"
-	"github.com/it-chep/tutors.git/internal/pkg/tg_bot/bot_dto"
-
-	"github.com/it-chep/tutors.git/internal/module/admin/action/tutor/conduct_lesson/dal"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/shopspring/decimal"
 )
@@ -48,12 +46,12 @@ func (a *Action) Do(ctx context.Context, tutorID, studentID, durationInMinutes i
 	}
 
 	if remain.LessThan(decimal.NewFromInt(0)) {
-		err = a.bot.SendMessages([]bot_dto.Message{
-			{
-				Chat: student.ParentTgID,
-				Text: "Добрый день! У вас возникла задолженность по оплате занятий, пополните пожалуйста баланс)",
-			},
-		})
+		//err = a.bot.SendMessages([]bot_dto.Message{
+		//	{
+		//		Chat: student.ParentTgID,
+		//		Text: "Добрый день! У вас возникла задолженность по оплате занятий, пополните пожалуйста баланс)",
+		//	},
+		//})
 	}
 
 	// Помечаем урок проведенным

@@ -25,6 +25,8 @@ func New(pool *pgxpool.Pool, bot *tg_bot.Bot) *Action {
 }
 
 func (a *Action) Do(ctx context.Context, studentID int64) error {
+	return errors.New("бот не работает")
+
 	student, err := a.dal.GetStudentByID(ctx, studentID)
 	if err != nil {
 		return err

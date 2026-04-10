@@ -3,12 +3,12 @@ package tg_bot
 import (
 	"context"
 	"github.com/it-chep/tutors.git/internal/pkg/logger"
+	"github.com/pkg/errors"
 	"net/http"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/it-chep/tutors.git/internal/module/bot/dto"
 	"github.com/it-chep/tutors.git/internal/pkg/tg_bot/bot_dto"
-	"github.com/samber/lo"
 )
 
 type Config interface {
@@ -79,6 +79,7 @@ func (b *Bot) GetUpdates() tgbotapi.UpdatesChannel {
 }
 
 func (b *Bot) GetUser(message dto.Message) (bot_dto.User, error) {
+
 	member, err := b.bot.GetChatMember(tgbotapi.GetChatMemberConfig{
 		ChatConfigWithUser: tgbotapi.ChatConfigWithUser{
 			ChatID: message.ChatID,
@@ -99,23 +100,25 @@ func (b *Bot) GetUser(message dto.Message) (bot_dto.User, error) {
 }
 
 func (b *Bot) SendMessage(msg bot_dto.Message, options ...MsgOption) error {
-	message := tgbotapi.NewMessage(msg.Chat, msg.Text)
-	if len(msg.Buttons) != 0 {
-		message.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
-			lo.Map(msg.Buttons, func(b dto.StepButton, _ int) []tgbotapi.InlineKeyboardButton {
-				return tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData(b.Text, b.Text))
-			})...,
-		)
-	}
-
-	for _, opt := range options {
-		message = opt(message)
-	}
-	_, err := b.bot.Send(message)
-	return err
+	return errors.New("бот не работает")
+	//message := tgbotapi.NewMessage(msg.Chat, msg.Text)
+	//if len(msg.Buttons) != 0 {
+	//	message.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
+	//		lo.Map(msg.Buttons, func(b dto.StepButton, _ int) []tgbotapi.InlineKeyboardButton {
+	//			return tgbotapi.NewInlineKeyboardRow(tgbotapi.NewInlineKeyboardButtonData(b.Text, b.Text))
+	//		})...,
+	//	)
+	//}
+	//
+	//for _, opt := range options {
+	//	message = opt(message)
+	//}
+	//_, err := b.bot.Send(message)
 }
 
 func (b *Bot) SendMessages(messages []bot_dto.Message) error {
+	return errors.New("бот не работает")
+
 	for _, msg := range messages {
 		if err := b.SendMessage(msg); err != nil {
 			return err
@@ -127,6 +130,8 @@ func (b *Bot) SendMessages(messages []bot_dto.Message) error {
 
 // SendMessageWithContentType отправляет сообщение с media
 func (b *Bot) SendMessageWithContentType(msg bot_dto.Message) error {
+	return errors.New("бот не работает")
+
 	var message tgbotapi.Chattable
 
 	if msg.ContentType == dto.Video {

@@ -2,6 +2,7 @@ package push_all_debitors
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/it-chep/tutors.git/internal/module/admin/action/student/push_all_debitors/dal"
 	"github.com/it-chep/tutors.git/internal/module/admin/dto"
@@ -39,6 +40,7 @@ func (a *Action) Do(ctx context.Context, adminID int64) error {
 		return item.StudentID, item
 	})
 
+	return errors.New("бот не работает")
 	for _, student := range students {
 		debtStr := studentsWalletMap[student.ID].Balance.Abs().String()
 
